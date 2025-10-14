@@ -2,29 +2,25 @@
 
 import { useState } from "react";
 import type { DHParams } from "@/types";
-import { nanoid } from "nanoid";
 import { DhPanel } from "@/components/dh-panel";
 import { RobotVisualizer } from "@/components/robot-visualizer";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/icons";
 
-const initialParams: DHParams[] = [
+const initialParams: Omit<DHParams, "id">[] = [
   {
-    id: nanoid(),
     a: 0,
     alpha: 90,
     d: 1,
     theta: 0,
   },
   {
-    id: nanoid(),
     a: 1.5,
     alpha: 0,
     d: 0,
     theta: 0,
   },
   {
-    id: nanoid(),
     a: 1,
     alpha: 0,
     d: 0,
@@ -34,7 +30,7 @@ const initialParams: DHParams[] = [
 
 
 export default function Home() {
-  const [params, setParams] = useState<DHParams[]>(initialParams);
+  const [params, setParams] = useState<Omit<DHParams, "id">[]>(initialParams);
 
   return (
     <div className="flex h-dvh flex-col font-sans">

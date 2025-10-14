@@ -7,7 +7,7 @@ import type { DHParams } from "@/types";
 import { createDHMatrix } from "@/lib/dh";
 
 type RobotVisualizerProps = {
-  params: DHParams[];
+  params: Omit<DHParams, "id">[];
 };
 
 export function RobotVisualizer({ params }: RobotVisualizerProps) {
