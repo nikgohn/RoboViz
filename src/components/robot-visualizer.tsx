@@ -114,57 +114,77 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
     baseMesh.position.y = 0.1;
     robotGroup.add(baseMesh);
 
+    const baseJointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+    const baseJointMesh = new THREE.Mesh(baseJointGeometry, jointMaterial);
+    robotGroup.add(baseJointMesh);
+
+
     params.forEach((p, i) => {
-      const { a, alpha, d, theta } = p;
-      const dhMatrix = createDHMatrix(a, alpha, d, theta);
-      
-      const prevMatrix = currentMatrix.clone();
-      currentMatrix.multiply(dhMatrix);
+        const { a, alpha, d, theta } = p;
+        const dhMatrix = createDHMatrix(a, alpha, d, theta);
 
-      const frame = new THREE.Group();
-      frame.matrixAutoUpdate = false;
-      frame.matrix.copy(prevMatrix);
-      robotGroup.add(frame);
-      
-      // Joint
-      const jointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
-      const jointMesh = new THREE.Mesh(jointGeometry, jointMaterial);
-      const zAxis = new THREE.Vector3(0, 0, 1);
-      const start = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
-      const end = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
-      const direction = new THREE.Vector3().subVectors(end, start);
-      const linkLength = direction.length();
-      
-      // Create link (if a > 0 or d > 0)
-      if (a > 0.01) {
-          const linkGeometry = new THREE.CylinderGeometry(0.1, 0.1, a, 32);
-          const linkMesh = new THREE.Mesh(linkGeometry, linkMaterial);
-          
-          const alignMatrix = new THREE.Matrix4();
-          const targetDirection = new THREE.Vector3(1, 0, 0);
-          const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), targetDirection);
-          alignMatrix.makeRotationFromQuaternion(quaternion);
-          alignMatrix.setPosition(new THREE.Vector3(a/2, 0, 0));
-          linkMesh.applyMatrix4(alignMatrix);
-          frame.add(linkMesh);
-      }
-      
-      if (d > 0.01) {
-          const offsetLinkGeometry = new THREE.CylinderGeometry(0.08, 0.08, d, 32);
-          const offsetLinkMesh = new THREE.Mesh(offsetLinkGeometry, new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 }));
-          offsetLinkMesh.position.set(0, 0, d/2); // along z-axis of previous frame
-          frame.add(offsetLinkMesh);
-      }
-      
-      const newJointFrame = new THREE.Group();
-      newJointFrame.matrixAutoUpdate = false;
-      newJointFrame.matrix.copy(currentMatrix);
-      
-      const nextJointMesh = new THREE.Mesh(jointGeometry, jointMaterial);
-      newJointFrame.add(nextJointMesh);
+        const prevMatrix = currentMatrix.clone();
+        currentMatrix.multiply(dhMatrix);
 
-      robotGroup.add(newJointFrame);
+        const startPoint = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
+        const endPoint = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
 
+        // Draw joint at the end of the new link
+        const jointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+        const jointMesh = new THREE.Mesh(jointGeometry, jointMaterial);
+        jointMesh.position.copy(endPoint);
+        robotGroup.add(jointMesh);
+
+        // This is the transform for the link *before* the DH matrix is applied for the *next* link
+        // We need to find the position of the X-axis from the previous frame.
+        const intermediateMatrix = createDHMatrix(a, 0, d, theta);
+        const linkEndMatrix = prevMatrix.clone().multiply(intermediateMatrix);
+        const linkEndPoint = new THREE.Vector3().setFromMatrixPosition(linkEndMatrix);
+
+
+        if (d > 0.01) {
+            const offsetLinkGeometry = new THREE.CylinderGeometry(0.08, 0.08, d, 32);
+            const offsetLinkMesh = new THREE.Mesh(offsetLinkGeometry, new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 }));
+            
+            const start = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
+            const end = start.clone().setZ(start.z + d);
+            
+            const position = new THREE.Vector3().addVectors(start, new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().multiplyMatrices(prevMatrix, new THREE.Matrix4().makeTranslation(0,0,d)))).multiplyScalar(0.5);
+
+            const zOffsetMatrix = new THREE.Matrix4().makeTranslation(0, 0, d);
+            const zLinkMatrix = prevMatrix.clone().multiply(zOffsetMatrix);
+            const zLinkStart = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
+            const zLinkEnd = new THREE.Vector3().setFromMatrixPosition(zLinkMatrix);
+            const zLinkVector = new THREE.Vector3().subVectors(zLinkEnd, zLinkStart);
+
+            offsetLinkMesh.position.copy(zLinkStart).add(zLinkVector.multiplyScalar(0.5));
+            offsetLinkMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), zLinkVector.clone().normalize());
+
+            robotGroup.add(offsetLinkMesh);
+        }
+        
+        if (a > 0.01) {
+            const linkGeometry = new THREE.CylinderGeometry(0.1, 0.1, a, 32);
+            const linkMesh = new THREE.Mesh(linkGeometry, linkMaterial);
+            
+            const rotZ = new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(theta));
+            const transZ = new THREE.Matrix4().makeTranslation(0, 0, d);
+            const linkStartMatrix = new THREE.Matrix4().multiply(rotZ).multiply(transZ);
+            
+            const totalStartMatrix = prevMatrix.clone().multiply(linkStartMatrix);
+            const linkStartPoint = new THREE.Vector3().setFromMatrixPosition(totalStartMatrix);
+
+            const transX = new THREE.Matrix4().makeTranslation(a, 0, 0);
+            const linkEndMatrixCalc = totalStartMatrix.clone().multiply(transX);
+            const linkEndPointCalc = new THREE.Vector3().setFromMatrixPosition(linkEndMatrixCalc);
+            
+            const linkVector = new THREE.Vector3().subVectors(linkEndPointCalc, linkStartPoint);
+
+            linkMesh.position.copy(linkStartPoint).add(linkVector.clone().multiplyScalar(0.5));
+            linkMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), linkVector.clone().normalize());
+            
+            robotGroup.add(linkMesh);
+        }
     });
 
     if (controlsRef.current) {
