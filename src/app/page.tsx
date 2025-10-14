@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { DHParams } from "@/types";
 import { DhPanel } from "@/components/dh-panel";
 import { RobotVisualizer } from "@/components/robot-visualizer";
@@ -30,9 +30,36 @@ const initialParams: Omit<DHParams, "id">[] = [
   },
 ];
 
+const LOCAL_STORAGE_KEY = 'robot-dh-params';
 
 export default function Home() {
-  const [params, setParams] = useState<Omit<DHParams, "id">[]>(initialParams);
+  const [params, setParams] = useState<Omit<DHParams, "id">[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const storedParams = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedParams) {
+        setParams(JSON.parse(storedParams));
+      } else {
+        setParams(initialParams);
+      }
+    } catch (error) {
+      console.error("Failed to parse params from localStorage", error);
+      setParams(initialParams);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(params));
+    }
+  }, [params, isLoaded]);
+
+  if (!isLoaded) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="flex h-dvh flex-col font-sans">
