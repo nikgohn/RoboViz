@@ -85,7 +85,10 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
         rendererRef.current.dispose();
       }
       if (currentMount && rendererRef.current?.domElement) {
-        currentMount.removeChild(rendererRef.current.domElement);
+        // Check if the DOM element is still a child before removing
+        if (currentMount.contains(rendererRef.current.domElement)) {
+          currentMount.removeChild(rendererRef.current.domElement);
+        }
       }
     };
   }, []);
@@ -105,23 +108,27 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
 
     const jointMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5, roughness: 0.5 });
     const linkMaterial = new THREE.MeshStandardMaterial({ color: new THREE.Color("hsl(var(--primary))"), metalness: 0.3, roughness: 0.6 });
+    const offsetLinkMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 });
 
-    let currentMatrix = new THREE.Matrix4(); // Identity matrix for base
+    let currentMatrix = new THREE.Matrix4();
 
     // Base
     const baseGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 32);
     const baseMesh = new THREE.Mesh(baseGeometry, jointMaterial);
     baseMesh.position.y = 0.1;
     robotGroup.add(baseMesh);
-
+    
     const baseJointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
     const baseJointMesh = new THREE.Mesh(baseJointGeometry, jointMaterial);
+    baseJointMesh.position.y = 0.2; // Position on top of the base
     robotGroup.add(baseJointMesh);
 
+    currentMatrix.makeTranslation(0, 0.2, 0);
 
-    params.forEach((p, i) => {
-        const { a, alpha, d, theta } = p;
-        const dhMatrix = createDHMatrix(a, alpha, d, theta);
+    params.forEach((p) => {
+        const { a, alpha, d, theta, thetaOffset } = p;
+        const totalTheta = theta + thetaOffset;
+        const dhMatrix = createDHMatrix(a, alpha, d, totalTheta);
 
         const prevMatrix = currentMatrix.clone();
         currentMatrix.multiply(dhMatrix);
@@ -129,57 +136,47 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
         const startPoint = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
         const endPoint = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
 
-        // Draw joint at the end of the new link
+        // Joint at the end of the new link
         const jointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
         const jointMesh = new THREE.Mesh(jointGeometry, jointMaterial);
         jointMesh.position.copy(endPoint);
         robotGroup.add(jointMesh);
 
-        // This is the transform for the link *before* the DH matrix is applied for the *next* link
-        // We need to find the position of the X-axis from the previous frame.
-        const intermediateMatrix = createDHMatrix(a, 0, d, theta);
-        const linkEndMatrix = prevMatrix.clone().multiply(intermediateMatrix);
-        const linkEndPoint = new THREE.Vector3().setFromMatrixPosition(linkEndMatrix);
-
+        // Create a separate matrix for visualizing links, without the alpha rotation
+        const visMatrix = new THREE.Matrix4();
+        visMatrix.multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
+        visMatrix.multiply(new THREE.Matrix4().makeTranslation(0, 0, d));
+        
+        const offsetLinkEndMatrix = prevMatrix.clone().multiply(visMatrix);
 
         if (d > 0.01) {
-            const offsetLinkGeometry = new THREE.CylinderGeometry(0.08, 0.08, d, 32);
-            const offsetLinkMesh = new THREE.Mesh(offsetLinkGeometry, new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 }));
+            const offsetLinkGeom = new THREE.CylinderGeometry(0.08, 0.08, d, 32);
+            const offsetLinkMesh = new THREE.Mesh(offsetLinkGeom, offsetLinkMaterial);
             
-            const start = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
-            const end = start.clone().setZ(start.z + d);
-            
-            const position = new THREE.Vector3().addVectors(start, new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().multiplyMatrices(prevMatrix, new THREE.Matrix4().makeTranslation(0,0,d)))).multiplyScalar(0.5);
-
-            const zOffsetMatrix = new THREE.Matrix4().makeTranslation(0, 0, d);
-            const zLinkMatrix = prevMatrix.clone().multiply(zOffsetMatrix);
             const zLinkStart = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
-            const zLinkEnd = new THREE.Vector3().setFromMatrixPosition(zLinkMatrix);
+
+            const rotZOnly = prevMatrix.clone().multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
+            const zLinkEnd = new THREE.Vector3().setFromMatrixPosition(rotZOnly.multiply(new THREE.Matrix4().makeTranslation(0,0,d)));
+
             const zLinkVector = new THREE.Vector3().subVectors(zLinkEnd, zLinkStart);
 
-            offsetLinkMesh.position.copy(zLinkStart).add(zLinkVector.multiplyScalar(0.5));
+            offsetLinkMesh.position.copy(zLinkStart).add(zLinkVector.clone().multiplyScalar(0.5));
             offsetLinkMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), zLinkVector.clone().normalize());
 
             robotGroup.add(offsetLinkMesh);
         }
-        
+
         if (a > 0.01) {
-            const linkGeometry = new THREE.CylinderGeometry(0.1, 0.1, a, 32);
-            const linkMesh = new THREE.Mesh(linkGeometry, linkMaterial);
-            
-            const rotZ = new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(theta));
-            const transZ = new THREE.Matrix4().makeTranslation(0, 0, d);
-            const linkStartMatrix = new THREE.Matrix4().multiply(rotZ).multiply(transZ);
-            
-            const totalStartMatrix = prevMatrix.clone().multiply(linkStartMatrix);
-            const linkStartPoint = new THREE.Vector3().setFromMatrixPosition(totalStartMatrix);
+            const linkGeom = new THREE.CylinderGeometry(0.1, 0.1, a, 32);
+            const linkMesh = new THREE.Mesh(linkGeom, linkMaterial);
 
-            const transX = new THREE.Matrix4().makeTranslation(a, 0, 0);
-            const linkEndMatrixCalc = totalStartMatrix.clone().multiply(transX);
-            const linkEndPointCalc = new THREE.Vector3().setFromMatrixPosition(linkEndMatrixCalc);
-            
-            const linkVector = new THREE.Vector3().subVectors(linkEndPointCalc, linkStartPoint);
+            const linkStartPoint = new THREE.Vector3().setFromMatrixPosition(offsetLinkEndMatrix);
 
+            const linkEndMatrix = offsetLinkEndMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(a, 0, 0));
+            const linkEndPoint = new THREE.Vector3().setFromMatrixPosition(linkEndMatrix);
+            
+            const linkVector = new THREE.Vector3().subVectors(linkEndPoint, linkStartPoint);
+            
             linkMesh.position.copy(linkStartPoint).add(linkVector.clone().multiplyScalar(0.5));
             linkMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), linkVector.clone().normalize());
             

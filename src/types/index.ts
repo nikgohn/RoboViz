@@ -3,5 +3,6 @@ export type DHParams = {
   a: number;      // link length
   alpha: number;  // link twist (degrees)
   d: number;      // link offset
+  thetaOffset: number; // joint angle offset (degrees)
   theta: number;  // joint angle (degrees)
 };

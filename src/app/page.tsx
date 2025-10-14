@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { DHParams } from "@/types";
 import { DhPanel } from "@/components/dh-panel";
 import { RobotVisualizer } from "@/components/robot-visualizer";
-import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/icons";
 
 const initialParams: Omit<DHParams, "id">[] = [
@@ -12,18 +11,21 @@ const initialParams: Omit<DHParams, "id">[] = [
     a: 0,
     alpha: 90,
     d: 1,
+    thetaOffset: 0,
     theta: 0,
   },
   {
     a: 1.5,
     alpha: 0,
     d: 0,
+    thetaOffset: 0,
     theta: 0,
   },
   {
     a: 1,
     alpha: 0,
     d: 0,
+    thetaOffset: 0,
     theta: 0,
   },
 ];

@@ -3,11 +3,10 @@
 import { Dispatch, SetStateAction, useId } from "react";
 import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Plus, Trash2 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -40,9 +39,9 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                 </div>
                 <AccordionContent className="p-4 pt-2">
                     <div className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-4 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor={`a-${id}`}>aᵢ (length)</Label>
+                                <Label htmlFor={`a-${id}`}>aᵢ (len)</Label>
                                 <Input id={`a-${id}`} type="number" value={param.a} onChange={(e) => onUpdate('a', parseFloat(e.target.value))} />
                             </div>
                             <div className="space-y-2">
@@ -50,13 +49,17 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                                 <Input id={`alpha-${id}`} type="number" value={param.alpha} onChange={(e) => onUpdate('alpha', parseFloat(e.target.value))} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor={`d-${id}`}>dᵢ (offset)</Label>
+                                <Label htmlFor={`d-${id}`}>dᵢ (off)</Label>
                                 <Input id={`d-${id}`} type="number" value={param.d} onChange={(e) => onUpdate('d', parseFloat(e.target.value))} />
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor={`thetaOffset-${id}`}>θᵢ (off)</Label>
+                                <Input id={`thetaOffset-${id}`} type="number" value={param.thetaOffset} onChange={(e) => onUpdate('thetaOffset', parseFloat(e.target.value))} />
                             </div>
                         </div>
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                              <Label htmlFor={`theta-${id}`}>θᵢ (angle)</Label>
+                              <Label htmlFor={`theta-${id}`}>θᵢ (rot)</Label>
                               <span className="text-sm text-muted-foreground font-mono">{param.theta.toFixed(0)}°</span>
                             </div>
                             <div className="[--primary:hsl(var(--accent-interactive))]">
@@ -92,6 +95,7 @@ export function DhPanel({ params, setParams }: DhPanelProps) {
       a: 1,
       alpha: 0,
       d: 0,
+      thetaOffset: 0,
       theta: 0,
     };
     setParams(prev => [...prev, newLink]);
