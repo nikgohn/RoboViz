@@ -13,6 +13,7 @@ type RobotVisualizerProps = {
 export function RobotVisualizer({ params }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
     // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("hsl(var(--background))");
+    sceneRef.current = scene;
 
     // Camera
     const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
@@ -79,13 +81,17 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
       controls.dispose();
-      renderer.dispose();
-      currentMount.removeChild(renderer.domElement);
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+      if (currentMount && rendererRef.current?.domElement) {
+        currentMount.removeChild(rendererRef.current.domElement);
+      }
     };
   }, []);
 
   useEffect(() => {
-    const scene = rendererRef.current?.info.programs?.[0].gl.canvas.parentElement?.___scene;
+    const scene = sceneRef.current;
     if (!scene) return;
     
     let robotGroup = scene.children.find(child => child.name === "robot");
