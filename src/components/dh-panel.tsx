@@ -52,22 +52,22 @@ export function DhPanel({ params, setParams }: DhPanelProps) {
             {params.map((param, index) => (
                 <AccordionItem key={param.id} value={param.id} className="border-b-0 mb-2">
                     <Card className="overflow-hidden">
-                        <AccordionTrigger className="p-4 hover:no-underline bg-muted/50">
-                            <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center bg-muted/50 pr-4">
+                            <AccordionTrigger className="p-4 hover:no-underline flex-1">
                                 <span className="font-medium">Link {index + 1}</span>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive rounded-full"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeLink(param.id);
-                                    }}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </AccordionTrigger>
+                            </AccordionTrigger>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive rounded-full"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeLink(param.id);
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
                         <AccordionContent className="p-4 pt-2">
                             <div className="space-y-6">
                                 <div className="grid grid-cols-3 gap-4">
