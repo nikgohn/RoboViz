@@ -15,9 +15,8 @@ import { Button } from "@/components/ui/button";
 
 
 export default function EditorPage() {
-  const { params, setParams } = useDHParams();
+  const { params, setParams, isFlipped, setIsFlipped } = useDHParams();
   const [showAxes, setShowAxes] = useState(false);
-  const [isFlipped, setIsFlipped] = useState(false);
   const { t } = useLanguage();
 
   return (

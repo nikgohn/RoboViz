@@ -34,10 +34,14 @@ const initialParams: Omit<DHParams, "id">[] = [
 ];
 
 const LOCAL_STORAGE_KEY = 'robot-dh-params';
+const FLIP_STATE_KEY = 'robot-flip-state';
+
 
 type DHParamsContextType = {
   params: Omit<DHParams, "id">[];
   setParams: Dispatch<SetStateAction<Omit<DHParams, "id">[]>>;
+  isFlipped: boolean;
+  setIsFlipped: Dispatch<SetStateAction<boolean>>;
   isLoaded: boolean;
 };
 
@@ -45,6 +49,7 @@ const DHParamsContext = createContext<DHParamsContextType | undefined>(undefined
 
 export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
   const [params, setParams] = useState<Omit<DHParams, "id">[]>([]);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -55,9 +60,16 @@ export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setParams(initialParams);
       }
+
+      const storedFlipState = localStorage.getItem(FLIP_STATE_KEY);
+      if (storedFlipState) {
+        setIsFlipped(JSON.parse(storedFlipState));
+      }
+
     } catch (error) {
       console.error("Failed to parse params from localStorage", error);
       setParams(initialParams);
+      setIsFlipped(false);
     }
     setIsLoaded(true);
   }, []);
@@ -65,15 +77,16 @@ export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(params));
+      localStorage.setItem(FLIP_STATE_KEY, JSON.stringify(isFlipped));
     }
-  }, [params, isLoaded]);
+  }, [params, isFlipped, isLoaded]);
 
   if (!isLoaded) {
     return null; // or a loading spinner
   }
 
   return (
-    <DHParamsContext.Provider value={{ params, setParams, isLoaded }}>
+    <DHParamsContext.Provider value={{ params, setParams, isFlipped, setIsFlipped, isLoaded }}>
       {children}
     </DHParamsContext.Provider>
   );
