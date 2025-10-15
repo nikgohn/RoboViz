@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useLanguage } from "@/context/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
-import { FileJson } from "lucide-react";
 
 
 export default function EditorPage() {
@@ -38,7 +37,6 @@ export default function EditorPage() {
         <div className="flex-1" />
         <Button variant="ghost" size="icon" asChild>
             <Link href="/analysis">
-                <FileJson className="h-5 w-5" />
             </Link>
         </Button>
         <div className="ml-auto">

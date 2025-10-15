@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, FileJson } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/context/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -107,7 +107,6 @@ export default function KinematicsPage() {
         <div className="flex-1" />
         <Button variant="ghost" size="icon" asChild>
             <Link href="/analysis">
-                <FileJson className="h-5 w-5" />
             </Link>
         </Button>
         <div className="ml-auto">

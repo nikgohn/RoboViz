@@ -10,7 +10,6 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileJson } from "lucide-react";
 
 export default function AnalysisPage() {
   const { params } = useDHParams();
@@ -54,7 +53,6 @@ export default function AnalysisPage() {
         <div className="flex-1" />
          <Button variant="ghost" size="icon" asChild>
             <Link href="/analysis">
-                <FileJson className="h-5 w-5" />
             </Link>
         </Button>
         <div className="ml-auto">
