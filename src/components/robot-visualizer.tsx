@@ -105,14 +105,8 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
 
     const currentMount = mountRef.current;
 
-    // Get text color from CSS custom property
-    const style = getComputedStyle(document.body);
-    const fgColor = style.getPropertyValue('--foreground').trim();
-    if (fgColor) {
-        // Assuming HSL format `h s% l%`
-        const color = new THREE.Color(`hsl(${fgColor.replace(/ /g, ',')})`);
-        textColorRef.current = { r: color.r * 255, g: color.g * 255, b: color.b * 255, a: 1.0 };
-    }
+    // Set text color to black for readability
+    textColorRef.current = { r: 0, g: 0, b: 0, a: 1.0 };
 
 
     // Scene
@@ -332,3 +326,5 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
 
   return <div ref={mountRef} className="w-full h-full" />;
 }
+
+    
