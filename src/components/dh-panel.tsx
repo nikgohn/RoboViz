@@ -184,12 +184,12 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
   return (
     <div className="flex flex-col h-full">
         <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
                 <div>
                     <CardTitle className="font-headline">DH Parameters</CardTitle>
                     <CardDescription>Adjust the parameters for each link of the robotic arm.</CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-1">
                     <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
                     <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
                 </div>
@@ -206,19 +206,21 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             </Button>
         </CardContent>
         <Separator />
-        <ScrollArea className="flex-1 px-6 py-4">
-            <Accordion type="multiple" defaultValue={params.map((p, i) => i.toString())} className="w-full">
-            {params.map((param, index) => (
-                <ParamRow 
-                    key={index} 
-                    param={param} 
-                    index={index} 
-                    onUpdate={(field, value) => updateParam(index, field, value)}
-                    onRemove={() => removeLink(index)}
-                />
-            ))}
-            </Accordion>
-        </ScrollArea>
+        <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full px-6 py-4">
+                <Accordion type="multiple" defaultValue={params.map((p, i) => i.toString())} className="w-full">
+                {params.map((param, index) => (
+                    <ParamRow 
+                        key={index} 
+                        param={param} 
+                        index={index} 
+                        onUpdate={(field, value) => updateParam(index, field, value)}
+                        onRemove={() => removeLink(index)}
+                    />
+                ))}
+                </Accordion>
+            </ScrollArea>
+        </div>
     </div>
   );
 }
