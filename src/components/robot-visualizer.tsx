@@ -38,19 +38,19 @@ const makeTextSprite = (message: string, opts: { fontsize: number; fontface: str
     return sprite;
 };
 
-const createAxisLabels = (scale: number) => {
+const createAxisLabels = (scale: number, index: number) => {
     const labels = new THREE.Group();
-    const spriteX = makeTextSprite("X", { fontsize: 40, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
+    const spriteX = makeTextSprite(`X${index}`, { fontsize: 30, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
     if(spriteX) {
         spriteX.position.set(scale, 0, 0);
         labels.add(spriteX);
     }
-    const spriteY = makeTextSprite("Y", { fontsize: 40, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
+    const spriteY = makeTextSprite(`Y${index}`, { fontsize: 30, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
     if (spriteY) {
         spriteY.position.set(0, scale, 0);
         labels.add(spriteY);
     }
-    const spriteZ = makeTextSprite("Z", { fontsize: 40, fontface: "Arial", textColor: { r: 0, g: 0, b: 255, a: 1.0 } });
+    const spriteZ = makeTextSprite(`Z${index}`, { fontsize: 30, fontface: "Arial", textColor: { r: 0, g: 0, b: 255, a: 1.0 } });
     if (spriteZ) {
         spriteZ.position.set(0, 0, scale);
         labels.add(spriteZ);
@@ -180,14 +180,14 @@ export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
         axesHelper.position.y = 0.2;
         robotGroup.add(axesHelper);
         
-        const axisLabels = createAxisLabels(1.1);
+        const axisLabels = createAxisLabels(1.1, 0);
         axisLabels.position.y = 0.2;
         robotGroup.add(axisLabels);
     }
 
     currentMatrix.makeTranslation(0, 0.2, 0);
 
-    params.forEach((p) => {
+    params.forEach((p, index) => {
         const { a, alpha, d, theta, thetaOffset } = p;
         const totalTheta = theta + thetaOffset;
         const dhMatrix = createDHMatrix(a, alpha, d, totalTheta);
@@ -203,7 +203,7 @@ export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
             axesHelper.applyMatrix4(currentMatrix);
             robotGroup.add(axesHelper);
 
-            const axisLabels = createAxisLabels(1.1);
+            const axisLabels = createAxisLabels(1.1, index + 1);
             axisLabels.applyMatrix4(currentMatrix);
             robotGroup.add(axisLabels);
         }
