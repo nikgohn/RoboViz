@@ -60,6 +60,32 @@ const createAxisLabels = (scale: number, index: number) => {
     return labels;
 };
 
+const createGripper = () => {
+    const gripperGroup = new THREE.Group();
+    const gripperMaterial = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.8, roughness: 0.4 });
+    const fingerMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.4 });
+
+    const palmGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.1, 32);
+    const palm = new THREE.Mesh(palmGeometry, gripperMaterial);
+    palm.rotation.x = Math.PI / 2; // Orient it
+    gripperGroup.add(palm);
+
+    const fingerGeometry = new THREE.BoxGeometry(0.04, 0.2, 0.04);
+    
+    const finger1 = new THREE.Mesh(fingerGeometry, fingerMaterial);
+    finger1.position.set(0.07, 0, 0.1);
+    gripperGroup.add(finger1);
+
+    const finger2 = new THREE.Mesh(fingerGeometry, fingerMaterial);
+    finger2.position.set(-0.07, 0, 0.1);
+    gripperGroup.add(finger2);
+
+    // Rotate the entire gripper to align with the tool Z-axis (forward)
+    gripperGroup.rotation.x = Math.PI / 2;
+    
+    return gripperGroup;
+};
+
 
 export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -257,6 +283,10 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
             robotGroup.add(linkMesh);
         }
     });
+
+    const gripper = createGripper();
+    gripper.applyMatrix4(currentMatrix);
+    robotGroup.add(gripper);
 
     if (onPositionUpdate) {
         onPositionUpdate(new THREE.Vector3().setFromMatrixPosition(currentMatrix));
