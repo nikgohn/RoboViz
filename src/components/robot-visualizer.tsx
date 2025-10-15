@@ -109,10 +109,11 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
     const style = getComputedStyle(document.body);
     const fgColor = style.getPropertyValue('--foreground').trim();
     if (fgColor) {
-      // Assuming HSL format `h s% l%`
-      const color = new THREE.Color(`hsl(${fgColor.replace(/ /g, ',')})`);
-      textColorRef.current = { r: color.r * 255, g: color.g * 255, b: color.b * 255, a: 1.0 };
+        // Assuming HSL format `h s% l%`
+        const color = new THREE.Color(`hsl(${fgColor.replace(/ /g, ',')})`);
+        textColorRef.current = { r: color.r * 255, g: color.g * 255, b: color.b * 255, a: 1.0 };
     }
+
 
     // Scene
     const scene = new THREE.Scene();
