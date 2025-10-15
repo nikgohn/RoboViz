@@ -4,7 +4,7 @@
 import { Dispatch, SetStateAction, useId } from "react";
 import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, RotateCcw, Download } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 
 type DhPanelProps = {
   params: Omit<DHParams, "id">[];
@@ -182,21 +183,30 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
 
   return (
     <div className="flex flex-col h-full">
-        <div className="shrink-0">
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle className="font-headline">DH Parameters</CardTitle>
-                        <CardDescription>Adjust the parameters for each link of the robotic arm.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
-                        <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
-                    </div>
+        <CardHeader>
+            <div className="flex justify-between items-center">
+                <div>
+                    <CardTitle className="font-headline">DH Parameters</CardTitle>
+                    <CardDescription>Adjust the parameters for each link of the robotic arm.</CardDescription>
                 </div>
-            </CardHeader>
-        </div>
-        <ScrollArea className="flex-1 px-6">
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
+                    <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                </div>
+            </div>
+        </CardHeader>
+        <CardContent className="flex gap-4">
+             <Button onClick={addLink} className="w-full">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Link
+            </Button>
+            <Button onClick={handleExportCSV} variant="secondary" className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
+            </Button>
+        </CardContent>
+        <Separator />
+        <ScrollArea className="flex-1 px-6 py-4">
             <Accordion type="multiple" defaultValue={params.map((p, i) => i.toString())} className="w-full">
             {params.map((param, index) => (
                 <ParamRow 
@@ -209,18 +219,6 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             ))}
             </Accordion>
         </ScrollArea>
-        <div className="shrink-0">
-            <CardFooter className="p-6 border-t flex gap-4">
-                <Button onClick={addLink} className="w-full">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Link
-                </Button>
-                <Button onClick={handleExportCSV} variant="secondary" className="w-full">
-                    <Download className="mr-2 h-4 w-4" />
-                    Export CSV
-                </Button>
-            </CardFooter>
-        </div>
     </div>
   );
 }
