@@ -14,6 +14,7 @@ import Link from "next/link";
 import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number) => void }) {
     if (param.dIsVariable) {
@@ -101,8 +102,16 @@ export default function KinematicsPage() {
         <aside className="flex flex-col border-r bg-card">
              <div className="flex flex-col h-full">
                 <CardHeader>
-                    <CardTitle className="font-headline">Kinematics Control</CardTitle>
-                    <CardDescription>Adjust the variable joints of the robotic arm.</CardDescription>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle className="font-headline">Kinematics Control</CardTitle>
+                            <CardDescription>Adjust the variable joints of the robotic arm.</CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2 pt-1">
+                            <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
+                            <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                        </div>
+                    </div>
                 </CardHeader>
                 <ScrollArea className="flex-1 px-6">
                    <div className="space-y-8 py-4">
@@ -131,4 +140,3 @@ export default function KinematicsPage() {
     </div>
   );
 }
-
