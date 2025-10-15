@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, FileJson } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/context/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -101,10 +101,15 @@ export default function KinematicsPage() {
                 <TabsList>
                     <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
                     <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
-                    <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
+        <div className="flex-1" />
+        <Button variant="ghost" size="icon" asChild>
+            <Link href="/analysis">
+                <FileJson className="h-5 w-5" />
+            </Link>
+        </Button>
         <div className="ml-auto">
           <LanguageSwitcher />
         </div>
