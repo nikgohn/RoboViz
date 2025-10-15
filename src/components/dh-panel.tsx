@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Dispatch, SetStateAction, useId } from "react";
@@ -194,7 +195,7 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             </div>
         </CardHeader>
         <ScrollArea className="flex-1 px-6">
-            <Accordion type="multiple" defaultValue={params.map((_, i) => `item-${i}`)} className="w-full">
+            <Accordion type="multiple" defaultValue={params.map((p, i) => i.toString())} className="w-full">
             {params.map((param, index) => (
                 <ParamRow 
                     key={index} 

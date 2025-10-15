@@ -1,0 +1,120 @@
+
+"use client";
+
+import { useState } from "react";
+import { RobotVisualizer } from "@/components/robot-visualizer";
+import { Logo } from "@/components/icons";
+import { useDHParams } from "@/context/dh-params-context";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
+import type { DHParams } from "@/types";
+
+function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number) => void }) {
+    if (param.dIsVariable) {
+        return (
+             <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                    <Label htmlFor={`d-${index}`}>d{index+1} (offset)</Label>
+                    <span className="text-sm text-muted-foreground font-mono">{param.d.toFixed(2)}</span>
+                </div>
+                <Slider
+                    id={`d-${index}`}
+                    min={-5}
+                    max={5}
+                    step={0.1}
+                    value={[param.d]}
+                    onValueChange={([val]) => onUpdate('d', val)}
+                />
+            </div>
+        )
+    }
+    if (!param.thetaIsFixed) {
+        return (
+            <div className="space-y-4">
+                 <div className="flex justify-between items-center">
+                    <Label htmlFor={`theta-${index}`}>θ{index+1} (rotation)</Label>
+                    <span className="text-sm text-muted-foreground font-mono">{param.theta.toFixed(0)}°</span>
+                </div>
+                <Slider
+                    id={`theta-${index}`}
+                    min={-180}
+                    max={180}
+                    step={1}
+                    value={[param.theta]}
+                    onValueChange={([val]) => onUpdate('theta', val)}
+                />
+            </div>
+        )
+    }
+    return null;
+}
+
+export default function KinematicsPage() {
+  const { params, setParams } = useDHParams();
+  const [showAxes, setShowAxes] = useState(false);
+
+  const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number) => {
+    setParams(prevParams => {
+        const newParams = [...prevParams];
+        newParams[index] = { ...newParams[index], [field]: value };
+        return newParams;
+    });
+  };
+
+  const variableParams = params.filter(p => p.dIsVariable || !p.thetaIsFixed);
+
+  return (
+    <div className="flex h-dvh flex-col font-sans">
+       <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
+        <Logo className="h-6 w-6 text-primary" />
+        <h1 className="font-headline text-xl font-semibold tracking-tight text-foreground">
+          RoboViz
+        </h1>
+        <nav className="flex items-center space-x-4 ml-6">
+            <Tabs defaultValue="kinematics">
+                <TabsList>
+                    <TabsTrigger value="editor" asChild><Link href="/">Editor</Link></TabsTrigger>
+                    <TabsTrigger value="kinematics" asChild><Link href="/kinematics">Kinematics</Link></TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </nav>
+      </header>
+      <main className="grid flex-1 grid-cols-1 lg:grid-cols-[400px_1fr] overflow-hidden">
+        <aside className="flex flex-col border-r bg-card">
+             <div className="flex flex-col h-full">
+                <CardHeader>
+                    <CardTitle className="font-headline">Kinematics Control</CardTitle>
+                    <CardDescription>Adjust the variable joints of the robotic arm.</CardDescription>
+                </CardHeader>
+                <ScrollArea className="flex-1 px-6">
+                   <div className="space-y-8 py-4">
+                     {variableParams.map((param, index) => {
+                       const originalIndex = params.findIndex(p => p === param);
+                       return (
+                         <KinematicsController 
+                            key={originalIndex}
+                            param={param}
+                            index={originalIndex}
+                            onUpdate={(field, value) => updateParam(originalIndex, field, value)}
+                         />
+                       )
+                     })}
+                     {variableParams.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-10">No variable parameters defined. Go to the Editor to set `d` as variable or `theta` as not fixed.</p>
+                     )}
+                   </div>
+                </ScrollArea>
+             </div>
+        </aside>
+        <div className="relative flex-1 bg-background overflow-hidden">
+          <RobotVisualizer params={params} showAxes={showAxes} />
+        </div>
+      </main>
+    </div>
+  );
+}
+
