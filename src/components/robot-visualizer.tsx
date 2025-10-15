@@ -11,6 +11,54 @@ type RobotVisualizerProps = {
   showAxes: boolean;
 };
 
+// Function to create a text sprite
+const makeTextSprite = (message: string, opts: { fontsize: number; fontface: string; textColor: { r: number; g: number; b: number; a: number; }}) => {
+    const { fontsize, fontface, textColor } = opts;
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+
+    context.font = `${fontsize}px ${fontface}`;
+    const metrics = context.measureText(message);
+    const textWidth = metrics.width;
+
+    canvas.width = textWidth + 8;
+    canvas.height = fontsize + 8;
+    
+    context.font = `bold ${fontsize}px ${fontface}`;
+    context.fillStyle = `rgba(${textColor.r},${textColor.g},${textColor.b},${textColor.a})`;
+    context.fillText(message, 4, fontsize);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false, renderOrder: 999 });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+    return sprite;
+};
+
+const createAxisLabels = (scale: number) => {
+    const labels = new THREE.Group();
+    const spriteX = makeTextSprite("X", { fontsize: 60, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
+    if(spriteX) {
+        spriteX.position.set(scale, 0, 0);
+        labels.add(spriteX);
+    }
+    const spriteY = makeTextSprite("Y", { fontsize: 60, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
+    if (spriteY) {
+        spriteY.position.set(0, scale, 0);
+        labels.add(spriteY);
+    }
+    const spriteZ = makeTextSprite("Z", { fontsize: 60, fontface: "Arial", textColor: { r: 0, b: 0, g: 255, a: 1.0 } });
+    if (spriteZ) {
+        spriteZ.position.set(0, 0, scale);
+        labels.add(spriteZ);
+    }
+    return labels;
+};
+
+
 export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -131,6 +179,10 @@ export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
         const axesHelper = new THREE.AxesHelper(1);
         axesHelper.position.y = 0.2;
         robotGroup.add(axesHelper);
+        
+        const axisLabels = createAxisLabels(1.1);
+        axisLabels.position.y = 0.2;
+        robotGroup.add(axisLabels);
     }
 
     currentMatrix.makeTranslation(0, 0.2, 0);
@@ -150,6 +202,10 @@ export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
             const axesHelper = new THREE.AxesHelper(1);
             axesHelper.applyMatrix4(currentMatrix);
             robotGroup.add(axesHelper);
+
+            const axisLabels = createAxisLabels(1.1);
+            axisLabels.applyMatrix4(currentMatrix);
+            robotGroup.add(axisLabels);
         }
 
         // Joint at the end of the new link
