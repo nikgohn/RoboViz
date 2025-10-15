@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import type { DHParams } from "@/types";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number) => void }) {
     if (param.dIsVariable) {
@@ -21,14 +23,20 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
                     <Label htmlFor={`d-${index}`}>d{index+1} (offset)</Label>
                     <span className="text-sm text-muted-foreground font-mono">{param.d.toFixed(2)}</span>
                 </div>
-                <Slider
-                    id={`d-${index}`}
-                    min={-5}
-                    max={5}
-                    step={0.1}
-                    value={[param.d]}
-                    onValueChange={([val]) => onUpdate('d', val)}
-                />
+                <div className="flex items-center gap-2">
+                    <Slider
+                        id={`d-${index}`}
+                        min={-5}
+                        max={5}
+                        step={0.1}
+                        value={[param.d]}
+                        onValueChange={([val]) => onUpdate('d', val)}
+                        className="flex-1"
+                    />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => onUpdate('d', 0)}>
+                        <RotateCcw className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         )
     }
@@ -39,14 +47,20 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
                     <Label htmlFor={`theta-${index}`}>θ{index+1} (rotation)</Label>
                     <span className="text-sm text-muted-foreground font-mono">{param.theta.toFixed(0)}°</span>
                 </div>
-                <Slider
-                    id={`theta-${index}`}
-                    min={-180}
-                    max={180}
-                    step={1}
-                    value={[param.theta]}
-                    onValueChange={([val]) => onUpdate('theta', val)}
-                />
+                <div className="flex items-center gap-2">
+                    <Slider
+                        id={`theta-${index}`}
+                        min={-180}
+                        max={180}
+                        step={1}
+                        value={[param.theta]}
+                        onValueChange={([val]) => onUpdate('theta', val)}
+                        className="flex-1"
+                    />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => onUpdate('theta', 0)}>
+                        <RotateCcw className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
         )
     }
