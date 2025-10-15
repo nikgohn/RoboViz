@@ -147,6 +147,9 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     const header = "a,alpha,d,theta\n";
     const rows = params.map(param => {
         const { a, alpha, d, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        
+        const alpha_val = `${alpha}*(pi/180)`;
+
         let d_val: string | number;
         if (dIsVariable) {
             d_val = `q_${variableCounter}`;
@@ -160,10 +163,10 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             theta_val = `q_${variableCounter}`;
             variableCounter++;
         } else {
-            theta_val = theta + thetaOffset;
+            theta_val = `${theta + thetaOffset}*(pi/180)`;
         }
         
-        return [a, alpha, d_val, theta_val].join(',');
+        return [a, alpha_val, d_val, theta_val].join(',');
     }).join('\n');
 
     const csvContent = "data:text/csv;charset=utf-8," + header + rows;
