@@ -98,6 +98,7 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const robotGroupRef = useRef<THREE.Group | null>(null);
+  const textColorRef = useRef({ r: 0, g: 0, b: 0, a: 1.0 });
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -182,6 +183,16 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
   }, []);
 
   useEffect(() => {
+    // Get text color from CSS custom property
+    const style = getComputedStyle(document.body);
+    const fgColor = style.getPropertyValue('--foreground').trim();
+    if (fgColor) {
+      // Assuming HSL format `h s% l%`
+      const color = new THREE.Color(`hsl(${fgColor.replace(/ /g, ',')})`);
+      textColorRef.current = { r: color.r * 255, g: color.g * 255, b: color.b * 255, a: 1.0 };
+    }
+
+
     const robotGroup = robotGroupRef.current;
     if (!robotGroup) return;
 
@@ -219,7 +230,7 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
      if (showLinkCoordinates) {
         const originPos = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
         const coordText = `(${originPos.x.toFixed(2)}, ${originPos.y.toFixed(2)}, ${originPos.z.toFixed(2)})`;
-        const coordSprite = makeTextSprite(coordText, { fontsize: 16, fontface: "Arial", textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
+        const coordSprite = makeTextSprite(coordText, { fontsize: 16, fontface: "Arial", textColor: textColorRef.current });
         if (coordSprite) {
             coordSprite.position.copy(originPos).add(new THREE.Vector3(0, 0.2, 0));
             robotGroup.add(coordSprite);
@@ -251,7 +262,7 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
         if (showLinkCoordinates) {
             const pos = endPoint;
             const coordText = `(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
-            const coordSprite = makeTextSprite(coordText, { fontsize: 16, fontface: "Arial", textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
+            const coordSprite = makeTextSprite(coordText, { fontsize: 16, fontface: "Arial", textColor: textColorRef.current });
             if (coordSprite) {
                 coordSprite.position.copy(pos).add(new THREE.Vector3(0, 0.2, 0));
                 robotGroup.add(coordSprite);
