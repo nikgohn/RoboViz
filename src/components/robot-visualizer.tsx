@@ -167,27 +167,17 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
     let currentMatrix = new THREE.Matrix4();
 
     // Base
-    const baseGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 32);
-    const baseMesh = new THREE.Mesh(baseGeometry, jointMaterial);
-    baseMesh.position.y = 0.1;
-    robotGroup.add(baseMesh);
-    
     const baseJointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
     const baseJointMesh = new THREE.Mesh(baseJointGeometry, jointMaterial);
-    baseJointMesh.position.y = 0.2; // Position on top of the base
     robotGroup.add(baseJointMesh);
 
     if (showAxes) {
         const axesHelper = new THREE.AxesHelper(1);
-        axesHelper.position.y = 0.2;
         robotGroup.add(axesHelper);
         
         const axisLabels = createAxisLabels(1.1, 0);
-        axisLabels.position.y = 0.2;
         robotGroup.add(axisLabels);
     }
-
-    currentMatrix.makeTranslation(0, 0.2, 0);
 
     params.forEach((p, index) => {
         const { a, alpha, d, theta, thetaOffset } = p;
