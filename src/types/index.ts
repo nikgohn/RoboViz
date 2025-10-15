@@ -6,5 +6,5 @@ export type DHParams = {
   dIsVariable?: boolean; // is d a variable or fixed
   thetaOffset: number; // joint angle offset (degrees)
   theta: number;  // joint angle (degrees)
-  thetaIsFixed?: boolean; // is theta slider fixed
+  thetaIsFixed: boolean; // is theta slider fixed
 };

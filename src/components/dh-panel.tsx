@@ -161,7 +161,7 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
 
         let theta_val: string | number;
         if (!thetaIsFixed) {
-            theta_val = `q_${variableCounter}`;
+            theta_val = `q_${variableCounter}+${thetaOffset}*(pi/180)`;
             variableCounter++;
         } else {
             theta_val = `${theta + thetaOffset}*(pi/180)`;
@@ -182,18 +182,20 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
 
   return (
     <div className="flex flex-col h-full">
-        <CardHeader>
-            <div className="flex justify-between items-center">
-                <div>
-                    <CardTitle className="font-headline">DH Parameters</CardTitle>
-                    <CardDescription>Adjust the parameters for each link of the robotic arm.</CardDescription>
+        <div className="shrink-0">
+            <CardHeader>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">DH Parameters</CardTitle>
+                        <CardDescription>Adjust the parameters for each link of the robotic arm.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
+                        <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
-                    <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
-                </div>
-            </div>
-        </CardHeader>
+            </CardHeader>
+        </div>
         <ScrollArea className="flex-1 px-6">
             <Accordion type="multiple" defaultValue={params.map((p, i) => i.toString())} className="w-full">
             {params.map((param, index) => (
@@ -207,16 +209,18 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             ))}
             </Accordion>
         </ScrollArea>
-        <CardFooter className="p-6 pt-4 border-t flex gap-4">
-            <Button onClick={addLink} className="w-full">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Link
-            </Button>
-            <Button onClick={handleExportCSV} variant="secondary" className="w-full">
-                <Download className="mr-2 h-4 w-4" />
-                Export CSV
-            </Button>
-        </CardFooter>
+        <div className="shrink-0">
+            <CardFooter className="p-6 border-t flex gap-4">
+                <Button onClick={addLink} className="w-full">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Link
+                </Button>
+                <Button onClick={handleExportCSV} variant="secondary" className="w-full">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export CSV
+                </Button>
+            </CardFooter>
+        </div>
     </div>
   );
 }
