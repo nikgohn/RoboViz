@@ -12,6 +12,7 @@ type RobotVisualizerProps = {
   showAxes: boolean;
   showLinkCoordinates?: boolean;
   onPositionUpdate?: (position: THREE.Vector3) => void;
+  isFlipped?: boolean;
 };
 
 // Function to create a text sprite
@@ -91,7 +92,7 @@ const createGripper = () => {
 };
 
 
-export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate }: RobotVisualizerProps) {
+export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate, isFlipped = false }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -194,6 +195,9 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
     while (robotGroup.children.length) {
       robotGroup.remove(robotGroup.children[0]);
     }
+    
+    // Handle flipping the base
+    robotGroup.rotation.x = isFlipped ? Math.PI : 0;
     
     const jointMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5, roughness: 0.5 });
     const linkMaterial = new THREE.MeshStandardMaterial({ color: new THREE.Color("hsl(var(--primary))"), metalness: 0.3, roughness: 0.6 });
@@ -322,9 +326,7 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
         onPositionUpdate(new THREE.Vector3().setFromMatrixPosition(currentMatrix));
     }
 
-  }, [params, showAxes, onPositionUpdate, showLinkCoordinates]);
+  }, [params, showAxes, onPositionUpdate, showLinkCoordinates, isFlipped]);
 
   return <div ref={mountRef} className="w-full h-full" />;
 }
-
-    

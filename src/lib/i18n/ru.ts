@@ -6,6 +6,7 @@ export const ru = {
   analysis: 'Анализ',
   showAxes: 'Показать оси',
   showCoordinates: 'Показать коорд.',
+  flipBase: 'Перевернуть',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',

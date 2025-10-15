@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, RotateCcw, Download } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Download, FlipHorizontal } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/context/language-context";
@@ -20,6 +20,8 @@ type DhPanelProps = {
   setParams: Dispatch<SetStateAction<Omit<DHParams, "id">[]>>;
   showAxes: boolean;
   setShowAxes: Dispatch<SetStateAction<boolean>>;
+  isFlipped: boolean;
+  setIsFlipped: Dispatch<SetStateAction<boolean>>;
 };
 
 function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number | boolean) => void, onRemove: () => void }) {
@@ -119,7 +121,7 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
     )
 }
 
-export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelProps) {
+export function DhPanel({ params, setParams, showAxes, setShowAxes, isFlipped, setIsFlipped }: DhPanelProps) {
   const { t } = useLanguage();
 
   const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number | boolean) => {
@@ -192,18 +194,24 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
                     <CardTitle className="font-headline">{t('dhParameters')}</CardTitle>
                     <CardDescription>{t('dhParametersDescription')}</CardDescription>
                 </div>
-                <div className="flex items-center gap-2 pt-1">
-                    <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
-                    <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                <div className="flex flex-col items-end gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
+                        <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <Label htmlFor="flip-base" className="text-sm">{t('flipBase')}</Label>
+                        <Switch id="flip-base" checked={isFlipped} onCheckedChange={setIsFlipped} />
+                    </div>
                 </div>
             </div>
         </CardHeader>
         <CardContent className="flex gap-4">
-             <Button onClick={addLink} className="w-full">
+             <Button onClick={addLink} className="flex-1">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addLink')}
             </Button>
-            <Button onClick={handleExportCSV} variant="secondary" className="w-full">
+            <Button onClick={handleExportCSV} variant="secondary" className="flex-1">
                 <Download className="mr-2 h-4 w-4" />
                 {t('exportCSV')}
             </Button>

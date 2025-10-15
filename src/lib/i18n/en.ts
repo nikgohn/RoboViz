@@ -6,6 +6,7 @@ export const en = {
   analysis: 'Analysis',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
+  flipBase: 'Flip Base',
   
   // DH Panel
   dhParameters: 'DH Parameters',

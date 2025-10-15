@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 export default function EditorPage() {
   const { params, setParams } = useDHParams();
   const [showAxes, setShowAxes] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
   const { t } = useLanguage();
 
   return (
@@ -50,10 +51,12 @@ export default function EditorPage() {
             setParams={setParams} 
             showAxes={showAxes}
             setShowAxes={setShowAxes}
+            isFlipped={isFlipped}
+            setIsFlipped={setIsFlipped}
           />
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} showAxes={showAxes} />
+          <RobotVisualizer params={params} showAxes={showAxes} isFlipped={isFlipped} />
         </div>
       </main>
     </div>
