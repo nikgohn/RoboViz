@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Download } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type DhPanelProps = {
@@ -141,6 +141,40 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
   const removeLink = (index: number) => {
     setParams(prev => prev.filter((_, i) => i !== index));
   };
+  
+  const handleExportCSV = () => {
+    let variableCounter = 1;
+    const header = "a,alpha,d,theta\n";
+    const rows = params.map(param => {
+        const { a, alpha, d, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        let d_val: string | number;
+        if (dIsVariable) {
+            d_val = `q_${variableCounter}`;
+            variableCounter++;
+        } else {
+            d_val = d;
+        }
+
+        let theta_val: string | number;
+        if (!thetaIsFixed) {
+            theta_val = `q_${variableCounter}`;
+            variableCounter++;
+        } else {
+            theta_val = theta + thetaOffset;
+        }
+        
+        return [a, alpha, d_val, theta_val].join(',');
+    }).join('\n');
+
+    const csvContent = "data:text/csv;charset=utf-8," + header + rows;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "dh_parameters.csv");
+    document.body.appendChild(link); 
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -169,10 +203,14 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             ))}
             </Accordion>
         </ScrollArea>
-        <CardFooter className="p-6 pt-4 border-t">
+        <CardFooter className="p-6 pt-4 border-t flex gap-4">
             <Button onClick={addLink} className="w-full">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Link
+            </Button>
+            <Button onClick={handleExportCSV} variant="secondary" className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
             </Button>
         </CardFooter>
     </div>
