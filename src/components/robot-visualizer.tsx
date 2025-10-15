@@ -40,17 +40,17 @@ const makeTextSprite = (message: string, opts: { fontsize: number; fontface: str
 
 const createAxisLabels = (scale: number) => {
     const labels = new THREE.Group();
-    const spriteX = makeTextSprite("X", { fontsize: 60, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
+    const spriteX = makeTextSprite("X", { fontsize: 40, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
     if(spriteX) {
         spriteX.position.set(scale, 0, 0);
         labels.add(spriteX);
     }
-    const spriteY = makeTextSprite("Y", { fontsize: 60, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
+    const spriteY = makeTextSprite("Y", { fontsize: 40, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
     if (spriteY) {
         spriteY.position.set(0, scale, 0);
         labels.add(spriteY);
     }
-    const spriteZ = makeTextSprite("Z", { fontsize: 60, fontface: "Arial", textColor: { r: 0, b: 0, g: 255, a: 1.0 } });
+    const spriteZ = makeTextSprite("Z", { fontsize: 40, fontface: "Arial", textColor: { r: 0, g: 0, b: 255, a: 1.0 } });
     if (spriteZ) {
         spriteZ.position.set(0, 0, scale);
         labels.add(spriteZ);
