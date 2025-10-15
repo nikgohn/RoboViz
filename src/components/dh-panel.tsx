@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, RotateCcw } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 type DhPanelProps = {
@@ -85,17 +85,27 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
                               <Label htmlFor={`theta-${id}`}>θᵢ (rot)</Label>
-                              <span className="text-sm text-muted-foreground font-mono">{param.theta.toFixed(0)}°</span>
+                              <div className="flex items-center gap-2">
+                                    <Label htmlFor={`theta-is-fixed-${id}`} className="text-xs text-muted-foreground">Fixed</Label>
+                                    <Switch id={`theta-is-fixed-${id}`} checked={param.thetaIsFixed} onCheckedChange={(checked) => onUpdate('thetaIsFixed', checked)} />
+                                </div>
                             </div>
-                            <div className="[--primary:hsl(var(--accent-interactive))]">
-                                <Slider
-                                    id={`theta-${id}`}
-                                    min={-180}
-                                    max={180}
-                                    step={1}
-                                    value={[param.theta]}
-                                    onValueChange={([val]) => onUpdate('theta', val)}
-                                />
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1 [--primary:hsl(var(--accent-interactive))]">
+                                    <Slider
+                                        id={`theta-${id}`}
+                                        min={-180}
+                                        max={180}
+                                        step={1}
+                                        value={[param.theta]}
+                                        onValueChange={([val]) => onUpdate('theta', val)}
+                                        disabled={param.thetaIsFixed}
+                                    />
+                                </div>
+                                <span className="text-sm text-muted-foreground font-mono w-10 text-right">{param.theta.toFixed(0)}°</span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => onUpdate('theta', 0)} disabled={param.thetaIsFixed}>
+                                    <RotateCcw className="h-4 w-4" />
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -123,6 +133,7 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
       dIsVariable: false,
       thetaOffset: 0,
       theta: 0,
+      thetaIsFixed: false,
     };
     setParams(prev => [...prev, newLink]);
   };
