@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -9,6 +10,7 @@ import { createDHMatrix } from "@/lib/dh";
 type RobotVisualizerProps = {
   params: Omit<DHParams, "id">[];
   showAxes: boolean;
+  onPositionUpdate?: (position: THREE.Vector3) => void;
 };
 
 // Function to create a text sprite
@@ -59,7 +61,7 @@ const createAxisLabels = (scale: number, index: number) => {
 };
 
 
-export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
+export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -258,11 +260,15 @@ export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
         }
     });
 
+    if (onPositionUpdate) {
+        onPositionUpdate(new THREE.Vector3().setFromMatrixPosition(currentMatrix));
+    }
+
     if (controlsRef.current) {
         controlsRef.current.target.set(0,1,0);
     }
 
-  }, [params, showAxes]);
+  }, [params, showAxes, onPositionUpdate]);
 
   return <div ref={mountRef} className="w-full h-full" />;
 }

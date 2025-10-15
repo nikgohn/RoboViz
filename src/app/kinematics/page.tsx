@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import * as THREE from "three";
 import { RobotVisualizer } from "@/components/robot-visualizer";
 import { Logo } from "@/components/icons";
 import { useDHParams } from "@/context/dh-params-context";
@@ -71,6 +72,8 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
 export default function KinematicsPage() {
   const { params, setParams } = useDHParams();
   const [showAxes, setShowAxes] = useState(false);
+  const [endEffectorPosition, setEndEffectorPosition] = useState<THREE.Vector3 | null>(null);
+
 
   const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number) => {
     setParams(prevParams => {
@@ -113,6 +116,33 @@ export default function KinematicsPage() {
                         </div>
                     </div>
                 </CardHeader>
+                <CardContent>
+                    <Card>
+                        <CardHeader className="p-4">
+                            <CardTitle className="text-base">End-Effector Position</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                            {endEffectorPosition ? (
+                                <div className="grid grid-cols-3 gap-2 text-center font-mono text-sm">
+                                    <div>
+                                        <div className="text-muted-foreground">X</div>
+                                        <div>{endEffectorPosition.x.toFixed(3)}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted-foreground">Y</div>
+                                        <div>{endEffectorPosition.y.toFixed(3)}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted-foreground">Z</div>
+                                        <div>{endEffectorPosition.z.toFixed(3)}</div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-sm text-muted-foreground text-center">-</div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </CardContent>
                 <ScrollArea className="flex-1 px-6">
                    <div className="space-y-8 py-4">
                      {variableParams.map((param, index) => {
@@ -134,7 +164,7 @@ export default function KinematicsPage() {
              </div>
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} showAxes={showAxes} />
+          <RobotVisualizer params={params} showAxes={showAxes} onPositionUpdate={setEndEffectorPosition} />
         </div>
       </main>
     </div>
