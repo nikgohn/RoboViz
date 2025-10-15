@@ -164,9 +164,17 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
     const linkMaterial = new THREE.MeshStandardMaterial({ color: new THREE.Color("hsl(var(--primary))"), metalness: 0.3, roughness: 0.6 });
     const offsetLinkMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 });
 
-    let currentMatrix = new THREE.Matrix4();
+    // Base (visual only)
+    const baseGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32);
+    const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
+    baseMesh.position.y = 0.05; // half of height
+    robotGroup.add(baseMesh);
 
-    // Base
+    // This matrix will track the transformations for kinematics
+    let currentMatrix = new THREE.Matrix4(); 
+
+    // Initial joint at origin
     const baseJointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
     const baseJointMesh = new THREE.Mesh(baseJointGeometry, jointMaterial);
     robotGroup.add(baseJointMesh);
