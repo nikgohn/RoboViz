@@ -3,6 +3,7 @@ export const en = {
   // General
   editor: 'Editor',
   kinematics: 'Kinematics',
+  analysis: 'Analysis',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
   
@@ -27,4 +28,14 @@ export const en = {
   noVariableParameters: 'No variable parameters defined. Go to the Editor to set `d` as variable or `theta` as not fixed.',
   offset: 'offset',
   rotation: 'rotation',
+
+  // Analysis Page
+  kinematicPairsTableTitle: 'Table 1 - Kinematic Pairs',
+  tableHeaderDesignation: 'Designation',
+  tableHeaderLinks: 'Links',
+  tableHeaderName: 'Name',
+  tableHeaderClass: 'Class',
+  jointTypeRevolute: 'Revolute',
+  jointTypePrismatic: 'Prismatic',
+  jointTypeFixed: 'Fixed',
 };

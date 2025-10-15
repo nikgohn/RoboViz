@@ -3,6 +3,7 @@ export const ru = {
   // General
   editor: 'Редактор',
   kinematics: 'Кинематика',
+  analysis: 'Анализ',
   showAxes: 'Показать оси',
   showCoordinates: 'Показать коорд.',
 
@@ -27,4 +28,14 @@ export const ru = {
   noVariableParameters: 'Переменные параметры не определены. Перейдите в редактор, чтобы установить `d` как переменную или `theta` как нефиксированную.',
   offset: 'смещение',
   rotation: 'поворот',
+
+  // Analysis Page
+  kinematicPairsTableTitle: 'Таблица 1 - Кинематические пары',
+  tableHeaderDesignation: 'Обозначение',
+  tableHeaderLinks: 'Звенья',
+  tableHeaderName: 'Название',
+  tableHeaderClass: 'Класс',
+  jointTypeRevolute: 'Вращательная',
+  jointTypePrismatic: 'Поступательная',
+  jointTypeFixed: 'Фиксированная',
 };
