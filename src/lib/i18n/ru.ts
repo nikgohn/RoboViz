@@ -38,4 +38,13 @@ export const ru = {
   jointTypeRevolute: 'Вращательная',
   jointTypePrismatic: 'Поступательная',
   jointTypeFixed: 'Фиксированная',
+
+  mechanismLinksTableTitle: 'Таблица 2 - Звенья механизма',
+  tableHeaderMotionType: 'Вид движения',
+  linkTypeBase: 'Стойка',
+  linkTypeSlider: 'Ползун',
+  linkTypeCrank: 'Кривошип',
+  linkTypeFixed: 'Фиксированное',
+  motionTypeTranslational: 'Поступательное',
+  motionTypeRotational: 'Вращательное',
 };

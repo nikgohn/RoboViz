@@ -19,6 +19,18 @@ export default function AnalysisPage() {
     if (!param.thetaIsFixed) return t('jointTypeRevolute');
     return t('jointTypeFixed');
   };
+  
+  const getLinkName = (param: Omit<import("@/types").DHParams, "id">) => {
+    if (param.dIsVariable) return t('linkTypeSlider');
+    if (!param.thetaIsFixed) return t('linkTypeCrank');
+    return t('linkTypeFixed');
+  }
+
+  const getMotionType = (param: Omit<import("@/types").DHParams, "id">) => {
+    if (param.dIsVariable) return t('motionTypeTranslational');
+    if (!param.thetaIsFixed) return t('motionTypeRotational');
+    return '-';
+  }
 
   const designations = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
@@ -43,7 +55,7 @@ export default function AnalysisPage() {
         </div>
       </header>
       <main className="flex-1 overflow-auto p-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto space-y-6">
             <Card>
                 <CardHeader>
                     <CardTitle>{t('kinematicPairsTableTitle')}</CardTitle>
@@ -65,6 +77,37 @@ export default function AnalysisPage() {
                                     <TableCell>{index}-{index + 1}</TableCell>
                                     <TableCell>{getJointType(param)}</TableCell>
                                     <TableCell>5(H)</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('mechanismLinksTableTitle')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>№</TableHead>
+                                <TableHead>{t('tableHeaderName')}</TableHead>
+                                <TableHead>{t('tableHeaderMotionType')}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell>0</TableCell>
+                                <TableCell>{t('linkTypeBase')}</TableCell>
+                                <TableCell>-</TableCell>
+                            </TableRow>
+                            {params.map((param, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{index + 1}</TableCell>
+                                    <TableCell>{getLinkName(param)}</TableCell>
+                                    <TableCell>{getMotionType(param)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -38,4 +38,13 @@ export const en = {
   jointTypeRevolute: 'Revolute',
   jointTypePrismatic: 'Prismatic',
   jointTypeFixed: 'Fixed',
+
+  mechanismLinksTableTitle: 'Table 2 - Links of the mechanism',
+  tableHeaderMotionType: 'Type of motion',
+  linkTypeBase: 'Base',
+  linkTypeSlider: 'Slider',
+  linkTypeCrank: 'Crank',
+  linkTypeFixed: 'Fixed',
+  motionTypeTranslational: 'Translational',
+  motionTypeRotational: 'Rotational',
 };
