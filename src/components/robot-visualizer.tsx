@@ -40,8 +40,9 @@ const makeTextSprite = (message: string, opts: { fontsize: number; fontface: str
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
 
-    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false, renderOrder: 999 });
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false });
     const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.renderOrder = 999;
     sprite.scale.set(canvas.width / 150, canvas.height / 150, 1.0); // Adjust scale for visibility
     return sprite;
 };
