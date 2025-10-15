@@ -105,6 +105,15 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
 
     const currentMount = mountRef.current;
 
+    // Get text color from CSS custom property
+    const style = getComputedStyle(document.body);
+    const fgColor = style.getPropertyValue('--foreground').trim();
+    if (fgColor) {
+      // Assuming HSL format `h s% l%`
+      const color = new THREE.Color(`hsl(${fgColor.replace(/ /g, ',')})`);
+      textColorRef.current = { r: color.r * 255, g: color.g * 255, b: color.b * 255, a: 1.0 };
+    }
+
     // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("hsl(var(--background))");
@@ -183,16 +192,6 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
   }, []);
 
   useEffect(() => {
-    // Get text color from CSS custom property
-    const style = getComputedStyle(document.body);
-    const fgColor = style.getPropertyValue('--foreground').trim();
-    if (fgColor) {
-      // Assuming HSL format `h s% l%`
-      const color = new THREE.Color(`hsl(${fgColor.replace(/ /g, ',')})`);
-      textColorRef.current = { r: color.r * 255, g: color.g * 255, b: color.b * 255, a: 1.0 };
-    }
-
-
     const robotGroup = robotGroupRef.current;
     if (!robotGroup) return;
 
