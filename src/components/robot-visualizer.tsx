@@ -42,17 +42,17 @@ const makeTextSprite = (message: string, opts: { fontsize: number; fontface: str
 
 const createAxisLabels = (scale: number, index: number) => {
     const labels = new THREE.Group();
-    const spriteX = makeTextSprite(`X${index}`, { fontsize: 30, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
+    const spriteX = makeTextSprite(`X${index}`, { fontsize: 24, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
     if(spriteX) {
         spriteX.position.set(scale, 0, 0);
         labels.add(spriteX);
     }
-    const spriteY = makeTextSprite(`Y${index}`, { fontsize: 30, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
+    const spriteY = makeTextSprite(`Y${index}`, { fontsize: 24, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
     if (spriteY) {
         spriteY.position.set(0, scale, 0);
         labels.add(spriteY);
     }
-    const spriteZ = makeTextSprite(`Z${index}`, { fontsize: 30, fontface: "Arial", textColor: { r: 0, g: 0, b: 255, a: 1.0 } });
+    const spriteZ = makeTextSprite(`Z${index}`, { fontsize: 24, fontface: "Arial", textColor: { r: 0, g: 0, b: 255, a: 1.0 } });
     if (spriteZ) {
         spriteZ.position.set(0, 0, scale);
         labels.add(spriteZ);
@@ -93,6 +93,7 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const robotGroupRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -121,6 +122,7 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
     controls.enableDamping = true;
     controls.dampingFactor = 0.1;
     controls.rotateSpeed = 0.5;
+    controls.target.set(0, 1, 0);
     controlsRef.current = controls;
 
     // Lighting
@@ -136,7 +138,9 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
 
     // Robot group
     const robotGroup = new THREE.Group();
+    robotGroup.name = "robot";
     scene.add(robotGroup);
+    robotGroupRef.current = robotGroup;
 
     let animationFrameId: number;
 
@@ -174,18 +178,14 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
   }, []);
 
   useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene) return;
-    
-    let robotGroup = scene.getObjectByName("robot");
-    if (robotGroup) {
-      scene.remove(robotGroup);
+    const robotGroup = robotGroupRef.current;
+    if (!robotGroup) return;
+
+    // Clear previous robot
+    while (robotGroup.children.length) {
+      robotGroup.remove(robotGroup.children[0]);
     }
     
-    robotGroup = new THREE.Group();
-    robotGroup.name = "robot";
-    scene.add(robotGroup);
-
     const jointMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5, roughness: 0.5 });
     const linkMaterial = new THREE.MeshStandardMaterial({ color: new THREE.Color("hsl(var(--primary))"), metalness: 0.3, roughness: 0.6 });
     const offsetLinkMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.3, roughness: 0.6 });
@@ -194,7 +194,7 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
     const baseGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32);
     const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
-    baseMesh.position.y = 0.05; // half of height
+    baseMesh.position.y = -0.05; // half of height, shifted down
     robotGroup.add(baseMesh);
 
     // This matrix will track the transformations for kinematics
@@ -290,10 +290,6 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
 
     if (onPositionUpdate) {
         onPositionUpdate(new THREE.Vector3().setFromMatrixPosition(currentMatrix));
-    }
-
-    if (controlsRef.current) {
-        controlsRef.current.target.set(0,1,0);
     }
 
   }, [params, showAxes, onPositionUpdate]);
