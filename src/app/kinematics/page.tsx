@@ -73,7 +73,7 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
 }
 
 export default function KinematicsPage() {
-  const { params, setParams, isFlipped } = useDHParams();
+  const { params, setParams, baseOrientation } = useDHParams();
   const [showAxes, setShowAxes] = useState(false);
   const [showCoordinates, setShowCoordinates] = useState(false);
   const [endEffectorPosition, setEndEffectorPosition] = useState<THREE.Vector3 | null>(null);
@@ -182,9 +182,11 @@ export default function KinematicsPage() {
              </div>
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} showAxes={showAxes} showLinkCoordinates={showCoordinates} onPositionUpdate={setEndEffectorPosition} isFlipped={isFlipped} />
+          <RobotVisualizer params={params} showAxes={showAxes} showLinkCoordinates={showCoordinates} onPositionUpdate={setEndEffectorPosition} baseOrientation={baseOrientation} />
         </div>
       </main>
     </div>
   );
 }
+
+    

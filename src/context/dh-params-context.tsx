@@ -33,15 +33,23 @@ const initialParams: Omit<DHParams, "id">[] = [
   },
 ];
 
+export type BaseOrientation = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+const initialOrientation: BaseOrientation = { x: 0, y: 0, z: 0 };
+
 const LOCAL_STORAGE_KEY = 'robot-dh-params';
-const FLIP_STATE_KEY = 'robot-flip-state';
+const ORIENTATION_STATE_KEY = 'robot-base-orientation';
 
 
 type DHParamsContextType = {
   params: Omit<DHParams, "id">[];
   setParams: Dispatch<SetStateAction<Omit<DHParams, "id">[]>>;
-  isFlipped: boolean;
-  setIsFlipped: Dispatch<SetStateAction<boolean>>;
+  baseOrientation: BaseOrientation;
+  setBaseOrientation: Dispatch<SetStateAction<BaseOrientation>>;
   isLoaded: boolean;
 };
 
@@ -49,7 +57,7 @@ const DHParamsContext = createContext<DHParamsContextType | undefined>(undefined
 
 export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
   const [params, setParams] = useState<Omit<DHParams, "id">[]>([]);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [baseOrientation, setBaseOrientation] = useState<BaseOrientation>(initialOrientation);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -61,15 +69,15 @@ export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
         setParams(initialParams);
       }
 
-      const storedFlipState = localStorage.getItem(FLIP_STATE_KEY);
-      if (storedFlipState) {
-        setIsFlipped(JSON.parse(storedFlipState));
+      const storedOrientation = localStorage.getItem(ORIENTATION_STATE_KEY);
+      if (storedOrientation) {
+        setBaseOrientation(JSON.parse(storedOrientation));
       }
 
     } catch (error) {
       console.error("Failed to parse params from localStorage", error);
       setParams(initialParams);
-      setIsFlipped(false);
+      setBaseOrientation(initialOrientation);
     }
     setIsLoaded(true);
   }, []);
@@ -77,16 +85,16 @@ export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(params));
-      localStorage.setItem(FLIP_STATE_KEY, JSON.stringify(isFlipped));
+      localStorage.setItem(ORIENTATION_STATE_KEY, JSON.stringify(baseOrientation));
     }
-  }, [params, isFlipped, isLoaded]);
+  }, [params, baseOrientation, isLoaded]);
 
   if (!isLoaded) {
     return null; // or a loading spinner
   }
 
   return (
-    <DHParamsContext.Provider value={{ params, setParams, isFlipped, setIsFlipped, isLoaded }}>
+    <DHParamsContext.Provider value={{ params, setParams, baseOrientation, setBaseOrientation, isLoaded }}>
       {children}
     </DHParamsContext.Provider>
   );
@@ -99,3 +107,5 @@ export const useDHParams = () => {
   }
   return context;
 };
+
+    

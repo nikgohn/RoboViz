@@ -6,7 +6,7 @@ export const en = {
   analysis: 'Analysis',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
-  flipBase: 'Flip Base',
+  reset: 'Reset',
   
   // DH Panel
   dhParameters: 'DH Parameters',
@@ -21,6 +21,7 @@ export const en = {
   jointAngle: 'θᵢ (rot)',
   variable: 'Var',
   fixed: 'Fixed',
+  baseOrientation: 'Base Orientation',
 
   // Kinematics Page
   kinematicsControl: 'Kinematics Control',
@@ -49,3 +50,5 @@ export const en = {
   motionTypeTranslational: 'Translational',
   motionTypeRotational: 'Rotational',
 };
+
+    

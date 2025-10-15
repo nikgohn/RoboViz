@@ -6,7 +6,7 @@ export const ru = {
   analysis: 'Анализ',
   showAxes: 'Показать оси',
   showCoordinates: 'Показать коорд.',
-  flipBase: 'Перевернуть',
+  reset: 'Сброс',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',
@@ -21,6 +21,7 @@ export const ru = {
   jointAngle: 'θᵢ (поворот)',
   variable: 'Перем.',
   fixed: 'Фикс.',
+  baseOrientation: 'Ориентация основания',
 
   // Kinematics Page
   kinematicsControl: 'Управление кинематикой',
@@ -49,3 +50,5 @@ export const ru = {
   motionTypeTranslational: 'Поступательное',
   motionTypeRotational: 'Вращательное',
 };
+
+    

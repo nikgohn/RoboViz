@@ -6,13 +6,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { DHParams } from "@/types";
 import { createDHMatrix } from "@/lib/dh";
+import type { BaseOrientation } from "@/context/dh-params-context";
 
 type RobotVisualizerProps = {
   params: Omit<DHParams, "id">[];
   showAxes: boolean;
   showLinkCoordinates?: boolean;
   onPositionUpdate?: (position: THREE.Vector3) => void;
-  isFlipped?: boolean;
+  baseOrientation?: BaseOrientation;
 };
 
 // Function to create a text sprite
@@ -92,7 +93,7 @@ const createGripper = () => {
 };
 
 
-export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate, isFlipped = false }: RobotVisualizerProps) {
+export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate, baseOrientation = {x: 0, y: 0, z: 0} }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -196,8 +197,14 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
       robotGroup.remove(robotGroup.children[0]);
     }
     
-    // Handle flipping the base
-    robotGroup.rotation.x = isFlipped ? Math.PI : 0;
+    // Apply base orientation
+    const euler = new THREE.Euler(
+        THREE.MathUtils.degToRad(baseOrientation.x),
+        THREE.MathUtils.degToRad(baseOrientation.y),
+        THREE.MathUtils.degToRad(baseOrientation.z),
+        'XYZ'
+    );
+    robotGroup.setRotationFromEuler(euler);
     
     const jointMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5, roughness: 0.5 });
     const linkMaterial = new THREE.MeshStandardMaterial({ color: new THREE.Color("hsl(var(--primary))"), metalness: 0.3, roughness: 0.6 });
@@ -326,7 +333,9 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
         onPositionUpdate(new THREE.Vector3().setFromMatrixPosition(currentMatrix));
     }
 
-  }, [params, showAxes, onPositionUpdate, showLinkCoordinates, isFlipped]);
+  }, [params, showAxes, onPositionUpdate, showLinkCoordinates, baseOrientation]);
 
   return <div ref={mountRef} className="w-full h-full" />;
 }
+
+    

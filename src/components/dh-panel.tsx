@@ -10,18 +10,17 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, RotateCcw, Download, FlipHorizontal } from "lucide-react";
+import { Plus, Trash2, RotateCcw, Download } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/context/language-context";
+import { useDHParams } from "@/context/dh-params-context";
 
 type DhPanelProps = {
   params: Omit<DHParams, "id">[];
   setParams: Dispatch<SetStateAction<Omit<DHParams, "id">[]>>;
   showAxes: boolean;
   setShowAxes: Dispatch<SetStateAction<boolean>>;
-  isFlipped: boolean;
-  setIsFlipped: Dispatch<SetStateAction<boolean>>;
 };
 
 function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number | boolean) => void, onRemove: () => void }) {
@@ -121,8 +120,9 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
     )
 }
 
-export function DhPanel({ params, setParams, showAxes, setShowAxes, isFlipped, setIsFlipped }: DhPanelProps) {
+export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelProps) {
   const { t } = useLanguage();
+  const { baseOrientation, setBaseOrientation } = useDHParams();
 
   const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number | boolean) => {
     setParams(prevParams => {
@@ -185,6 +185,14 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes, isFlipped, s
     link.click();
     document.body.removeChild(link);
   };
+  
+  const handleOrientationChange = (axis: 'x' | 'y' | 'z', value: string) => {
+    setBaseOrientation(prev => ({ ...prev, [axis]: parseFloat(value) || 0 }));
+  }
+  
+  const resetOrientation = () => {
+    setBaseOrientation({ x: 0, y: 0, z: 0 });
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -194,19 +202,42 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes, isFlipped, s
                     <CardTitle className="font-headline">{t('dhParameters')}</CardTitle>
                     <CardDescription>{t('dhParametersDescription')}</CardDescription>
                 </div>
-                <div className="flex flex-col items-end gap-2 pt-1">
-                    <div className="flex items-center gap-2">
-                        <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
-                        <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
-                    </div>
-                     <div className="flex items-center gap-2">
-                        <Label htmlFor="flip-base" className="text-sm">{t('flipBase')}</Label>
-                        <Switch id="flip-base" checked={isFlipped} onCheckedChange={setIsFlipped} />
-                    </div>
+                 <div className="flex items-center gap-2 pt-1">
+                    <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
+                    <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
                 </div>
             </div>
         </CardHeader>
-        <CardContent className="flex gap-4">
+         <CardContent>
+            <Card>
+                <CardHeader className="p-4">
+                     <div className="flex justify-between items-center">
+                        <CardTitle className="text-base">{t('baseOrientation')}</CardTitle>
+                        <Button variant="ghost" size="sm" onClick={resetOrientation}>
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            {t('reset')}
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                    <div className="grid grid-cols-3 gap-2">
+                        <div>
+                            <Label htmlFor="orientation-x">X (°)</Label>
+                            <Input id="orientation-x" type="number" value={baseOrientation.x} onChange={(e) => handleOrientationChange('x', e.target.value)} />
+                        </div>
+                        <div>
+                            <Label htmlFor="orientation-y">Y (°)</Label>
+                            <Input id="orientation-y" type="number" value={baseOrientation.y} onChange={(e) => handleOrientationChange('y', e.target.value)} />
+                        </div>
+                        <div>
+                            <Label htmlFor="orientation-z">Z (°)</Label>
+                            <Input id="orientation-z" type="number" value={baseOrientation.z} onChange={(e) => handleOrientationChange('z', e.target.value)} />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </CardContent>
+        <CardContent className="flex gap-4 pt-0">
              <Button onClick={addLink} className="flex-1">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addLink')}
@@ -235,3 +266,5 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes, isFlipped, s
     </div>
   );
 }
+
+    
