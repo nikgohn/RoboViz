@@ -1,8 +1,10 @@
+
 export const en = {
   // General
   editor: 'Editor',
   kinematics: 'Kinematics',
   showAxes: 'Show Axes',
+  showCoordinates: 'Show Coords',
   
   // DH Panel
   dhParameters: 'DH Parameters',

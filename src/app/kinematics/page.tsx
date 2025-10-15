@@ -75,6 +75,7 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
 export default function KinematicsPage() {
   const { params, setParams } = useDHParams();
   const [showAxes, setShowAxes] = useState(false);
+  const [showCoordinates, setShowCoordinates] = useState(false);
   const [endEffectorPosition, setEndEffectorPosition] = useState<THREE.Vector3 | null>(null);
   const { t } = useLanguage();
 
@@ -116,9 +117,15 @@ export default function KinematicsPage() {
                             <CardTitle className="font-headline">{t('kinematicsControl')}</CardTitle>
                             <CardDescription>{t('kinematicsControlDescription')}</CardDescription>
                         </div>
-                        <div className="flex items-center gap-2 pt-1">
-                            <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
-                            <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                        <div className="flex flex-col gap-2 pt-1">
+                            <div className="flex items-center gap-2">
+                                <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
+                                <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Label htmlFor="show-coords" className="text-sm">{t('showCoordinates')}</Label>
+                                <Switch id="show-coords" checked={showCoordinates} onCheckedChange={setShowCoordinates} />
+                            </div>
                         </div>
                     </div>
                 </CardHeader>
@@ -170,7 +177,7 @@ export default function KinematicsPage() {
              </div>
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} showAxes={showAxes} onPositionUpdate={setEndEffectorPosition} />
+          <RobotVisualizer params={params} showAxes={showAxes} showLinkCoordinates={showCoordinates} onPositionUpdate={setEndEffectorPosition} />
         </div>
       </main>
     </div>

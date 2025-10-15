@@ -1,8 +1,10 @@
+
 export const ru = {
   // General
   editor: 'Редактор',
   kinematics: 'Кинематика',
   showAxes: 'Показать оси',
+  showCoordinates: 'Показать коорд.',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',

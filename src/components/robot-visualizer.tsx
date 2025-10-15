@@ -10,6 +10,7 @@ import { createDHMatrix } from "@/lib/dh";
 type RobotVisualizerProps = {
   params: Omit<DHParams, "id">[];
   showAxes: boolean;
+  showLinkCoordinates?: boolean;
   onPositionUpdate?: (position: THREE.Vector3) => void;
 };
 
@@ -20,41 +21,44 @@ const makeTextSprite = (message: string, opts: { fontsize: number; fontface: str
     const context = canvas.getContext('2d');
     if (!context) return null;
 
+    // Estimate width
     context.font = `${fontsize}px ${fontface}`;
     const metrics = context.measureText(message);
     const textWidth = metrics.width;
-
-    canvas.width = textWidth + 8;
-    canvas.height = fontsize + 8;
     
-    context.font = `bold ${fontsize}px ${fontface}`;
+    canvas.width = textWidth + 8; // some padding
+    canvas.height = fontsize + 8; // some padding
+
+    // Re-set font (it can be cleared by canvas resize)
+    context.font = `${fontsize}px ${fontface}`;
     context.fillStyle = `rgba(${textColor.r},${textColor.g},${textColor.b},${textColor.a})`;
-    context.fillText(message, 4, fontsize);
+    context.textBaseline = 'top';
+    context.fillText(message, 4, 4);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
 
     const spriteMaterial = new THREE.SpriteMaterial({ map: texture, depthTest: false, renderOrder: 999 });
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(canvas.width / 100, canvas.height / 100, 1.0);
+    sprite.scale.set(canvas.width / 150, canvas.height / 150, 1.0); // Adjust scale for visibility
     return sprite;
 };
 
 const createAxisLabels = (scale: number, index: number) => {
     const labels = new THREE.Group();
-    const spriteX = makeTextSprite(`X${index}`, { fontsize: 24, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
+    const spriteX = makeTextSprite(`X${index}`, { fontsize: 18, fontface: "Arial", textColor: { r: 255, g: 0, b: 0, a: 1.0 } });
     if(spriteX) {
-        spriteX.position.set(scale, 0, 0);
+        spriteX.position.set(scale, 0.1, 0);
         labels.add(spriteX);
     }
-    const spriteY = makeTextSprite(`Y${index}`, { fontsize: 24, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
+    const spriteY = makeTextSprite(`Y${index}`, { fontsize: 18, fontface: "Arial", textColor: { r: 0, g: 255, b: 0, a: 1.0 } });
     if (spriteY) {
-        spriteY.position.set(0, scale, 0);
+        spriteY.position.set(0, scale + 0.1, 0);
         labels.add(spriteY);
     }
-    const spriteZ = makeTextSprite(`Z${index}`, { fontsize: 24, fontface: "Arial", textColor: { r: 0, g: 0, b: 255, a: 1.0 } });
+    const spriteZ = makeTextSprite(`Z${index}`, { fontsize: 18, fontface: "Arial", textColor: { r: 0, g: 100, b: 255, a: 1.0 } });
     if (spriteZ) {
-        spriteZ.position.set(0, 0, scale);
+        spriteZ.position.set(0, 0.1, scale);
         labels.add(spriteZ);
     }
     return labels;
@@ -87,7 +91,7 @@ const createGripper = () => {
 };
 
 
-export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVisualizerProps) {
+export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -194,7 +198,7 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
     const baseGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 32);
     const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
-    baseMesh.position.y = -0.05; // half of height, shifted down
+    baseMesh.position.y = 0.05; // half of height
     robotGroup.add(baseMesh);
 
     // This matrix will track the transformations for kinematics
@@ -212,6 +216,16 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
         const axisLabels = createAxisLabels(1.1, 0);
         robotGroup.add(axisLabels);
     }
+     if (showLinkCoordinates) {
+        const originPos = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
+        const coordText = `(${originPos.x.toFixed(2)}, ${originPos.y.toFixed(2)}, ${originPos.z.toFixed(2)})`;
+        const coordSprite = makeTextSprite(coordText, { fontsize: 16, fontface: "Arial", textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
+        if (coordSprite) {
+            coordSprite.position.copy(originPos).add(new THREE.Vector3(0, 0.2, 0));
+            robotGroup.add(coordSprite);
+        }
+    }
+
 
     params.forEach((p, index) => {
         const { a, alpha, d, theta, thetaOffset } = p;
@@ -233,6 +247,17 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
             axisLabels.applyMatrix4(currentMatrix);
             robotGroup.add(axisLabels);
         }
+        
+        if (showLinkCoordinates) {
+            const pos = endPoint;
+            const coordText = `(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})`;
+            const coordSprite = makeTextSprite(coordText, { fontsize: 16, fontface: "Arial", textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
+            if (coordSprite) {
+                coordSprite.position.copy(pos).add(new THREE.Vector3(0, 0.2, 0));
+                robotGroup.add(coordSprite);
+            }
+        }
+
 
         // Joint at the end of the new link
         const jointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
@@ -292,7 +317,7 @@ export function RobotVisualizer({ params, showAxes, onPositionUpdate }: RobotVis
         onPositionUpdate(new THREE.Vector3().setFromMatrixPosition(currentMatrix));
     }
 
-  }, [params, showAxes, onPositionUpdate]);
+  }, [params, showAxes, onPositionUpdate, showLinkCoordinates]);
 
   return <div ref={mountRef} className="w-full h-full" />;
 }
