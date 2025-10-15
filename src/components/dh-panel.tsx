@@ -206,7 +206,7 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
             </Button>
         </CardContent>
         <Separator />
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto">
             <ScrollArea className="h-full px-6 py-4">
                 <Accordion type="multiple" defaultValue={params.map((p, i) => i.toString())} className="w-full">
                 {params.map((param, index) => (

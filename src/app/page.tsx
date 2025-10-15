@@ -32,7 +32,7 @@ export default function EditorPage() {
         </nav>
       </header>
       <main className="grid flex-1 grid-cols-1 lg:grid-cols-[400px_1fr] overflow-hidden">
-        <aside className="flex flex-col border-r bg-card">
+        <aside className="flex flex-col border-r bg-card overflow-hidden">
           <DhPanel 
             params={params} 
             setParams={setParams} 
