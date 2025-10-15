@@ -8,12 +8,14 @@ import { createDHMatrix } from "@/lib/dh";
 
 type RobotVisualizerProps = {
   params: Omit<DHParams, "id">[];
+  showAxes: boolean;
 };
 
-export function RobotVisualizer({ params }: RobotVisualizerProps) {
+export function RobotVisualizer({ params, showAxes }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
     // Camera
     const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
     camera.position.set(4, 3, 5);
+    cameraRef.current = camera;
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -70,7 +73,7 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
 
     // Handle resize
     const handleResize = () => {
-      if (!currentMount) return;
+      if (!currentMount || !rendererRef.current || !cameraRef.current) return;
       camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
@@ -79,13 +82,14 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       controls.dispose();
       if (rendererRef.current) {
         rendererRef.current.dispose();
       }
       if (currentMount && rendererRef.current?.domElement) {
-        // Check if the DOM element is still a child before removing
         if (currentMount.contains(rendererRef.current.domElement)) {
           currentMount.removeChild(rendererRef.current.domElement);
         }
@@ -97,7 +101,7 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
     const scene = sceneRef.current;
     if (!scene) return;
     
-    let robotGroup = scene.children.find(child => child.name === "robot");
+    let robotGroup = scene.getObjectByName("robot");
     if (robotGroup) {
       scene.remove(robotGroup);
     }
@@ -123,6 +127,12 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
     baseJointMesh.position.y = 0.2; // Position on top of the base
     robotGroup.add(baseJointMesh);
 
+    if (showAxes) {
+        const axesHelper = new THREE.AxesHelper(1);
+        axesHelper.position.y = 0.2;
+        robotGroup.add(axesHelper);
+    }
+
     currentMatrix.makeTranslation(0, 0.2, 0);
 
     params.forEach((p) => {
@@ -136,44 +146,52 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
         const startPoint = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
         const endPoint = new THREE.Vector3().setFromMatrixPosition(currentMatrix);
 
+        if (showAxes) {
+            const axesHelper = new THREE.AxesHelper(1);
+            axesHelper.applyMatrix4(currentMatrix);
+            robotGroup.add(axesHelper);
+        }
+
         // Joint at the end of the new link
         const jointGeometry = new THREE.SphereGeometry(0.15, 32, 32);
         const jointMesh = new THREE.Mesh(jointGeometry, jointMaterial);
         jointMesh.position.copy(endPoint);
         robotGroup.add(jointMesh);
 
-        // Create a separate matrix for visualizing links, without the alpha rotation
-        const visMatrix = new THREE.Matrix4();
-        visMatrix.multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
-        visMatrix.multiply(new THREE.Matrix4().makeTranslation(0, 0, d));
+        // Create a separate matrix for visualizing links, without the final alpha rotation and a translation.
+        const visMatrixNoAlpha = new THREE.Matrix4();
+        visMatrixNoAlpha.multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
+        visMatrixNoAlpha.multiply(new THREE.Matrix4().makeTranslation(0, 0, d));
         
-        const offsetLinkEndMatrix = prevMatrix.clone().multiply(visMatrix);
+        const offsetLinkEndMatrix = prevMatrix.clone().multiply(visMatrixNoAlpha);
 
-        if (d > 0.01) {
-            const offsetLinkGeom = new THREE.CylinderGeometry(0.08, 0.08, d, 32);
-            const offsetLinkMesh = new THREE.Mesh(offsetLinkGeom, offsetLinkMaterial);
+        // d link (z-axis offset)
+        if (Math.abs(d) > 0.001) {
+            const dLinkStart = startPoint;
             
-            const zLinkStart = new THREE.Vector3().setFromMatrixPosition(prevMatrix);
+            const zRotOnlyMatrix = prevMatrix.clone().multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
+            const dLinkEnd = new THREE.Vector3().setFromMatrixPosition(zRotOnlyMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(0,0,d)));
 
-            const rotZOnly = prevMatrix.clone().multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
-            const zLinkEnd = new THREE.Vector3().setFromMatrixPosition(rotZOnly.multiply(new THREE.Matrix4().makeTranslation(0,0,d)));
+            const dLinkVector = new THREE.Vector3().subVectors(dLinkEnd, dLinkStart);
 
-            const zLinkVector = new THREE.Vector3().subVectors(zLinkEnd, zLinkStart);
+            const offsetLinkGeom = new THREE.CylinderGeometry(0.08, 0.08, dLinkVector.length(), 32);
+            const offsetLinkMesh = new THREE.Mesh(offsetLinkGeom, offsetLinkMaterial);
 
-            offsetLinkMesh.position.copy(zLinkStart).add(zLinkVector.clone().multiplyScalar(0.5));
-            offsetLinkMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), zLinkVector.clone().normalize());
+            offsetLinkMesh.position.copy(dLinkStart).add(dLinkVector.clone().multiplyScalar(0.5));
+            offsetLinkMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dLinkVector.clone().normalize());
 
             robotGroup.add(offsetLinkMesh);
         }
-
-        if (a > 0.01) {
+        
+        // a link (x-axis length)
+        if (Math.abs(a) > 0.001) {
             const linkGeom = new THREE.CylinderGeometry(0.1, 0.1, a, 32);
             const linkMesh = new THREE.Mesh(linkGeom, linkMaterial);
 
             const linkStartPoint = new THREE.Vector3().setFromMatrixPosition(offsetLinkEndMatrix);
 
-            const linkEndMatrix = offsetLinkEndMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(a, 0, 0));
-            const linkEndPoint = new THREE.Vector3().setFromMatrixPosition(linkEndMatrix);
+            const xTransOnlyMatrix = offsetLinkEndMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(a, 0, 0));
+            const linkEndPoint = new THREE.Vector3().setFromMatrixPosition(xTransOnlyMatrix);
             
             const linkVector = new THREE.Vector3().subVectors(linkEndPoint, linkStartPoint);
             
@@ -188,7 +206,7 @@ export function RobotVisualizer({ params }: RobotVisualizerProps) {
         controlsRef.current.target.set(0,1,0);
     }
 
-  }, [params]);
+  }, [params, showAxes]);
 
   return <div ref={mountRef} className="w-full h-full" />;
 }

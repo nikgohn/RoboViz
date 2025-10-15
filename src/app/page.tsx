@@ -13,6 +13,7 @@ const initialParams: Omit<DHParams, "id">[] = [
     d: 1,
     thetaOffset: 0,
     theta: 0,
+    dIsVariable: false,
   },
   {
     a: 1.5,
@@ -20,6 +21,7 @@ const initialParams: Omit<DHParams, "id">[] = [
     d: 0,
     thetaOffset: 0,
     theta: 0,
+    dIsVariable: false,
   },
   {
     a: 1,
@@ -27,6 +29,7 @@ const initialParams: Omit<DHParams, "id">[] = [
     d: 0,
     thetaOffset: 0,
     theta: 0,
+    dIsVariable: false,
   },
 ];
 
@@ -35,6 +38,7 @@ const LOCAL_STORAGE_KEY = 'robot-dh-params';
 export default function Home() {
   const [params, setParams] = useState<Omit<DHParams, "id">[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showAxes, setShowAxes] = useState(false);
 
   useEffect(() => {
     try {
@@ -71,10 +75,15 @@ export default function Home() {
       </header>
       <main className="grid flex-1 grid-cols-1 lg:grid-cols-[400px_1fr] overflow-hidden">
         <aside className="flex flex-col border-r bg-card">
-          <DhPanel params={params} setParams={setParams} />
+          <DhPanel 
+            params={params} 
+            setParams={setParams} 
+            showAxes={showAxes}
+            setShowAxes={setShowAxes}
+          />
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} />
+          <RobotVisualizer params={params} showAxes={showAxes} />
         </div>
       </main>
     </div>
