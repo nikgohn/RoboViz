@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, RotateCcw, Download } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
+import { useLanguage } from "@/context/language-context";
 
 type DhPanelProps = {
   params: Omit<DHParams, "id">[];
@@ -23,12 +24,13 @@ type DhPanelProps = {
 
 function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number | boolean) => void, onRemove: () => void }) {
     const id = useId();
+    const { t } = useLanguage();
     return (
         <AccordionItem value={id} className="border-b-0 mb-2">
             <Card className="overflow-hidden">
                 <div className="flex items-center bg-muted/50 pr-4">
                     <AccordionTrigger className="p-4 hover:no-underline flex-1">
-                        <span className="font-medium">Link {index + 1}</span>
+                        <span className="font-medium">{t('link')} {index + 1}</span>
                     </AccordionTrigger>
                     <Button
                         variant="ghost"
@@ -46,24 +48,24 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                     <div className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor={`a-${id}`}>aᵢ (len)</Label>
+                                <Label htmlFor={`a-${id}`}>{t('linkLength')}</Label>
                                 <Input id={`a-${id}`} type="number" value={param.a} onChange={(e) => onUpdate('a', parseFloat(e.target.value))} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor={`alpha-${id}`}>αᵢ (twist)</Label>
+                                <Label htmlFor={`alpha-${id}`}>{t('linkTwist')}</Label>
                                 <Input id={`alpha-${id}`} type="number" value={param.alpha} onChange={(e) => onUpdate('alpha', parseFloat(e.target.value))} />
                             </div>
                              <div className="space-y-2">
-                                <Label htmlFor={`thetaOffset-${id}`}>θᵢ (off)</Label>
+                                <Label htmlFor={`thetaOffset-${id}`}>{t('thetaOffset')}</Label>
                                 <Input id={`thetaOffset-${id}`} type="number" value={param.thetaOffset} onChange={(e) => onUpdate('thetaOffset', parseFloat(e.target.value))} />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <Label htmlFor={`d-${id}`}>dᵢ (off)</Label>
+                                <Label htmlFor={`d-${id}`}>{t('linkOffset')}</Label>
                                 <div className="flex items-center gap-2">
-                                    <Label htmlFor={`d-is-var-${id}`} className="text-xs text-muted-foreground">Var</Label>
+                                    <Label htmlFor={`d-is-var-${id}`} className="text-xs text-muted-foreground">{t('variable')}</Label>
                                     <Switch id={`d-is-var-${id}`} checked={param.dIsVariable} onCheckedChange={(checked) => onUpdate('dIsVariable', checked)} />
                                 </div>
                             </div>
@@ -86,9 +88,9 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                              <Label htmlFor={`theta-${id}`}>θᵢ (rot)</Label>
+                              <Label htmlFor={`theta-${id}`}>{t('jointAngle')}</Label>
                               <div className="flex items-center gap-2">
-                                    <Label htmlFor={`theta-is-fixed-${id}`} className="text-xs text-muted-foreground">Fixed</Label>
+                                    <Label htmlFor={`theta-is-fixed-${id}`} className="text-xs text-muted-foreground">{t('fixed')}</Label>
                                     <Switch id={`theta-is-fixed-${id}`} checked={param.thetaIsFixed} onCheckedChange={(checked) => onUpdate('thetaIsFixed', checked)} />
                                 </div>
                             </div>
@@ -118,6 +120,7 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
 }
 
 export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelProps) {
+  const { t } = useLanguage();
 
   const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number | boolean) => {
     setParams(prevParams => {
@@ -186,11 +189,11 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
         <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
-                    <CardTitle className="font-headline">DH Parameters</CardTitle>
-                    <CardDescription>Adjust the parameters for each link of the robotic arm.</CardDescription>
+                    <CardTitle className="font-headline">{t('dhParameters')}</CardTitle>
+                    <CardDescription>{t('dhParametersDescription')}</CardDescription>
                 </div>
                 <div className="flex items-center gap-2 pt-1">
-                    <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
+                    <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
                     <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
                 </div>
             </div>
@@ -198,11 +201,11 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
         <CardContent className="flex gap-4">
              <Button onClick={addLink} className="w-full">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Link
+                {t('addLink')}
             </Button>
             <Button onClick={handleExportCSV} variant="secondary" className="w-full">
                 <Download className="mr-2 h-4 w-4" />
-                Export CSV
+                {t('exportCSV')}
             </Button>
         </CardContent>
         <Separator />

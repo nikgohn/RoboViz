@@ -16,13 +16,16 @@ import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useLanguage } from "@/context/language-context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number) => void }) {
+    const { t } = useLanguage();
     if (param.dIsVariable) {
         return (
              <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                    <Label htmlFor={`d-${index}`}>d{index+1} (offset)</Label>
+                    <Label htmlFor={`d-${index}`}>d{index+1} ({t('offset')})</Label>
                     <span className="text-sm text-muted-foreground font-mono">{param.d.toFixed(2)}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -46,7 +49,7 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
         return (
             <div className="space-y-4">
                  <div className="flex justify-between items-center">
-                    <Label htmlFor={`theta-${index}`}>θ{index+1} (rotation)</Label>
+                    <Label htmlFor={`theta-${index}`}>θ{index+1} ({t('rotation')})</Label>
                     <span className="text-sm text-muted-foreground font-mono">{param.theta.toFixed(0)}°</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -73,7 +76,7 @@ export default function KinematicsPage() {
   const { params, setParams } = useDHParams();
   const [showAxes, setShowAxes] = useState(false);
   const [endEffectorPosition, setEndEffectorPosition] = useState<THREE.Vector3 | null>(null);
-
+  const { t } = useLanguage();
 
   const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number) => {
     setParams(prevParams => {
@@ -95,11 +98,14 @@ export default function KinematicsPage() {
         <nav className="flex items-center space-x-4 ml-6">
             <Tabs defaultValue="kinematics">
                 <TabsList>
-                    <TabsTrigger value="editor" asChild><Link href="/">Editor</Link></TabsTrigger>
-                    <TabsTrigger value="kinematics" asChild><Link href="/kinematics">Kinematics</Link></TabsTrigger>
+                    <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
+                    <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
+        <div className="ml-auto">
+          <LanguageSwitcher />
+        </div>
       </header>
       <main className="grid flex-1 grid-cols-1 lg:grid-cols-[400px_1fr] overflow-hidden">
         <aside className="flex flex-col border-r bg-card">
@@ -107,11 +113,11 @@ export default function KinematicsPage() {
                 <CardHeader>
                     <div className="flex justify-between items-start">
                         <div>
-                            <CardTitle className="font-headline">Kinematics Control</CardTitle>
-                            <CardDescription>Adjust the variable joints of the robotic arm.</CardDescription>
+                            <CardTitle className="font-headline">{t('kinematicsControl')}</CardTitle>
+                            <CardDescription>{t('kinematicsControlDescription')}</CardDescription>
                         </div>
                         <div className="flex items-center gap-2 pt-1">
-                            <Label htmlFor="show-axes" className="text-sm">Show Axes</Label>
+                            <Label htmlFor="show-axes" className="text-sm">{t('showAxes')}</Label>
                             <Switch id="show-axes" checked={showAxes} onCheckedChange={setShowAxes} />
                         </div>
                     </div>
@@ -119,7 +125,7 @@ export default function KinematicsPage() {
                 <CardContent>
                     <Card>
                         <CardHeader className="p-4">
-                            <CardTitle className="text-base">End-Effector Position</CardTitle>
+                            <CardTitle className="text-base">{t('endEffectorPosition')}</CardTitle>
                         </CardHeader>
                         <CardContent className="p-4 pt-0">
                             {endEffectorPosition ? (
@@ -157,7 +163,7 @@ export default function KinematicsPage() {
                        )
                      })}
                      {variableParams.length === 0 && (
-                        <p className="text-sm text-muted-foreground text-center py-10">No variable parameters defined. Go to the Editor to set `d` as variable or `theta` as not fixed.</p>
+                        <p className="text-sm text-muted-foreground text-center py-10">{t('noVariableParameters')}</p>
                      )}
                    </div>
                 </ScrollArea>

@@ -1,0 +1,28 @@
+export const en = {
+  // General
+  editor: 'Editor',
+  kinematics: 'Kinematics',
+  showAxes: 'Show Axes',
+  
+  // DH Panel
+  dhParameters: 'DH Parameters',
+  dhParametersDescription: 'Adjust the parameters for each link of the robotic arm.',
+  addLink: 'Add Link',
+  exportCSV: 'Export CSV',
+  link: 'Link',
+  linkLength: 'aᵢ (len)',
+  linkTwist: 'αᵢ (twist)',
+  linkOffset: 'dᵢ (off)',
+  thetaOffset: 'θᵢ (off)',
+  jointAngle: 'θᵢ (rot)',
+  variable: 'Var',
+  fixed: 'Fixed',
+
+  // Kinematics Page
+  kinematicsControl: 'Kinematics Control',
+  kinematicsControlDescription: 'Adjust the variable joints of the robotic arm.',
+  endEffectorPosition: 'End-Effector Position',
+  noVariableParameters: 'No variable parameters defined. Go to the Editor to set `d` as variable or `theta` as not fixed.',
+  offset: 'offset',
+  rotation: 'rotation',
+};
