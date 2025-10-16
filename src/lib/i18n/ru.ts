@@ -14,6 +14,7 @@ export const ru = {
   addLink: 'Добавить звено',
   import: 'Импорт',
   export: 'Экспорт',
+  exportToExcel: 'Экспорт в Excel',
   link: 'Звено',
   linkLength: 'aᵢ (длина)',
   linkTwist: 'αᵢ (скручивание)',
@@ -51,5 +52,3 @@ export const ru = {
   motionTypeTranslational: 'Поступательное',
   motionTypeRotational: 'Вращательное',
 };
-
-    

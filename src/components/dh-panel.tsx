@@ -157,6 +157,43 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     setBaseOrientation({ x: 0, y: 0, z: 0 });
   }
 
+  const handleExcelExport = () => {
+    let variableCounter = 1;
+    const header = "a,alpha,d,theta\n";
+    const rows = params.map(param => {
+        const { a, alpha, d, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        
+        const alpha_val = `${alpha}*(pi/180)`;
+
+        let d_val: string | number;
+        if (dIsVariable) {
+            d_val = `q_${variableCounter}`;
+            variableCounter++;
+        } else {
+            d_val = d;
+        }
+
+        let theta_val: string | number;
+        if (!thetaIsFixed) {
+            theta_val = `q_${variableCounter}+${thetaOffset}*(pi/180)`;
+            variableCounter++;
+        } else {
+            theta_val = `${theta + thetaOffset}*(pi/180)`;
+        }
+        
+        return [a, alpha_val, d_val, theta_val].join(',');
+    }).join('\n');
+
+    const csvContent = "data:text/csv;charset=utf-8," + header + rows;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "dh_parameters_excel.csv");
+    document.body.appendChild(link); 
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col h-full">
         <CardHeader>
@@ -205,6 +242,9 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addLink')}
             </Button>
+            <Button onClick={handleExcelExport} variant="outline" className="flex-1">
+                {t('exportToExcel')}
+            </Button>
         </CardContent>
         <Separator />
         <div className="flex-1 overflow-auto">
@@ -225,5 +265,3 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     </div>
   );
 }
-
-    

@@ -14,6 +14,7 @@ export const en = {
   addLink: 'Add Link',
   import: 'Import',
   export: 'Export',
+  exportToExcel: 'Export to Excel',
   link: 'Link',
   linkLength: 'aᵢ (len)',
   linkTwist: 'αᵢ (twist)',
@@ -51,5 +52,3 @@ export const en = {
   motionTypeTranslational: 'Translational',
   motionTypeRotational: 'Rotational',
 };
-
-    
