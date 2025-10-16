@@ -145,7 +145,7 @@ export function HeaderActions() {
               <Tooltip>
                 <TooltipTrigger asChild>
                     <Button onClick={handleImportClick} variant="ghost" size="icon">
-                        <Upload className="h-4 w-4" />
+                        <Download className="h-4 w-4" />
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -157,7 +157,7 @@ export function HeaderActions() {
               <Tooltip>
                 <TooltipTrigger asChild>
                     <Button onClick={handleExportCSV} variant="ghost" size="icon">
-                        <Download className="h-4 w-4" />
+                        <Upload className="h-4 w-4" />
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
