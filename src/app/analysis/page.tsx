@@ -10,6 +10,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { HeaderActions } from "@/components/header-actions";
 
 export default function AnalysisPage() {
   const { params } = useDHParams();
@@ -55,7 +56,8 @@ export default function AnalysisPage() {
             <Link href="/analysis">
             </Link>
         </Button>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <HeaderActions />
           <LanguageSwitcher />
         </div>
       </header>

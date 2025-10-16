@@ -18,6 +18,7 @@ import { RotateCcw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/context/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { HeaderActions } from "@/components/header-actions";
 
 function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number) => void }) {
     const { t } = useLanguage();
@@ -109,7 +110,8 @@ export default function KinematicsPage() {
             <Link href="/analysis">
             </Link>
         </Button>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <HeaderActions />
           <LanguageSwitcher />
         </div>
       </header>

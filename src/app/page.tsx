@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useLanguage } from "@/context/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
+import { HeaderActions } from "@/components/header-actions";
 
 
 export default function EditorPage() {
@@ -39,7 +40,8 @@ export default function EditorPage() {
             <Link href="/analysis">
             </Link>
         </Button>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <HeaderActions />
           <LanguageSwitcher />
         </div>
       </header>

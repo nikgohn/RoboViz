@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Dispatch, SetStateAction, useId, useRef } from "react";
+import { Dispatch, SetStateAction, useId } from "react";
 import type { DHParams } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, RotateCcw, Download, Upload } from "lucide-react";
+import { Plus, Trash2, RotateCcw } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/context/language-context";
@@ -123,8 +123,7 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
 export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelProps) {
   const { t } = useLanguage();
   const { baseOrientation, setBaseOrientation } = useDHParams();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
   const updateParam = (index: number, field: keyof Omit<DHParams, "id">, value: number | boolean) => {
     setParams(prevParams => {
         const newParams = [...prevParams];
@@ -150,125 +149,6 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     setParams(prev => prev.filter((_, i) => i !== index));
   };
   
-  const handleExportCSV = () => {
-    let variableCounter = 1;
-    const header = "a,alpha,d,theta\n";
-    const orientationRow = `0,${baseOrientation.x},${baseOrientation.y},${baseOrientation.z}\n`;
-    const rows = params.map(param => {
-        const { a, alpha, d, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
-        
-        const alpha_val = `${alpha}*(pi/180)`;
-
-        let d_val: string | number;
-        if (dIsVariable) {
-            d_val = `q_${variableCounter}`;
-            variableCounter++;
-        } else {
-            d_val = d;
-        }
-
-        let theta_val: string | number;
-        if (!thetaIsFixed) {
-            theta_val = `q_${variableCounter}+${thetaOffset}*(pi/180)`;
-            variableCounter++;
-        } else {
-            theta_val = `${theta + thetaOffset}*(pi/180)`;
-        }
-        
-        return [a, alpha_val, d_val, theta_val].join(',');
-    }).join('\n');
-
-    const csvContent = "data:text/csv;charset=utf-8," + header + orientationRow + rows;
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "dh_parameters.csv");
-    document.body.appendChild(link); 
-    link.click();
-    document.body.removeChild(link);
-  };
-  
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const lines = text.split('\n').filter(line => line.trim() !== '');
-        
-        if (lines.length < 2) {
-            console.error("Invalid CSV format");
-            return;
-        }
-
-        // First line after header is orientation
-        const orientationParts = lines[1].split(',');
-        if (orientationParts.length === 4) {
-            setBaseOrientation({
-                x: parseFloat(orientationParts[1]) || 0,
-                y: parseFloat(orientationParts[2]) || 0,
-                z: parseFloat(orientationParts[3]) || 0,
-            });
-        }
-
-        const newParams: Omit<DHParams, "id">[] = [];
-        // The rest are DH params
-        const paramLines = lines.slice(2);
-        
-        let variableCounter = 1;
-        paramLines.forEach(line => {
-            const parts = line.split(',');
-            if (parts.length === 4) {
-                const [aStr, alphaStr, dStr, thetaStr] = parts;
-                
-                const newParam: Omit<DHParams, "id"> = {
-                    a: parseFloat(aStr) || 0,
-                    alpha: parseFloat(alphaStr.replace(/\*\(pi\/180\)/, '')) || 0,
-                    d: 0,
-                    dIsVariable: false,
-                    theta: 0,
-                    thetaIsFixed: false,
-                    thetaOffset: 0,
-                };
-                
-                if (dStr.startsWith('q_')) {
-                    newParam.dIsVariable = true;
-                    newParam.d = 0; // Default slider value
-                    variableCounter++;
-                } else {
-                    newParam.d = parseFloat(dStr) || 0;
-                }
-
-                if (thetaStr.startsWith('q_')) {
-                    newParam.thetaIsFixed = false;
-                    const thetaParts = thetaStr.replace(`q_${variableCounter}`, '0').split('+');
-                    if (thetaParts.length > 1) {
-                      newParam.thetaOffset = parseFloat(thetaParts[1].replace(/\*\(pi\/180\)/, '')) || 0;
-                    }
-                    newParam.theta = 0; // Default angle value
-                    variableCounter++;
-                } else {
-                    newParam.thetaIsFixed = true;
-                    const combinedTheta = parseFloat(thetaStr.replace(/\*\(pi\/180\)/, '')) || 0;
-                    newParam.theta = combinedTheta;
-                    newParam.thetaOffset = 0;
-                }
-                
-                newParams.push(newParam);
-            }
-        });
-        setParams(newParams);
-    };
-    reader.readAsText(file);
-    // Reset file input
-    if(event.target) event.target.value = '';
-  };
-  
   const handleOrientationChange = (axis: 'x' | 'y' | 'z', value: string) => {
     setBaseOrientation(prev => ({ ...prev, [axis]: parseFloat(value) || 0 }));
   }
@@ -279,7 +159,6 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
 
   return (
     <div className="flex flex-col h-full">
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".csv" />
         <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
@@ -325,14 +204,6 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
              <Button onClick={addLink} className="flex-1">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addLink')}
-            </Button>
-            <Button onClick={handleImportClick} variant="secondary" className="flex-1">
-                <Upload className="mr-2 h-4 w-4" />
-                {t('import')}
-            </Button>
-            <Button onClick={handleExportCSV} variant="secondary" className="flex-1">
-                <Download className="mr-2 h-4 w-4" />
-                {t('export')}
             </Button>
         </CardContent>
         <Separator />
