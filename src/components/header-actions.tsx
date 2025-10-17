@@ -24,16 +24,16 @@ export function HeaderActions() {
         const header = "a,alpha,d,theta\n";
         const orientationRow = `0,${baseOrientation.x},${baseOrientation.y},${baseOrientation.z}\n`;
         const rows = params.map(param => {
-            const { a, alpha, d, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
+            const { a, alpha, d, dOffset, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
             
             const alpha_val = `${alpha}*(pi/180)`;
 
             let d_val: string | number;
-            if (dIsVariable) {
-                d_val = `q_${variableCounter}`;
+             if (dIsVariable) {
+                d_val = `q_${variableCounter}+${dOffset}`;
                 variableCounter++;
             } else {
-                d_val = d;
+                d_val = dOffset;
             }
 
             let theta_val: string | number;
@@ -98,6 +98,7 @@ export function HeaderActions() {
                     const newParam: Omit<DHParams, "id"> = {
                         a: parseFloat(aStr) || 0,
                         alpha: parseFloat(alphaStr.replace(/\*\(pi\/180\)/, '')) || 0,
+                        dOffset: 0,
                         d: 0,
                         dIsVariable: false,
                         theta: 0,
@@ -105,19 +106,24 @@ export function HeaderActions() {
                         thetaOffset: 0,
                     };
                     
-                    if (dStr.startsWith('q_')) {
+                    if (dStr.includes(`q_${variableCounter}`)) {
                         newParam.dIsVariable = true;
                         newParam.d = 0; // Default slider value
+                        const dParts = dStr.replace(`q_${variableCounter}`, '0').split('+');
+                        if (dParts.length > 1) {
+                            newParam.dOffset = parseFloat(dParts[1]) || 0;
+                        }
                         variableCounter++;
                     } else {
-                        newParam.d = parseFloat(dStr) || 0;
+                        newParam.dIsVariable = false;
+                        newParam.dOffset = parseFloat(dStr) || 0;
                     }
 
-                    if (thetaStr.startsWith('q_')) {
+                    if (thetaStr.includes(`q_${variableCounter}`)) {
                         newParam.thetaIsFixed = false;
                         const thetaParts = thetaStr.replace(`q_${variableCounter}`, '0').split('+');
                         if (thetaParts.length > 1) {
-                        newParam.thetaOffset = parseFloat(thetaParts[1].replace(/\*\(pi\/180\)/, '')) || 0;
+                            newParam.thetaOffset = parseFloat(thetaParts[1].replace(/\*\(pi\/180\)/, '')) || 0;
                         }
                         newParam.theta = 0; // Default angle value
                         variableCounter++;
@@ -168,3 +174,5 @@ export function HeaderActions() {
         </>
     );
 }
+
+    

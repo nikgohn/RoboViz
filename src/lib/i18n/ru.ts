@@ -20,6 +20,7 @@ export const ru = {
   linkTwist: 'αᵢ (скручивание)',
   linkOffset: 'dᵢ (смещение)',
   thetaOffset: 'θᵢ (смещ.)',
+  dVariable: 'dᵢ (перем.)',
   jointAngle: 'θᵢ (поворот)',
   variable: 'Перем.',
   fixed: 'Фикс.',
@@ -52,3 +53,5 @@ export const ru = {
   motionTypeTranslational: 'Поступательное',
   motionTypeRotational: 'Вращательное',
 };
+
+    

@@ -60,19 +60,22 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                                 <Label htmlFor={`thetaOffset-${id}`}>{t('thetaOffset')}</Label>
                                 <Input id={`thetaOffset-${id}`} type="number" value={param.thetaOffset} onChange={(e) => onUpdate('thetaOffset', parseFloat(e.target.value))} />
                             </div>
+                            <div className="space-y-2">
+                                <Label htmlFor={`dOffset-${id}`}>{t('linkOffset')}</Label>
+                                <Input id={`dOffset-${id}`} type="number" value={param.dOffset} onChange={(e) => onUpdate('dOffset', parseFloat(e.target.value))} />
+                            </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <Label htmlFor={`d-${id}`}>{t('linkOffset')}</Label>
+                                <Label htmlFor={`d-${id}`}>{t('dVariable')}</Label>
                                 <div className="flex items-center gap-2">
                                     <Label htmlFor={`d-is-var-${id}`} className="text-xs text-muted-foreground">{t('variable')}</Label>
                                     <Switch id={`d-is-var-${id}`} checked={param.dIsVariable} onCheckedChange={(checked) => onUpdate('dIsVariable', checked)} />
                                 </div>
                             </div>
-                            {param.dIsVariable ? (
-                                <>
-                                <span className="text-sm text-muted-foreground font-mono">{param.d.toFixed(2)}</span>
+                            <div className="flex items-center gap-2">
+                               <div className="flex-1">
                                 <Slider
                                     id={`d-${id}`}
                                     min={-5}
@@ -80,11 +83,14 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                                     step={0.1}
                                     value={[param.d]}
                                     onValueChange={([val]) => onUpdate('d', val)}
+                                    disabled={!param.dIsVariable}
                                 />
-                                </>
-                            ) : (
-                                <Input id={`d-${id}`} type="number" value={param.d} onChange={(e) => onUpdate('d', parseFloat(e.target.value))} />
-                            )}
+                               </div>
+                               <span className="text-sm text-muted-foreground font-mono w-10 text-right">{param.d.toFixed(2)}</span>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={() => onUpdate('d', 0)} disabled={!param.dIsVariable}>
+                                    <RotateCcw className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -136,6 +142,7 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     const newLink: Omit<DHParams, "id"> = {
       a: 1,
       alpha: 0,
+      dOffset: 0,
       d: 0,
       dIsVariable: false,
       thetaOffset: 0,
@@ -161,16 +168,16 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     let variableCounter = 1;
     const header = "a,alpha,d,theta\n";
     const rows = params.map(param => {
-        const { a, alpha, d, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        const { a, alpha, d, dOffset, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
         
         const alpha_val = `${alpha}*(pi/180)`;
 
         let d_val: string | number;
         if (dIsVariable) {
-            d_val = `q_${variableCounter}`;
+            d_val = `q_${variableCounter}+${dOffset}`;
             variableCounter++;
         } else {
-            d_val = d;
+            d_val = dOffset;
         }
 
         let theta_val: string | number;
@@ -265,3 +272,5 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
     </div>
   );
 }
+
+    

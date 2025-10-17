@@ -20,6 +20,7 @@ export const en = {
   linkTwist: 'αᵢ (twist)',
   linkOffset: 'dᵢ (off)',
   thetaOffset: 'θᵢ (off)',
+  dVariable: 'dᵢ (var)',
   jointAngle: 'θᵢ (rot)',
   variable: 'Var',
   fixed: 'Fixed',
@@ -52,3 +53,5 @@ export const en = {
   motionTypeTranslational: 'Translational',
   motionTypeRotational: 'Rotational',
 };
+
+    

@@ -7,7 +7,8 @@ const initialParams: Omit<DHParams, "id">[] = [
   {
     a: 0,
     alpha: 90,
-    d: 1,
+    dOffset: 1,
+    d: 0,
     thetaOffset: 0,
     theta: 0,
     dIsVariable: false,
@@ -16,6 +17,7 @@ const initialParams: Omit<DHParams, "id">[] = [
   {
     a: 1.5,
     alpha: 0,
+    dOffset: 0,
     d: 0,
     thetaOffset: 0,
     theta: 0,
@@ -25,6 +27,7 @@ const initialParams: Omit<DHParams, "id">[] = [
   {
     a: 1,
     alpha: 0,
+    dOffset: 0,
     d: 0,
     thetaOffset: 0,
     theta: 0,

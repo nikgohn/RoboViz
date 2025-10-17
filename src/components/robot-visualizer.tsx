@@ -245,9 +245,10 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
 
 
     params.forEach((p, index) => {
-        const { a, alpha, d, theta, thetaOffset } = p;
+        const { a, alpha, d, dOffset, theta, thetaOffset } = p;
         const totalTheta = theta + thetaOffset;
-        const dhMatrix = createDHMatrix(a, alpha, d, totalTheta);
+        const totalD = d + dOffset;
+        const dhMatrix = createDHMatrix(a, alpha, totalD, totalTheta);
 
         const prevMatrix = currentMatrix.clone();
         currentMatrix.multiply(dhMatrix);
@@ -285,16 +286,16 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
         // Create a separate matrix for visualizing links, without the final alpha rotation and a translation.
         const visMatrixNoAlpha = new THREE.Matrix4();
         visMatrixNoAlpha.multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
-        visMatrixNoAlpha.multiply(new THREE.Matrix4().makeTranslation(0, 0, d));
+        visMatrixNoAlpha.multiply(new THREE.Matrix4().makeTranslation(0, 0, totalD));
         
         const offsetLinkEndMatrix = prevMatrix.clone().multiply(visMatrixNoAlpha);
 
         // d link (z-axis offset)
-        if (Math.abs(d) > 0.001) {
+        if (Math.abs(totalD) > 0.001) {
             const dLinkStart = startPoint;
             
             const zRotOnlyMatrix = prevMatrix.clone().multiply(new THREE.Matrix4().makeRotationZ(THREE.MathUtils.degToRad(totalTheta)));
-            const dLinkEnd = new THREE.Vector3().setFromMatrixPosition(zRotOnlyMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(0,0,d)));
+            const dLinkEnd = new THREE.Vector3().setFromMatrixPosition(zRotOnlyMatrix.clone().multiply(new THREE.Matrix4().makeTranslation(0,0,totalD)));
 
             const dLinkVector = new THREE.Vector3().subVectors(dLinkEnd, dLinkStart);
 
