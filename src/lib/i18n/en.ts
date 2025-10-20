@@ -74,6 +74,8 @@ export const en = {
   targetPosition: 'Target Position',
   targetOrientation: 'Target Orientation',
   ikNotAvailable: 'IK calculation not yet available.',
+  ikSolverSettings: 'IK Solver Settings',
+  ikTolerance: 'Tolerance',
 
   // IK Solution Page
   ikSolutionTitle: 'IK Algorithmic Solution',
@@ -90,6 +92,7 @@ export const en = {
   ikRevoluteJointsDescription: 'For a revolute joint, we calculate the angle Δθ to rotate the end-effector towards the target.',
   ikPrismaticJoints: 'Prismatic Joints (dᵢ)',
   ikPrismaticJointsDescription: 'For a prismatic joint, we calculate the distance Δd to move the end-effector towards the target along the joint axis.',
+  noActiveJoints: 'There are no active (variable) joints in the current mechanism. Go to the Editor to enable them.',
 
   // Workspace Page
   workspaceVisualization: 'Workspace Limits',

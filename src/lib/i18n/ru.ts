@@ -74,6 +74,8 @@ export const ru = {
   targetPosition: 'Целевое положение',
   targetOrientation: 'Целевая ориентация',
   ikNotAvailable: 'Расчет ОЗК пока недоступен.',
+  ikSolverSettings: 'Настройки решателя ОЗК',
+  ikTolerance: 'Допуск',
   
   // IK Solution Page
   ikSolutionTitle: 'Алгоритмическое Решение ОЗК',
@@ -90,6 +92,7 @@ export const ru = {
   ikRevoluteJointsDescription: 'Для вращательного сустава мы вычисляем угол Δθ, чтобы повернуть рабочий орган к цели.',
   ikPrismaticJoints: 'Поступательные суставы (dᵢ)',
   ikPrismaticJointsDescription: 'Для поступательного сустава мы вычисляем расстояние Δd, чтобы переместить рабочий орган к цели вдоль оси сустава.',
+  noActiveJoints: 'В текущем механизме нет активных (переменных) суставов. Перейдите в редактор, чтобы включить их.',
 
   // Workspace Page
   workspaceVisualization: 'Ограничения рабочей зоны',

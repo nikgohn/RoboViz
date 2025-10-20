@@ -126,7 +126,7 @@ export default function IKSolutionPage() {
                 <Card>
                     <CardContent className="pt-6">
                         <p className="text-muted-foreground text-center">
-                            There are no active (variable) joints in the current mechanism. Go to the Editor to enable them.
+                           {t('noActiveJoints')}
                         </p>
                     </CardContent>
                 </Card>
