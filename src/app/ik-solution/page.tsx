@@ -86,10 +86,10 @@ export default function IKSolutionPage() {
                             </CardHeader>
                             <CardContent>
                                 <p>
-                                    <SymbolicValue html={t('ikRevoluteJointsExplanation', { index: joint.index.toString() })} />
+                                    <SymbolicValue html={t('ikRevoluteJointsExplanation', { index: (joint.index + 1).toString() })} />
                                 </p>
-                                <Formula>V_JE = (E - J<sub>{joint.index}</sub>).projectOnPlane(axis<sub>{joint.index}</sub>)</Formula>
-                                <Formula>V_JT = (T - J<sub>{joint.index}</sub>).projectOnPlane(axis<sub>{joint.index}</sub>)</Formula>
+                                <Formula>V_JE = (E - J<sub>{joint.index + 1}</sub>).projectOnPlane(axis<sub>{joint.index + 1}</sub>)</Formula>
+                                <Formula>V_JT = (T - J<sub>{joint.index + 1}</sub>).projectOnPlane(axis<sub>{joint.index + 1}</sub>)</Formula>
                                 <p>{t('ikRevoluteJointsAngle')}</p>
                                 <Formula>Δθ = angleTo(V_JE, V_JT)</Formula>
                                 <p>{t('ikNewJointAngle')}</p>
@@ -108,10 +108,10 @@ export default function IKSolutionPage() {
                             </CardHeader>
                             <CardContent>
                                 <p>
-                                     <SymbolicValue html={t('ikPrismaticJointsExplanation', { index: joint.index.toString() })} />
+                                     <SymbolicValue html={t('ikPrismaticJointsExplanation', { index: (joint.index + 1).toString() })} />
                                 </p>
                                 <p>{t('ikPrismaticJointsDistance')}</p>
-                                <Formula>Δd = (T - J<sub>{joint.index}</sub>)·axis<sub>{joint.index}</sub> - (E - J<sub>{joint.index}</sub>)·axis<sub>{joint.index}</sub></Formula>
+                                <Formula>Δd = (T - J<sub>{joint.index + 1}</sub>)·axis<sub>{joint.index + 1}</sub> - (E - J<sub>{joint.index + 1}</sub>)·axis<sub>{joint.index + 1}</sub></Formula>
                                  <p>{t('ikNewJointDistance')}</p>
                                 <Formula>d<sub>{joint.index + 1}</sub>_new = d<sub>{joint.index + 1}</sub>_current + Δd</Formula>
                             </CardContent>

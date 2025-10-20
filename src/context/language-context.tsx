@@ -4,10 +4,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { translations, Language } from '@/lib/i18n';
 
+type TranslationFunction = (
+  key: keyof (typeof translations)['en'],
+  vars?: Record<string, string>
+) => string;
+
 type LanguageContextType = {
   language: Language;
   setLanguage: (language: Language) => void;
-  t: (key: keyof (typeof translations)['en']) => string;
+  t: TranslationFunction;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -46,8 +51,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [language, isLoaded])
 
-  const t = (key: keyof (typeof translations)['en']): string => {
-    return translations[language][key] || translations['en'][key];
+  const t: TranslationFunction = (key, vars) => {
+    let translation = translations[language][key] || translations['en'][key];
+    if (vars) {
+      Object.entries(vars).forEach(([varKey, value]) => {
+        translation = translation.replace(new RegExp(`{${varKey}}`, 'g'), value);
+      });
+    }
+    return translation;
   };
 
   if (!isLoaded) {
