@@ -5,9 +5,12 @@ export const en = {
   kinematics: 'Kinematics',
   analysis: 'Analysis',
   matrices: 'Matrices',
+  workspace: 'Workspace',
+  ik: 'IK',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
   reset: 'Reset',
+  calculate: 'Calculate',
   
   // DH Panel
   dhParameters: 'DH Parameters',
@@ -62,4 +65,15 @@ export const en = {
   transformationMatricesDescription: 'Symbolic representation of the transformation matrix for each link.',
   baseTransform: 'Base Transform',
   finalTransformationMatrix: 'Final Transformation Matrix',
+
+  // IK Page
+  ikSetup: 'Inverse Kinematics Setup',
+  ikSetupDescription: 'Define the target position and orientation for the end-effector.',
+  targetPosition: 'Target Position',
+  targetOrientation: 'Target Orientation',
+  ikNotAvailable: 'IK calculation not yet available.',
+
+  // Workspace Page
+  workspaceVisualization: 'Workspace Visualization',
+  workspaceVisualizationDescription: 'A 3D visualization of the robot\'s reachable workspace.',
 };

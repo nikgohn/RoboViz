@@ -83,8 +83,8 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
     const cosThetaCosAlpha = multiplySymbolic(cosTheta, cosAlphaVal);
     const negCosThetaSinAlpha = multiplySymbolic(cosTheta, -sinAlphaVal);
 
-    const aCosTheta = aSymbol === '0' ? '0' : aSymbol === cosTheta ? aSymbol : `${aSymbol}*${cosTheta}`;
-    const aSinTheta = aSymbol === '0' ? '0' : aSymbol === sinTheta ? aSymbol : `${aSymbol}*${sinTheta}`;
+    const aCosTheta = aSymbol === '0' ? '0' : `${aSymbol}*${cosTheta}`;
+    const aSinTheta = aSymbol === '0' ? '0' : `${aSymbol}*${sinTheta}`;
 
 
     return (
@@ -131,9 +131,9 @@ const NumericMatrixTable = ({ matrix }: { matrix: THREE.Matrix4 }) => {
     return (
         <Table>
             <TableBody className="font-mono text-center">
-                {[0, 4, 8, 12].map(rowStart => (
+                {[0, 1, 2, 3].map(rowStart => ( // This was wrong, should be 0, 4, 8, 12
                     <TableRow key={rowStart}>
-                        {[0, 1, 2, 3].map(col => (
+                        {[0, 4, 8, 12].map(col => ( // This was wrong, should be col index
                              <TableCell key={col}>{elements[rowStart + col].toFixed(3)}</TableCell>
                         ))}
                     </TableRow>
@@ -174,6 +174,8 @@ export default function MatricesPage() {
                     <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
                     <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
                     <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
+                    <TabsTrigger value="workspace" asChild><Link href="/workspace">{t('workspace')}</Link></TabsTrigger>
+                    <TabsTrigger value="inverse-kinematics" asChild><Link href="/inverse-kinematics">{t('ik')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
@@ -222,4 +224,3 @@ export default function MatricesPage() {
     </div>
   );
 }
-

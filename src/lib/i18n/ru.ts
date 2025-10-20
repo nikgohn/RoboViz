@@ -5,9 +5,12 @@ export const ru = {
   kinematics: 'Кинематика',
   analysis: 'Анализ',
   matrices: 'Матрицы',
+  workspace: 'Роб. зона',
+  ik: 'ОЗК',
   showAxes: 'Показать оси',
   showCoordinates: 'Показать коорд.',
   reset: 'Сброс',
+  calculate: 'Рассчитать',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',
@@ -62,4 +65,15 @@ export const ru = {
   transformationMatricesDescription: 'Символьное представление матрицы преобразования для каждого звена.',
   baseTransform: 'Преобразование основания',
   finalTransformationMatrix: 'Итоговая матрица преобразования',
+  
+  // IK Page
+  ikSetup: 'Настройка Обратной Задачи Кинематики',
+  ikSetupDescription: 'Определите целевое положение и ориентацию для рабочего органа.',
+  targetPosition: 'Целевое положение',
+  targetOrientation: 'Целевая ориентация',
+  ikNotAvailable: 'Расчет ОЗК пока недоступен.',
+  
+  // Workspace Page
+  workspaceVisualization: 'Визуализация рабочей зоны',
+  workspaceVisualizationDescription: 'Трехмерная визуализация достижимой рабочей зоны робота.',
 };
