@@ -46,7 +46,7 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
     
     const getASymbol = () => {
         if (a !== 0) return `L<sub>${i}</sub>`;
-        return a.toString();
+        return '0';
     };
 
     const thetaSymbol = getThetaSymbol();
@@ -55,11 +55,29 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
     
     const cosTheta = thetaIsFixed ? Math.cos(theta * Math.PI / 180).toFixed(2) : `cos(${thetaSymbol})`;
     const sinTheta = thetaIsFixed ? Math.sin(theta * Math.PI / 180).toFixed(2) : `sin(${thetaSymbol})`;
-    const cosAlpha = Math.cos(alpha * Math.PI / 180).toFixed(2);
-    const sinAlpha = Math.sin(alpha * Math.PI / 180).toFixed(2);
+    const cosAlphaVal = parseFloat(Math.cos(alpha * Math.PI / 180).toFixed(2));
+    const sinAlphaVal = parseFloat(Math.sin(alpha * Math.PI / 180).toFixed(2));
     
-    const aCosTheta = a === 0 ? '0' : `<SymbolicValue html="${aSymbol}" />${cosTheta.startsWith('cos') ? cosTheta : `(${cosTheta})`}`;
-    const aSinTheta = a === 0 ? '0' : `<SymbolicValue html="${aSymbol}" />${sinTheta.startsWith('sin') ? sinTheta : `(${sinTheta})`}`;
+    const multiplySymbolic = (symbol: string, factor: number) => {
+        if (factor === 0) return '0';
+        if (factor === 1) return symbol;
+        if (factor === -1) return `-${symbol}`;
+        
+        const isNumericSymbol = !isNaN(parseFloat(symbol));
+        if (isNumericSymbol) {
+            return (parseFloat(symbol) * factor).toFixed(2);
+        }
+        
+        return `${factor}*${symbol}`;
+    };
+    
+    const negSinThetaCosAlpha = multiplySymbolic(`sin(${thetaSymbol})`, -cosAlphaVal);
+    const sinThetaSinAlpha = multiplySymbolic(`sin(${thetaSymbol})`, sinAlphaVal);
+    const cosThetaCosAlpha = multiplySymbolic(`cos(${thetaSymbol})`, cosAlphaVal);
+    const negCosThetaSinAlpha = multiplySymbolic(`cos(${thetaSymbol})`, -sinAlphaVal);
+
+    const aCosTheta = a === 0 ? '0' : (thetaIsFixed ? (a * parseFloat(cosTheta)).toFixed(2) : `${aSymbol}*${cosTheta}`);
+    const aSinTheta = a === 0 ? '0' : (thetaIsFixed ? (a * parseFloat(sinTheta)).toFixed(2) : `${aSymbol}*${sinTheta}`);
 
     return (
         <Card>
@@ -71,20 +89,20 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
                     <TableBody className="font-mono text-center">
                         <TableRow>
                             <TableCell><SymbolicValue html={cosTheta} /></TableCell>
-                            <TableCell><SymbolicValue html={`-${sinTheta}*${cosAlpha}`} /></TableCell>
-                            <TableCell><SymbolicValue html={`${sinTheta}*${sinAlpha}`} /></TableCell>
+                            <TableCell><SymbolicValue html={thetaIsFixed ? (-(parseFloat(sinTheta)) * cosAlphaVal).toFixed(2) : negSinThetaCosAlpha} /></TableCell>
+                            <TableCell><SymbolicValue html={thetaIsFixed ? (parseFloat(sinTheta) * sinAlphaVal).toFixed(2) : sinThetaSinAlpha} /></TableCell>
                             <TableCell><SymbolicValue html={aCosTheta} /></TableCell>
                         </TableRow>
                          <TableRow>
                             <TableCell><SymbolicValue html={sinTheta} /></TableCell>
-                            <TableCell><SymbolicValue html={`${cosTheta}*${cosAlpha}`} /></TableCell>
-                            <TableCell><SymbolicValue html={`-${cosTheta}*${sinAlpha}`} /></TableCell>
+                            <TableCell><SymbolicValue html={thetaIsFixed ? (parseFloat(cosTheta) * cosAlphaVal).toFixed(2) : cosThetaCosAlpha} /></TableCell>
+                            <TableCell><SymbolicValue html={thetaIsFixed ? (-(parseFloat(cosTheta)) * sinAlphaVal).toFixed(2) : negCosThetaSinAlpha} /></TableCell>
                             <TableCell><SymbolicValue html={aSinTheta} /></TableCell>
                         </TableRow>
                          <TableRow>
                             <TableCell>0</TableCell>
-                            <TableCell>{sinAlpha}</TableCell>
-                            <TableCell>{cosAlpha}</TableCell>
+                            <TableCell>{sinAlphaVal.toFixed(2)}</TableCell>
+                            <TableCell>{cosAlphaVal.toFixed(2)}</TableCell>
                             <TableCell><SymbolicValue html={dSymbol} /></TableCell>
                         </TableRow>
                          <TableRow>
@@ -118,13 +136,10 @@ export default function MatricesPage() {
                     <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
                     <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
                     <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
+                    <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
-        <Button variant="ghost" size="icon" asChild>
-            <Link href="/analysis">
-            </Link>
-        </Button>
         <div className="ml-auto flex items-center gap-2">
           <HeaderActions />
           <LanguageSwitcher />
@@ -158,4 +173,3 @@ export default function MatricesPage() {
     </div>
   );
 }
-

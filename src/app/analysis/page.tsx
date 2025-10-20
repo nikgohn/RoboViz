@@ -82,18 +82,15 @@ export default function AnalysisPage() {
           RoboViz
         </h1>
         <nav className="ml-auto flex items-center space-x-4">
-            <Tabs>
+            <Tabs defaultValue="analysis">
                 <TabsList>
                     <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
                     <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
                     <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
+                    <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
-        <Button variant="ghost" size="icon" asChild>
-            <Link href="/analysis">
-            </Link>
-        </Button>
         <div className="ml-auto flex items-center gap-2">
           <HeaderActions />
           <LanguageSwitcher />
