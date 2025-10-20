@@ -13,11 +13,9 @@ import { RobotVisualizer } from '@/components/robot-visualizer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { solveIK } from '@/lib/ik';
-import type { DHParams } from '@/types';
 
 export default function InverseKinematicsPage() {
   const { params, baseOrientation, setParams, workspaceLimits, getQIndexForParam } = useDHParams();
@@ -26,7 +24,9 @@ export default function InverseKinematicsPage() {
 
   const [targetPosition, setTargetPosition] = useState({ x: 1, y: 1, z: 1 });
   const [targetOrientation, setTargetOrientation] = useState({ roll: 0, pitch: 0, yaw: 0 });
+  const [tolerance, setTolerance] = useState(0.1);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState<THREE.Vector3 | null>(null);
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: string) => {
     setTargetPosition(prev => ({ ...prev, [axis]: parseFloat(value) || 0 }));
@@ -40,7 +40,7 @@ export default function InverseKinematicsPage() {
     setIsCalculating(true);
     try {
         const target = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
-        const solution = await solveIK(params, baseOrientation, target, workspaceLimits, getQIndexForParam);
+        const solution = await solveIK(params, baseOrientation, target, workspaceLimits, getQIndexForParam, 30, tolerance);
         
         if (solution) {
              setParams(solution);
@@ -92,11 +92,37 @@ export default function InverseKinematicsPage() {
         </div>
       </header>
        <main className="grid flex-1 grid-cols-1 lg:grid-cols-[400px_1fr] overflow-hidden">
-        <aside className="flex flex-col border-r bg-card p-6 space-y-6">
+        <aside className="flex flex-col border-r bg-card p-6 space-y-6 overflow-y-auto">
              <CardHeader className="p-0">
                 <CardTitle className="font-headline">{t('ikSetup')}</CardTitle>
                 <CardDescription>{t('ikSetupDescription')}</CardDescription>
             </CardHeader>
+            
+            <Card>
+                <CardHeader className="p-4">
+                    <CardTitle className="text-base">{t('endEffectorPosition')}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                    {currentPosition ? (
+                        <div className="grid grid-cols-3 gap-2 text-center font-mono text-sm">
+                            <div>
+                                <div className="text-muted-foreground">X</div>
+                                <div>{currentPosition.x.toFixed(3)}</div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground">Y</div>
+                                <div>{currentPosition.y.toFixed(3)}</div>
+                            </div>
+                            <div>
+                                <div className="text-muted-foreground">Z</div>
+                                <div>{currentPosition.z.toFixed(3)}</div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-sm text-muted-foreground text-center">-</div>
+                    )}
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader className="p-4">
@@ -141,6 +167,18 @@ export default function InverseKinematicsPage() {
                     </div>
                 </CardContent>
             </Card>
+            
+            <Card>
+                <CardHeader className="p-4">
+                    <CardTitle className="text-base">IK Solver Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                     <div>
+                        <Label htmlFor="target-tolerance">Tolerance</Label>
+                        <Input id="target-tolerance" type="number" value={tolerance} step={0.01} onChange={e => setTolerance(parseFloat(e.target.value) || 0)} />
+                    </div>
+                </CardContent>
+            </Card>
 
             <Button onClick={handleCalculate} disabled={isCalculating}>
                 {isCalculating ? t('calculating') : t('calculate')}
@@ -148,7 +186,7 @@ export default function InverseKinematicsPage() {
             
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} showAxes={false} baseOrientation={baseOrientation} ikTarget={new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z)} />
+          <RobotVisualizer params={params} showAxes={false} baseOrientation={baseOrientation} ikTarget={new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z)} onPositionUpdate={setCurrentPosition}/>
         </div>
       </main>
     </div>
