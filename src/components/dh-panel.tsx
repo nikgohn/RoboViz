@@ -29,10 +29,10 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
     const { workspaceLimits, getQIndexForParam } = useDHParams();
 
     const dQIndex = getQIndexForParam(index, 'd');
-    const dLimits = dQIndex ? workspaceLimits[dQIndex] : { min: -5, max: 5 };
+    const dLimits = dQIndex && workspaceLimits[dQIndex] ? workspaceLimits[dQIndex] : { min: -5, max: 5 };
 
     const thetaQIndex = getQIndexForParam(index, 'theta');
-    const thetaLimits = thetaQIndex ? workspaceLimits[thetaQIndex] : { min: -180, max: 180 };
+    const thetaLimits = thetaQIndex && workspaceLimits[thetaQIndex] ? workspaceLimits[thetaQIndex] : { min: -180, max: 180 };
 
     return (
         <AccordionItem value={id} className="border-b-0 mb-2">
