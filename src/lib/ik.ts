@@ -54,7 +54,7 @@ export const solveIK = (
     workspaceLimits: WorkspaceLimits,
     getQIndexForParam: (paramIndex: number, type: 'd' | 'theta') => number | null,
     iterations = 30,
-    tolerance = 0.01
+    tolerance = 0.1
 ): Promise<Omit<DHParams, "id">[] | null> => {
     return new Promise((resolve) => {
         let currentParams = JSON.parse(JSON.stringify(initialParams));
