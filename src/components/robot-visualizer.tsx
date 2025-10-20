@@ -14,6 +14,7 @@ type RobotVisualizerProps = {
   showLinkCoordinates?: boolean;
   onPositionUpdate?: (position: THREE.Vector3) => void;
   baseOrientation?: BaseOrientation;
+  ikTarget?: THREE.Vector3;
 };
 
 // Function to create a text sprite
@@ -94,7 +95,7 @@ const createGripper = () => {
 };
 
 
-export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate, baseOrientation = {x: 0, y: 0, z: 0} }: RobotVisualizerProps) {
+export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false, onPositionUpdate, baseOrientation = {x: 0, y: 0, z: 0}, ikTarget }: RobotVisualizerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -102,6 +103,7 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
   const controlsRef = useRef<OrbitControls | null>(null);
   const robotGroupRef = useRef<THREE.Group | null>(null);
   const textColorRef = useRef({ r: 0, g: 0, b: 0, a: 1.0 });
+  const ikTargetRef = useRef<THREE.Mesh | null>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -147,6 +149,15 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
     // Helpers
     const gridHelper = new THREE.GridHelper(20, 20, 0x888888, 0x444444);
     scene.add(gridHelper);
+    
+    // IK Target Visualizer
+    const targetGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+    const targetMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+    const targetMesh = new THREE.Mesh(targetGeometry, targetMaterial);
+    targetMesh.name = "ikTarget";
+    scene.add(targetMesh);
+    ikTargetRef.current = targetMesh;
+
 
     // Robot group
     const robotGroup = new THREE.Group();
@@ -188,6 +199,17 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
       }
     };
   }, []);
+
+   useEffect(() => {
+    if (ikTargetRef.current) {
+      if (ikTarget) {
+        ikTargetRef.current.position.copy(ikTarget);
+        ikTargetRef.current.visible = true;
+      } else {
+        ikTargetRef.current.visible = false;
+      }
+    }
+   }, [ikTarget]);
 
   useEffect(() => {
     const robotGroup = robotGroupRef.current;

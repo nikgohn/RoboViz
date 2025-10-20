@@ -11,6 +11,7 @@ export const ru = {
   showCoordinates: 'Показать коорд.',
   reset: 'Сброс',
   calculate: 'Рассчитать',
+  calculating: 'Вычисление...',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',

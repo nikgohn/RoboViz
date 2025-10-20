@@ -11,6 +11,7 @@ export const en = {
   showCoordinates: 'Show Coords',
   reset: 'Reset',
   calculate: 'Calculate',
+  calculating: 'Calculating...',
   
   // DH Panel
   dhParameters: 'DH Parameters',

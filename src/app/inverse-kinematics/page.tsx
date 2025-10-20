@@ -16,6 +16,8 @@ import { Label } from '@/components/ui/label';
 import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { solveIK } from '@/lib/ik';
+import type { DHParams } from '@/types';
 
 export default function InverseKinematicsPage() {
   const { params, baseOrientation, setParams } = useDHParams();
@@ -24,6 +26,7 @@ export default function InverseKinematicsPage() {
 
   const [targetPosition, setTargetPosition] = useState({ x: 1, y: 1, z: 1 });
   const [targetOrientation, setTargetOrientation] = useState({ roll: 0, pitch: 0, yaw: 0 });
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const handlePositionChange = (axis: 'x' | 'y' | 'z', value: string) => {
     setTargetPosition(prev => ({ ...prev, [axis]: parseFloat(value) || 0 }));
@@ -33,11 +36,35 @@ export default function InverseKinematicsPage() {
     setTargetOrientation(prev => ({ ...prev, [axis]: parseFloat(value) || 0 }));
   };
 
-  const handleCalculate = () => {
-    toast({
-        title: "Coming Soon",
-        description: t('ikNotAvailable'),
-    })
+  const handleCalculate = async () => {
+    setIsCalculating(true);
+    try {
+        const target = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
+        const solution = await solveIK(params, baseOrientation, target);
+        
+        if (solution) {
+             setParams(solution);
+             toast({
+                title: "IK Solution Found",
+                description: "The robot parameters have been updated.",
+            })
+        } else {
+            toast({
+                variant: "destructive",
+                title: "IK Failed",
+                description: "Could not find a solution. The target might be unreachable.",
+            })
+        }
+
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "IK Error",
+            description: "An unexpected error occurred during calculation.",
+        })
+    }
+    setIsCalculating(false);
   }
 
   return (
@@ -101,27 +128,27 @@ export default function InverseKinematicsPage() {
                     <div className="grid grid-cols-3 gap-2">
                         <div>
                             <Label htmlFor="target-roll">Roll (°)</Label>
-                            <Input id="target-roll" type="number" value={targetOrientation.roll} onChange={e => handleOrientationChange('roll', e.target.value)} />
+                            <Input id="target-roll" type="number" value={targetOrientation.roll} onChange={e => handleOrientationChange('roll', e.target.value)} disabled />
                         </div>
                         <div>
                             <Label htmlFor="target-pitch">Pitch (°)</Label>
-                            <Input id="target-pitch" type="number" value={targetOrientation.pitch} onChange={e => handleOrientationChange('pitch', e.target.value)} />
+                            <Input id="target-pitch" type="number" value={targetOrientation.pitch} onChange={e => handleOrientationChange('pitch', e.target.value)} disabled />
                         </div>
                         <div>
                             <Label htmlFor="target-yaw">Yaw (°)</Label>
-                            <Input id="target-yaw" type="number" value={targetOrientation.yaw} onChange={e => handleOrientationChange('yaw', e.target.value)} />
+                            <Input id="target-yaw" type="number" value={targetOrientation.yaw} onChange={e => handleOrientationChange('yaw', e.target.value)} disabled />
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            <Button onClick={handleCalculate}>
-                {t('calculate')}
+            <Button onClick={handleCalculate} disabled={isCalculating}>
+                {isCalculating ? t('calculating') : t('calculate')}
             </Button>
             
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
-          <RobotVisualizer params={params} showAxes={false} baseOrientation={baseOrientation} />
+          <RobotVisualizer params={params} showAxes={false} baseOrientation={baseOrientation} ikTarget={new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z)} />
         </div>
       </main>
     </div>
