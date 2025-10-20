@@ -42,10 +42,14 @@ export type BaseOrientation = {
   z: number;
 };
 
-const initialOrientation: BaseOrientation = { x: 0, y: 0, z: 0 };
+export type WorkspaceLimits = Record<number, {min: number, max: number}>;
 
-const LOCAL_STORAGE_KEY = 'robot-dh-params';
-const ORIENTATION_STATE_KEY = 'robot-base-orientation';
+const initialOrientation: BaseOrientation = { x: 0, y: 0, z: 0 };
+const initialWorkspaceLimits: WorkspaceLimits = {};
+
+const PARAMS_STORAGE_KEY = 'robot-dh-params';
+const ORIENTATION_STORAGE_KEY = 'robot-base-orientation';
+const WORKSPACE_LIMITS_STORAGE_KEY = 'robot-workspace-limits';
 
 
 type DHParamsContextType = {
@@ -53,6 +57,8 @@ type DHParamsContextType = {
   setParams: Dispatch<SetStateAction<Omit<DHParams, "id">[]>>;
   baseOrientation: BaseOrientation;
   setBaseOrientation: Dispatch<SetStateAction<BaseOrientation>>;
+  workspaceLimits: WorkspaceLimits;
+  setWorkspaceLimits: Dispatch<SetStateAction<WorkspaceLimits>>;
   isLoaded: boolean;
 };
 
@@ -61,43 +67,51 @@ const DHParamsContext = createContext<DHParamsContextType | undefined>(undefined
 export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
   const [params, setParams] = useState<Omit<DHParams, "id">[]>([]);
   const [baseOrientation, setBaseOrientation] = useState<BaseOrientation>(initialOrientation);
+  const [workspaceLimits, setWorkspaceLimits] = useState<WorkspaceLimits>(initialWorkspaceLimits);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
-      const storedParams = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const storedParams = localStorage.getItem(PARAMS_STORAGE_KEY);
       if (storedParams) {
         setParams(JSON.parse(storedParams));
       } else {
         setParams(initialParams);
       }
 
-      const storedOrientation = localStorage.getItem(ORIENTATION_STATE_KEY);
+      const storedOrientation = localStorage.getItem(ORIENTATION_STORAGE_KEY);
       if (storedOrientation) {
         setBaseOrientation(JSON.parse(storedOrientation));
+      }
+      
+      const storedLimits = localStorage.getItem(WORKSPACE_LIMITS_STORAGE_KEY);
+      if (storedLimits) {
+          setWorkspaceLimits(JSON.parse(storedLimits));
       }
 
     } catch (error) {
       console.error("Failed to parse params from localStorage", error);
       setParams(initialParams);
       setBaseOrientation(initialOrientation);
+      setWorkspaceLimits(initialWorkspaceLimits);
     }
     setIsLoaded(true);
   }, []);
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(params));
-      localStorage.setItem(ORIENTATION_STATE_KEY, JSON.stringify(baseOrientation));
+      localStorage.setItem(PARAMS_STORAGE_KEY, JSON.stringify(params));
+      localStorage.setItem(ORIENTATION_STORAGE_KEY, JSON.stringify(baseOrientation));
+      localStorage.setItem(WORKSPACE_LIMITS_STORAGE_KEY, JSON.stringify(workspaceLimits));
     }
-  }, [params, baseOrientation, isLoaded]);
+  }, [params, baseOrientation, workspaceLimits, isLoaded]);
 
   if (!isLoaded) {
     return null; // or a loading spinner
   }
 
   return (
-    <DHParamsContext.Provider value={{ params, setParams, baseOrientation, setBaseOrientation, isLoaded }}>
+    <DHParamsContext.Provider value={{ params, setParams, baseOrientation, setBaseOrientation, workspaceLimits, setWorkspaceLimits, isLoaded }}>
       {children}
     </DHParamsContext.Provider>
   );
@@ -110,5 +124,3 @@ export const useDHParams = () => {
   }
   return context;
 };
-
-    

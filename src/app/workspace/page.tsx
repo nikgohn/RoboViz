@@ -1,7 +1,7 @@
 
 "use client";
 import * as THREE from 'three';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useDHParams } from "@/context/dh-params-context";
 import { useLanguage } from "@/context/language-context";
 import { Logo } from "@/components/icons";
@@ -26,7 +26,7 @@ type VariableParam = {
 };
 
 export default function WorkspacePage() {
-  const { params, baseOrientation } = useDHParams();
+  const { params, baseOrientation, workspaceLimits, setWorkspaceLimits } = useDHParams();
   const { t } = useLanguage();
 
   const variableParams = useMemo((): Omit<VariableParam, 'min' | 'max'>[] => {
@@ -38,27 +38,34 @@ export default function WorkspacePage() {
         qIndexCounter++;
       }
       if (param.dIsVariable) {
-        vars.push({ qIndex: qIndexCounter, linkIndex: linkIndex + 1, type: 'd' });
+        vars.push({ qIndex: qIndexCounter, linkIndex: linkIndex, type: 'd' });
         qIndexCounter++;
       }
     });
     return vars;
   }, [params]);
 
-  const [limits, setLimits] = useState<Record<number, {min: number, max: number}>>(() => {
-    const initialLimits: Record<number, {min: number, max: number}> = {};
+  useEffect(() => {
+    const newLimits = { ...workspaceLimits };
+    let hasChanged = false;
     variableParams.forEach(v => {
-      if(v.type === 'theta') {
-        initialLimits[v.qIndex] = { min: -180, max: 180 };
-      } else {
-        initialLimits[v.qIndex] = { min: -5, max: 5 };
+      if (!newLimits[v.qIndex]) {
+        hasChanged = true;
+        if(v.type === 'theta') {
+          newLimits[v.qIndex] = { min: -180, max: 180 };
+        } else {
+          newLimits[v.qIndex] = { min: -5, max: 5 };
+        }
       }
     });
-    return initialLimits;
-  });
+    if(hasChanged) {
+        setWorkspaceLimits(newLimits);
+    }
+  }, [variableParams, workspaceLimits, setWorkspaceLimits]);
+
 
   const handleLimitChange = (qIndex: number, type: 'min' | 'max', value: string) => {
-    setLimits(prev => ({
+    setWorkspaceLimits(prev => ({
       ...prev,
       [qIndex]: {
         ...prev[qIndex],
@@ -105,7 +112,7 @@ export default function WorkspacePage() {
                             <Card key={v.qIndex}>
                                 <CardHeader className="p-4">
                                 <CardTitle className="text-base font-mono">
-                                    q<sub>{v.qIndex}</sub> ({v.type === 'theta' ? `θ${v.linkIndex}` : `d${v.linkIndex}`})
+                                    q<sub>{v.qIndex}</sub> ({v.type === 'theta' ? `θ${v.linkIndex}` : `d${v.linkIndex+1}`})
                                 </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-4 pt-0">
@@ -115,7 +122,7 @@ export default function WorkspacePage() {
                                     <Input
                                         id={`q${v.qIndex}-min`}
                                         type="number"
-                                        value={limits[v.qIndex]?.min ?? ''}
+                                        value={workspaceLimits[v.qIndex]?.min ?? ''}
                                         onChange={(e) => handleLimitChange(v.qIndex, 'min', e.target.value)}
                                     />
                                     </div>
@@ -124,7 +131,7 @@ export default function WorkspacePage() {
                                     <Input
                                         id={`q${v.qIndex}-max`}
                                         type="number"
-                                        value={limits[v.qIndex]?.max ?? ''}
+                                        value={workspaceLimits[v.qIndex]?.max ?? ''}
                                         onChange={(e) => handleLimitChange(v.qIndex, 'max', e.target.value)}
                                     />
                                     </div>
@@ -135,6 +142,7 @@ export default function WorkspacePage() {
                             {variableParams.length === 0 && (
                                 <div className="text-center text-muted-foreground py-10">
                                     <p>{t('noVariableParameters')}</p>
+
                                 </div>
                             )}
                         </div>
