@@ -131,9 +131,9 @@ const NumericMatrixTable = ({ matrix }: { matrix: THREE.Matrix4 }) => {
     return (
         <Table>
             <TableBody className="font-mono text-center">
-                {[0, 1, 2, 3].map(rowStart => ( // This was wrong, should be 0, 4, 8, 12
+                {[0, 1, 2, 3].map(rowStart => (
                     <TableRow key={rowStart}>
-                        {[0, 4, 8, 12].map(col => ( // This was wrong, should be col index
+                        {[0, 4, 8, 12].map(col => (
                              <TableCell key={col}>{elements[rowStart + col].toFixed(3)}</TableCell>
                         ))}
                     </TableRow>

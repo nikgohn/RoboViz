@@ -29,7 +29,7 @@ export default function AnalysisPage() {
     return t('linkTypeFixed');
   }
 
-  const getMotionType = (param: Omit<import("@types").DHParams, "id">) => {
+  const getMotionType = (param: Omit<import("@/types").DHParams, "id">) => {
     if (param.dIsVariable) return t('motionTypeTranslational');
     if (!param.thetaIsFixed) return t('motionTypeRotational');
     return '-';
