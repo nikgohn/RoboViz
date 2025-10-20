@@ -43,7 +43,7 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
             const offsetStr = dOffset !== 0 ? `+${dOffset}` : '';
             return `q<sub>${varCount}</sub>${offsetStr}`;
         }
-        return param.d.toString();
+        return (param.d + dOffset).toString();
     };
     
     const getASymbol = () => {
@@ -62,8 +62,8 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
     
     const multiplySymbolic = (symbol: string, factor: number) => {
         if (factor === 0) return '0';
-
-        const isNumericSymbol = !isNaN(parseFloat(symbol));
+        
+        const isNumericSymbol = !isNaN(parseFloat(symbol)) && isFinite(Number(symbol));
         if (isNumericSymbol) {
             return (parseFloat(symbol) * factor).toFixed(2);
         }
@@ -81,8 +81,9 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
     const cosThetaCosAlpha = multiplySymbolic(cosTheta, cosAlphaVal);
     const negCosThetaSinAlpha = multiplySymbolic(cosTheta, -sinAlphaVal);
 
-    const aCosTheta = a === 0 ? '0' : multiplySymbolic(cosTheta, a);
-    const aSinTheta = a === 0 ? '0' : multiplySymbolic(sinTheta, a);
+    const aCosTheta = aSymbol === '0' ? '0' : aSymbol === cosTheta ? aSymbol : `${aSymbol}*${cosTheta}`;
+    const aSinTheta = aSymbol === '0' ? '0' : aSymbol === sinTheta ? aSymbol : `${aSymbol}*${sinTheta}`;
+
 
     return (
         <Card>
