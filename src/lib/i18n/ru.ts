@@ -58,7 +58,7 @@ export const ru = {
   baseTool: 'Стойка-Схват',
   
   // Matrices Page
-  transformationMatrices: 'Матрицы преобразования',
-  transformationMatricesDescription: 'Матрица преобразования прямой кинематики для каждого звена.',
+  transformationMatrices: 'Символьные матрицы преобразования',
+  transformationMatricesDescription: 'Символьное представление матрицы преобразования для каждого звена.',
   baseTransform: 'Преобразование основания',
 };

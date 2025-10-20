@@ -58,7 +58,7 @@ export const en = {
   baseTool: 'Base-Tool',
 
   // Matrices Page
-  transformationMatrices: 'Transformation Matrices',
-  transformationMatricesDescription: 'Forward kinematics transformation matrix for each link.',
+  transformationMatrices: 'Symbolic Transformation Matrices',
+  transformationMatricesDescription: 'Symbolic representation of the transformation matrix for each link.',
   baseTransform: 'Base Transform',
 };

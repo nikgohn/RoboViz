@@ -1,37 +1,52 @@
 
 "use client";
-import * as THREE from 'three';
 import { useDHParams } from "@/context/dh-params-context";
 import { useLanguage } from "@/context/language-context";
 import { Logo } from "@/components/icons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/header-actions";
-import { createDHMatrix } from '@/lib/dh';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-const MatrixTable = ({ matrix, title }: { matrix: THREE.Matrix4, title: string }) => {
-    const elements = matrix.elements;
+const SymbolicMatrixTable = ({ index }: { index: number }) => {
+    const i = index;
+    const iMinus1 = index - 1;
     return (
         <Card>
             <CardHeader>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle>A<sub>{iMinus1}→{i}</sub></CardTitle>
             </CardHeader>
             <CardContent>
                 <Table>
-                    <TableBody className="font-mono">
-                        {[0, 4, 8, 12].map(i => (
-                            <TableRow key={i}>
-                                <TableCell>{elements[i].toFixed(4)}</TableCell>
-                                <TableCell>{elements[i + 1].toFixed(4)}</TableCell>
-                                <TableCell>{elements[i + 2].toFixed(4)}</TableCell>
-                                <TableCell>{elements[i + 3].toFixed(4)}</TableCell>
-                            </TableRow>
-                        ))}
+                    <TableBody className="font-mono text-center">
+                        <TableRow>
+                            <TableCell>cos(θ<sub>{i}</sub>)</TableCell>
+                            <TableCell>-sin(θ<sub>{i}</sub>)cos(α<sub>{i}</sub>)</TableCell>
+                            <TableCell>sin(θ<sub>{i}</sub>)sin(α<sub>{i}</sub>)</TableCell>
+                            <TableCell>a<sub>{i}</sub>cos(θ<sub>{i}</sub>)</TableCell>
+                        </TableRow>
+                         <TableRow>
+                            <TableCell>sin(θ<sub>{i}</sub>)</TableCell>
+                            <TableCell>cos(θ<sub>{i}</sub>)cos(α<sub>{i}</sub>)</TableCell>
+                            <TableCell>-cos(θ<sub>{i}</sub>)sin(α<sub>{i}</sub>)</TableCell>
+                            <TableCell>a<sub>{i}</sub>sin(θ<sub>{i}</sub>)</TableCell>
+                        </TableRow>
+                         <TableRow>
+                            <TableCell>0</TableCell>
+                            <TableCell>sin(α<sub>{i}</sub>)</TableCell>
+                            <TableCell>cos(α<sub>{i}</sub>)</TableCell>
+                            <TableCell>d<sub>{i}</sub></TableCell>
+                        </TableRow>
+                         <TableRow>
+                            <TableCell>0</TableCell>
+                            <TableCell>0</TableCell>
+                            <TableCell>0</TableCell>
+                            <TableCell>1</TableCell>
+                        </TableRow>
                     </TableBody>
                 </Table>
             </CardContent>
@@ -40,34 +55,8 @@ const MatrixTable = ({ matrix, title }: { matrix: THREE.Matrix4, title: string }
 };
 
 export default function MatricesPage() {
-  const { params, baseOrientation } = useDHParams();
+  const { params } = useDHParams();
   const { t } = useLanguage();
-
-  const matrices = params.reduce((acc, p, index) => {
-    const { a, alpha, d, dOffset, theta, thetaOffset } = p;
-    const totalTheta = theta + thetaOffset;
-    const totalD = d + dOffset;
-    const dhMatrix = createDHMatrix(a, alpha, totalD, totalTheta);
-    
-    const prevMatrix = acc.length > 0 ? acc[acc.length - 1].matrix : new THREE.Matrix4();
-    const currentMatrix = new THREE.Matrix4().multiplyMatrices(prevMatrix, dhMatrix);
-    
-    acc.push({
-        link: index,
-        matrix: currentMatrix,
-    });
-
-    return acc;
-  }, [] as {link: number, matrix: THREE.Matrix4}[]);
-
-  const baseTransform = new THREE.Matrix4().makeRotationFromEuler(
-    new THREE.Euler(
-        THREE.MathUtils.degToRad(baseOrientation.x),
-        THREE.MathUtils.degToRad(baseOrientation.y),
-        THREE.MathUtils.degToRad(baseOrientation.z),
-        'XYZ'
-    )
-  );
 
   return (
     <div className="flex h-dvh flex-col font-sans">
@@ -85,7 +74,7 @@ export default function MatricesPage() {
                 </TabsList>
             </Tabs>
         </nav>
-        <div className="flex-1" />
+        <div className="ml-auto" />
         <Button variant="ghost" size="icon" asChild>
             <Link href="/analysis">
             </Link>
@@ -103,13 +92,10 @@ export default function MatricesPage() {
                     <p className="text-muted-foreground">{t('transformationMatricesDescription')}</p>
                 </div>
 
-                <MatrixTable matrix={baseTransform} title={`${t('baseTransform')} T(0)`} />
-
-                {matrices.map((item) => (
-                    <MatrixTable 
-                        key={item.link}
-                        matrix={item.matrix}
-                        title={`T(${item.link + 1})`}
+                {params.map((_, index) => (
+                    <SymbolicMatrixTable 
+                        key={index}
+                        index={index + 1}
                     />
                 ))}
             </div>
