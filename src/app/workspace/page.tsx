@@ -1,6 +1,7 @@
 
 "use client";
 import * as THREE from 'three';
+import React, { useState, useMemo } from 'react';
 import { useDHParams } from "@/context/dh-params-context";
 import { useLanguage } from "@/context/language-context";
 import { Logo } from "@/components/icons";
@@ -10,10 +11,61 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { HeaderActions } from "@/components/header-actions";
 import { RobotVisualizer } from '@/components/robot-visualizer';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import type { DHParams } from '@/types';
+
+type VariableParam = {
+  qIndex: number;
+  linkIndex: number;
+  type: 'theta' | 'd';
+  min: number;
+  max: number;
+};
 
 export default function WorkspacePage() {
   const { params, baseOrientation } = useDHParams();
   const { t } = useLanguage();
+
+  const variableParams = useMemo((): Omit<VariableParam, 'min' | 'max'>[] => {
+    let qIndexCounter = 1;
+    const vars: Omit<VariableParam, 'min' | 'max'>[] = [];
+    params.forEach((param, linkIndex) => {
+      if (!param.thetaIsFixed) {
+        vars.push({ qIndex: qIndexCounter, linkIndex: linkIndex + 1, type: 'theta' });
+        qIndexCounter++;
+      }
+      if (param.dIsVariable) {
+        vars.push({ qIndex: qIndexCounter, linkIndex: linkIndex + 1, type: 'd' });
+        qIndexCounter++;
+      }
+    });
+    return vars;
+  }, [params]);
+
+  const [limits, setLimits] = useState<Record<number, {min: number, max: number}>>(() => {
+    const initialLimits: Record<number, {min: number, max: number}> = {};
+    variableParams.forEach(v => {
+      if(v.type === 'theta') {
+        initialLimits[v.qIndex] = { min: -180, max: 180 };
+      } else {
+        initialLimits[v.qIndex] = { min: -5, max: 5 };
+      }
+    });
+    return initialLimits;
+  });
+
+  const handleLimitChange = (qIndex: number, type: 'min' | 'max', value: string) => {
+    setLimits(prev => ({
+      ...prev,
+      [qIndex]: {
+        ...prev[qIndex],
+        [type]: parseFloat(value) || 0
+      }
+    }));
+  };
 
   return (
     <div className="flex h-dvh flex-col font-sans">
@@ -40,16 +92,54 @@ export default function WorkspacePage() {
         </div>
       </header>
        <main className="grid flex-1 grid-cols-1 lg:grid-cols-[400px_1fr] overflow-hidden">
-        <aside className="flex flex-col border-r bg-card p-6">
-             <CardHeader className="p-0">
+        <aside className="flex flex-col border-r bg-card">
+             <CardHeader className="p-6">
                 <CardTitle className="font-headline">{t('workspaceVisualization')}</CardTitle>
                 <CardDescription>{t('workspaceVisualizationDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center p-0 mt-6">
-                <div className="text-center text-muted-foreground">
-                    <p>Workspace visualization coming soon.</p>
-                </div>
-            </CardContent>
+            <ScrollArea className="flex-1 px-6">
+                 <div className="space-y-4 pb-6">
+                    {variableParams.map((v) => (
+                      <Card key={v.qIndex}>
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-base font-mono">
+                            q<sub>{v.qIndex}</sub> ({v.type === 'theta' ? `θ${v.linkIndex}` : `d${v.linkIndex}`})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`q${v.qIndex}-min`}>Min</Label>
+                              <Input
+                                id={`q${v.qIndex}-min`}
+                                type="number"
+                                value={limits[v.qIndex]?.min ?? ''}
+                                onChange={(e) => handleLimitChange(v.qIndex, 'min', e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`q${v.qIndex}-max`}>Max</Label>
+                              <Input
+                                id={`q${v.qIndex}-max`}
+                                type="number"
+                                value={limits[v.qIndex]?.max ?? ''}
+                                onChange={(e) => handleLimitChange(v.qIndex, 'max', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {variableParams.length === 0 && (
+                        <div className="text-center text-muted-foreground py-10">
+                            <p>{t('noVariableParameters')}</p>
+                        </div>
+                    )}
+                 </div>
+            </ScrollArea>
+             <div className="p-6 border-t">
+                <Button className="w-full" disabled>Generate Workspace</Button>
+            </div>
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">
           <RobotVisualizer params={params} showAxes={false} baseOrientation={baseOrientation} />
