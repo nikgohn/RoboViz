@@ -8,10 +8,12 @@ import Link from "next/link";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/header-actions";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { DHParams } from "@/types";
+import { createDHMatrix } from "@/lib/dh";
+import * as THREE from 'three';
+
 
 type SymbolicMatrixProps = {
     index: number;
@@ -45,7 +47,7 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
         }
         return (param.d + dOffset).toString();
     };
-    
+
     const getASymbol = () => {
         if (a !== 0) return `L<sub>${i}</sub>`;
         return '0';
@@ -124,10 +126,39 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
     );
 };
 
+const NumericMatrixTable = ({ matrix }: { matrix: THREE.Matrix4 }) => {
+    const elements = matrix.elements;
+    return (
+        <Table>
+            <TableBody className="font-mono text-center">
+                {[0, 4, 8, 12].map(rowStart => (
+                    <TableRow key={rowStart}>
+                        {[0, 1, 2, 3].map(col => (
+                             <TableCell key={col}>{elements[rowStart + col].toFixed(3)}</TableCell>
+                        ))}
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    )
+};
+
+
 export default function MatricesPage() {
   const { params } = useDHParams();
   const { t } = useLanguage();
   let variableCounter = 0;
+
+  const finalMatrix = params.reduce((acc, p) => {
+    const { a, alpha, d, dOffset, theta, thetaOffset } = p;
+    const totalTheta = theta + thetaOffset;
+    const totalD = d + dOffset;
+    const dhMatrix = createDHMatrix(a, alpha, totalD, totalTheta);
+    return acc.multiply(dhMatrix);
+  }, new THREE.Matrix4());
+  
+  const finalMatrixEquation = `T<sub>0→${params.length}</sub> = ${params.map((_, i) => `A<sub>${i}→${i+1}</sub>`).join(' × ')}`;
+
 
   return (
     <div className="flex h-dvh flex-col font-sans">
@@ -173,9 +204,22 @@ export default function MatricesPage() {
                         />
                     );
                 })}
+
+                <Card>
+                    <CardHeader>
+                         <CardTitle>{t('finalTransformationMatrix')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="p-4 mb-4 bg-muted rounded-md text-center font-mono text-lg overflow-x-auto">
+                            <SymbolicValue html={finalMatrixEquation} />
+                        </div>
+                        <NumericMatrixTable matrix={finalMatrix} />
+                    </CardContent>
+                </Card>
             </div>
         </ScrollArea>
       </main>
     </div>
   );
 }
+

@@ -61,4 +61,5 @@ export const ru = {
   transformationMatrices: 'Символьные матрицы преобразования',
   transformationMatricesDescription: 'Символьное представление матрицы преобразования для каждого звена.',
   baseTransform: 'Преобразование основания',
+  finalTransformationMatrix: 'Итоговая матрица преобразования',
 };

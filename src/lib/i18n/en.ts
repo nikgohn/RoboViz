@@ -61,4 +61,5 @@ export const en = {
   transformationMatrices: 'Symbolic Transformation Matrices',
   transformationMatricesDescription: 'Symbolic representation of the transformation matrix for each link.',
   baseTransform: 'Base Transform',
+  finalTransformationMatrix: 'Final Transformation Matrix',
 };
