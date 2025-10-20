@@ -7,6 +7,7 @@ export const en = {
   matrices: 'Matrices',
   workspace: 'Workspace',
   ik: 'IK',
+  ikSolution: 'IK Solution',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
   reset: 'Reset',
@@ -74,7 +75,23 @@ export const en = {
   targetOrientation: 'Target Orientation',
   ikNotAvailable: 'IK calculation not yet available.',
 
+  // IK Solution Page
+  ikSolutionTitle: 'IK Algorithmic Solution',
+  ikSolutionDescription: 'This page describes the Cyclic Coordinate Descent (CCD) algorithm used for inverse kinematics.',
+  ikCcdAlgorithm: 'CCD Algorithm',
+  ikCcdAlgorithmDescription: 'An iterative method that adjusts one joint at a time to minimize the distance between the end-effector and the target.',
+  ikIterationProcess: 'Iteration Process',
+  ikIterationProcessStep1: '1. Start from the last joint (n) and move towards the base (joint 1).',
+  ikIterationProcessStep2: '2. For each joint, calculate the rotation or translation needed to align the end-effector with the target.',
+  ikIterationProcessStep3: '3. Apply the change to the joint variable (θᵢ or dᵢ), respecting its limits.',
+  ikIterationProcessStep4: '4. Update the position of the entire kinematic chain.',
+  ikIterationProcessStep5: '5. Repeat for a fixed number of iterations or until the end-effector is close enough to the target.',
+  ikRevoluteJoints: 'Revolute Joints (θᵢ)',
+  ikRevoluteJointsDescription: 'For a revolute joint, we calculate the angle Δθ to rotate the end-effector towards the target.',
+  ikPrismaticJoints: 'Prismatic Joints (dᵢ)',
+  ikPrismaticJointsDescription: 'For a prismatic joint, we calculate the distance Δd to move the end-effector towards the target along the joint axis.',
+
   // Workspace Page
-  workspaceVisualization: 'Workspace Visualization',
-  workspaceVisualizationDescription: 'A 3D visualization of the robot\'s reachable workspace.',
+  workspaceVisualization: 'Workspace Limits',
+  workspaceVisualizationDescription: "Define the minimum and maximum limits for each variable joint (qᵢ). These limits will constrain the robot's movement in the Kinematics and IK modes.",
 };
