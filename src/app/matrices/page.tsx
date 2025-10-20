@@ -19,40 +19,47 @@ type SymbolicMatrixProps = {
     variableIndex: number;
 };
 
+const SymbolicValue = ({ html }: { html: string }) => {
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
 const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProps) => {
     const i = index;
     const { a, alpha, theta, thetaIsFixed, d, dIsVariable } = param;
     let varCount = variableIndex;
     
-    const getTheta = () => {
+    const getThetaSymbol = () => {
         if (thetaIsFixed) {
-            return `(${(theta * Math.PI / 180).toFixed(2)})`;
+            return `θ<sub>${i}</sub>`;
         }
         varCount++;
-        return `q_${varCount}`;
+        return `q<sub>${varCount}</sub>`;
     };
 
-    const getD = () => {
+    const getDSymbol = () => {
         if (dIsVariable) {
             varCount++;
-            return `q_${varCount}`;
+            return `q<sub>${varCount}</sub>`;
         }
-        return d;
+        return d.toString();
     };
     
-    const getA = () => {
-        if (a !== 0) return `L_${i}`;
-        return a;
+    const getASymbol = () => {
+        if (a !== 0) return `L<sub>${i}</sub>`;
+        return a.toString();
     };
+
+    const thetaSymbol = getThetaSymbol();
+    const dSymbol = getDSymbol();
+    const aSymbol = getASymbol();
     
-    const theta_val = getTheta();
-    const d_val = getD();
-    const a_val = getA();
+    const cosTheta = thetaIsFixed ? Math.cos(theta * Math.PI / 180).toFixed(2) : `cos(${thetaSymbol})`;
+    const sinTheta = thetaIsFixed ? Math.sin(theta * Math.PI / 180).toFixed(2) : `sin(${thetaSymbol})`;
+    const cosAlpha = Math.cos(alpha * Math.PI / 180).toFixed(2);
+    const sinAlpha = Math.sin(alpha * Math.PI / 180).toFixed(2);
     
-    // Recalculate variable counter based on what was rendered
-    let finalVarCount = variableIndex;
-    if (!thetaIsFixed) finalVarCount++;
-    if (dIsVariable) finalVarCount++;
+    const aCosTheta = a === 0 ? '0' : `<SymbolicValue html="${aSymbol}" />${cosTheta.startsWith('cos') ? cosTheta : `(${cosTheta})`}`;
+    const aSinTheta = a === 0 ? '0' : `<SymbolicValue html="${aSymbol}" />${sinTheta.startsWith('sin') ? sinTheta : `(${sinTheta})`}`;
 
     return (
         <Card>
@@ -63,22 +70,22 @@ const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProp
                 <Table>
                     <TableBody className="font-mono text-center">
                         <TableRow>
-                            <TableCell>cos({theta_val})</TableCell>
-                            <TableCell>-sin({theta_val})cos({alpha}°)</TableCell>
-                            <TableCell>sin({theta_val})sin({alpha}°)</TableCell>
-                            <TableCell>{a_val === 0 ? 0 : `${a_val}cos(${theta_val})`}</TableCell>
+                            <TableCell><SymbolicValue html={cosTheta} /></TableCell>
+                            <TableCell><SymbolicValue html={`-${sinTheta}*${cosAlpha}`} /></TableCell>
+                            <TableCell><SymbolicValue html={`${sinTheta}*${sinAlpha}`} /></TableCell>
+                            <TableCell><SymbolicValue html={aCosTheta} /></TableCell>
                         </TableRow>
                          <TableRow>
-                            <TableCell>sin({theta_val})</TableCell>
-                            <TableCell>cos({theta_val})cos({alpha}°)</TableCell>
-                            <TableCell>-cos({theta_val})sin({alpha}°)</TableCell>
-                            <TableCell>{a_val === 0 ? 0 : `${a_val}sin(${theta_val})`}</TableCell>
+                            <TableCell><SymbolicValue html={sinTheta} /></TableCell>
+                            <TableCell><SymbolicValue html={`${cosTheta}*${cosAlpha}`} /></TableCell>
+                            <TableCell><SymbolicValue html={`-${cosTheta}*${sinAlpha}`} /></TableCell>
+                            <TableCell><SymbolicValue html={aSinTheta} /></TableCell>
                         </TableRow>
                          <TableRow>
                             <TableCell>0</TableCell>
-                            <TableCell>sin({alpha}°)</TableCell>
-                            <TableCell>cos({alpha}°)</TableCell>
-                            <TableCell>{d_val}</TableCell>
+                            <TableCell>{sinAlpha}</TableCell>
+                            <TableCell>{cosAlpha}</TableCell>
+                            <TableCell><SymbolicValue html={dSymbol} /></TableCell>
                         </TableRow>
                          <TableRow>
                             <TableCell>0</TableCell>
@@ -114,7 +121,6 @@ export default function MatricesPage() {
                 </TabsList>
             </Tabs>
         </nav>
-        <div className="ml-auto" />
         <Button variant="ghost" size="icon" asChild>
             <Link href="/analysis">
             </Link>
