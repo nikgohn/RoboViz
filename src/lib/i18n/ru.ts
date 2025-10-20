@@ -52,6 +52,8 @@ export const ru = {
   linkTypeFixed: 'Фиксированное',
   motionTypeTranslational: 'Поступательное',
   motionTypeRotational: 'Вращательное',
+
+  eulerAnglesTableTitle: 'Таблица 3 - Углы Эйлера',
 };
 
     

@@ -52,6 +52,8 @@ export const en = {
   linkTypeFixed: 'Fixed',
   motionTypeTranslational: 'Translational',
   motionTypeRotational: 'Rotational',
+
+  eulerAnglesTableTitle: 'Table 3 - Euler Angles',
 };
 
     
