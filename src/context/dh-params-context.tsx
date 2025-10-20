@@ -1,6 +1,6 @@
 
 "use client";
-import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction, useCallback } from 'react';
 import type { DHParams } from '@/types';
 
 const initialParams: Omit<DHParams, "id">[] = [
@@ -59,6 +59,7 @@ type DHParamsContextType = {
   setBaseOrientation: Dispatch<SetStateAction<BaseOrientation>>;
   workspaceLimits: WorkspaceLimits;
   setWorkspaceLimits: Dispatch<SetStateAction<WorkspaceLimits>>;
+  getQIndexForParam: (paramIndex: number, type: 'd' | 'theta') => number | null;
   isLoaded: boolean;
 };
 
@@ -106,12 +107,32 @@ export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [params, baseOrientation, workspaceLimits, isLoaded]);
 
+  const getQIndexForParam = useCallback((paramIndex: number, type: 'd' | 'theta'): number | null => {
+    let qIndexCounter = 1;
+    for (let i = 0; i < params.length; i++) {
+        const p = params[i];
+        if (!p.thetaIsFixed) {
+            if (i === paramIndex && type === 'theta') {
+                return qIndexCounter;
+            }
+            qIndexCounter++;
+        }
+        if (p.dIsVariable) {
+             if (i === paramIndex && type === 'd') {
+                return qIndexCounter;
+            }
+            qIndexCounter++;
+        }
+    }
+    return null;
+  }, [params]);
+
   if (!isLoaded) {
     return null; // or a loading spinner
   }
 
   return (
-    <DHParamsContext.Provider value={{ params, setParams, baseOrientation, setBaseOrientation, workspaceLimits, setWorkspaceLimits, isLoaded }}>
+    <DHParamsContext.Provider value={{ params, setParams, baseOrientation, setBaseOrientation, workspaceLimits, setWorkspaceLimits, getQIndexForParam, isLoaded }}>
       {children}
     </DHParamsContext.Provider>
   );

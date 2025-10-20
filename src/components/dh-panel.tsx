@@ -26,6 +26,14 @@ type DhPanelProps = {
 function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number | boolean) => void, onRemove: () => void }) {
     const id = useId();
     const { t } = useLanguage();
+    const { workspaceLimits, getQIndexForParam } = useDHParams();
+
+    const dQIndex = getQIndexForParam(index, 'd');
+    const dLimits = dQIndex ? workspaceLimits[dQIndex] : { min: -5, max: 5 };
+
+    const thetaQIndex = getQIndexForParam(index, 'theta');
+    const thetaLimits = thetaQIndex ? workspaceLimits[thetaQIndex] : { min: -180, max: 180 };
+
     return (
         <AccordionItem value={id} className="border-b-0 mb-2">
             <Card className="overflow-hidden">
@@ -78,8 +86,8 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                                <div className="flex-1">
                                 <Slider
                                     id={`d-${id}`}
-                                    min={-5}
-                                    max={5}
+                                    min={dLimits.min}
+                                    max={dLimits.max}
                                     step={0.1}
                                     value={[param.d]}
                                     onValueChange={([val]) => onUpdate('d', val)}
@@ -105,8 +113,8 @@ function ParamRow({ param, index, onUpdate, onRemove }: { param: Omit<DHParams, 
                                 <div className="flex-1 [--primary:hsl(var(--accent-interactive))]">
                                     <Slider
                                         id={`theta-${id}`}
-                                        min={-180}
-                                        max={180}
+                                        min={thetaLimits.min}
+                                        max={thetaLimits.max}
                                         step={1}
                                         value={[param.theta]}
                                         onValueChange={([val]) => onUpdate('theta', val)}

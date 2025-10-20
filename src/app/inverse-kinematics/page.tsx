@@ -20,7 +20,7 @@ import { solveIK } from '@/lib/ik';
 import type { DHParams } from '@/types';
 
 export default function InverseKinematicsPage() {
-  const { params, baseOrientation, setParams } = useDHParams();
+  const { params, baseOrientation, setParams, workspaceLimits, getQIndexForParam } = useDHParams();
   const { t } = useLanguage();
   const { toast } = useToast();
 
@@ -40,7 +40,7 @@ export default function InverseKinematicsPage() {
     setIsCalculating(true);
     try {
         const target = new THREE.Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
-        const solution = await solveIK(params, baseOrientation, target);
+        const solution = await solveIK(params, baseOrientation, target, workspaceLimits, getQIndexForParam);
         
         if (solution) {
              setParams(solution);
@@ -52,7 +52,7 @@ export default function InverseKinematicsPage() {
             toast({
                 variant: "destructive",
                 title: "IK Failed",
-                description: "Could not find a solution. The target might be unreachable.",
+                description: "Could not find a solution. The target might be unreachable or outside defined limits.",
             })
         }
 

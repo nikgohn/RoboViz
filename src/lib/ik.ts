@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import type { DHParams } from '@/types';
 import { createDHMatrix } from './dh';
+import type { WorkspaceLimits } from '@/context/dh-params-context';
 
 // This function computes the world positions of each joint based on the DH parameters.
 const getForwardKinematics = (dhParams: Omit<DHParams, "id">[], baseOrientation: {x: number, y: number, z: number}) => {
@@ -50,6 +51,8 @@ export const solveIK = (
     initialParams: Omit<DHParams, "id">[],
     baseOrientation: {x: number, y: number, z: number},
     target: THREE.Vector3,
+    workspaceLimits: WorkspaceLimits,
+    getQIndexForParam: (paramIndex: number, type: 'd' | 'theta') => number | null,
     iterations = 30,
     tolerance = 0.01
 ): Promise<Omit<DHParams, "id">[] | null> => {
@@ -62,7 +65,7 @@ export const solveIK = (
 
         for (let iter = 0; iter < iterations; iter++) {
             const joints = getForwardKinematics(currentParams, baseOrientation);
-            const endEffectorPosition = joints[joints.length - 1].position;
+            let endEffectorPosition = joints[joints.length - 1].position;
             
             const distance = endEffectorPosition.distanceTo(target);
             if (distance < tolerance) {
@@ -83,8 +86,11 @@ export const solveIK = (
                 if (param.dIsVariable) { // Prismatic joint
                     const projection = toTarget.dot(jointAxis) - toEndEffector.dot(jointAxis);
                     param.d += projection;
-                    // Clamp within limits
-                    param.d = Math.max(-5, Math.min(5, param.d));
+                    
+                    const qIndex = getQIndexForParam(paramIndex, 'd');
+                    if (qIndex && workspaceLimits[qIndex]) {
+                        param.d = Math.max(workspaceLimits[qIndex].min, Math.min(workspaceLimits[qIndex].max, param.d));
+                    }
 
                 } else { // Revolute joint
                     toEndEffector.projectOnPlane(jointAxis);
@@ -100,12 +106,15 @@ export const solveIK = (
                     }
                     
                     param.theta += THREE.MathUtils.radToDeg(angle);
-                    // Clamp within limits
-                    param.theta = Math.max(-180, Math.min(180, param.theta));
+
+                    const qIndex = getQIndexForParam(paramIndex, 'theta');
+                    if (qIndex && workspaceLimits[qIndex]) {
+                         param.theta = Math.max(workspaceLimits[qIndex].min, Math.min(workspaceLimits[qIndex].max, param.theta));
+                    }
                 }
                  // Update kinematics for the next joint in the loop
                  const updatedJoints = getForwardKinematics(currentParams, baseOrientation);
-                 endEffectorPosition.copy(updatedJoints[updatedJoints.length-1].position);
+                 endEffectorPosition = updatedJoints[updatedJoints.length - 1].position;
             }
         }
         

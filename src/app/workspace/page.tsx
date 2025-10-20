@@ -34,7 +34,7 @@ export default function WorkspacePage() {
     const vars: Omit<VariableParam, 'min' | 'max'>[] = [];
     params.forEach((param, linkIndex) => {
       if (!param.thetaIsFixed) {
-        vars.push({ qIndex: qIndexCounter, linkIndex: linkIndex + 1, type: 'theta' });
+        vars.push({ qIndex: qIndexCounter, linkIndex: linkIndex, type: 'theta' });
         qIndexCounter++;
       }
       if (param.dIsVariable) {
@@ -105,52 +105,47 @@ export default function WorkspacePage() {
                     <CardTitle className="font-headline">{t('workspaceVisualization')}</CardTitle>
                     <CardDescription>{t('workspaceVisualizationDescription')}</CardDescription>
                 </CardHeader>
-                <div className="flex-1 overflow-auto">
-                    <ScrollArea className="h-full px-6">
-                        <div className="space-y-4 pb-6">
-                            {variableParams.map((v) => (
-                            <Card key={v.qIndex}>
-                                <CardHeader className="p-4">
-                                <CardTitle className="text-base font-mono">
-                                    q<sub>{v.qIndex}</sub> ({v.type === 'theta' ? `θ${v.linkIndex}` : `d${v.linkIndex+1}`})
-                                </CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                    <Label htmlFor={`q${v.qIndex}-min`}>Min</Label>
-                                    <Input
-                                        id={`q${v.qIndex}-min`}
-                                        type="number"
-                                        value={workspaceLimits[v.qIndex]?.min ?? ''}
-                                        onChange={(e) => handleLimitChange(v.qIndex, 'min', e.target.value)}
-                                    />
-                                    </div>
-                                    <div>
-                                    <Label htmlFor={`q${v.qIndex}-max`}>Max</Label>
-                                    <Input
-                                        id={`q${v.qIndex}-max`}
-                                        type="number"
-                                        value={workspaceLimits[v.qIndex]?.max ?? ''}
-                                        onChange={(e) => handleLimitChange(v.qIndex, 'max', e.target.value)}
-                                    />
-                                    </div>
+                <ScrollArea className="flex-1">
+                    <div className="space-y-4 pb-6 px-6">
+                        {variableParams.map((v) => (
+                        <Card key={v.qIndex}>
+                            <CardHeader className="p-4">
+                            <CardTitle className="text-base font-mono">
+                                q<sub>{v.qIndex}</sub> ({v.type === 'theta' ? `θ${v.linkIndex + 1}` : `d${v.linkIndex + 1}`})
+                            </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                <Label htmlFor={`q${v.qIndex}-min`}>Min</Label>
+                                <Input
+                                    id={`q${v.qIndex}-min`}
+                                    type="number"
+                                    value={workspaceLimits[v.qIndex]?.min ?? ''}
+                                    onChange={(e) => handleLimitChange(v.qIndex, 'min', e.target.value)}
+                                />
                                 </div>
-                                </CardContent>
-                            </Card>
-                            ))}
-                            {variableParams.length === 0 && (
-                                <div className="text-center text-muted-foreground py-10">
-                                    <p>{t('noVariableParameters')}</p>
+                                <div>
+                                <Label htmlFor={`q${v.qIndex}-max`}>Max</Label>
+                                <Input
+                                    id={`q${v.qIndex}-max`}
+                                    type="number"
+                                    value={workspaceLimits[v.qIndex]?.max ?? ''}
+                                    onChange={(e) => handleLimitChange(v.qIndex, 'max', e.target.value)}
+                                />
+                                </div>
+                            </div>
+                            </CardContent>
+                        </Card>
+                        ))}
+                        {variableParams.length === 0 && (
+                            <div className="text-center text-muted-foreground py-10">
+                                <p>{t('noVariableParameters')}</p>
 
-                                </div>
-                            )}
-                        </div>
-                    </ScrollArea>
-                </div>
-                <div className="p-6 border-t">
-                    <Button className="w-full" disabled>Generate Workspace</Button>
-                </div>
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
             </div>
         </aside>
         <div className="relative flex-1 bg-background overflow-hidden">

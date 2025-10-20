@@ -22,7 +22,11 @@ import { HeaderActions } from "@/components/header-actions";
 
 function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams, "id">, index: number, onUpdate: (field: keyof Omit<DHParams, "id">, value: number) => void }) {
     const { t } = useLanguage();
+    const { workspaceLimits, getQIndexForParam } = useDHParams();
+
     if (param.dIsVariable) {
+        const qIndex = getQIndexForParam(index, 'd');
+        const limits = qIndex ? workspaceLimits[qIndex] : { min: -5, max: 5 };
         return (
              <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -32,8 +36,8 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
                 <div className="flex items-center gap-2">
                     <Slider
                         id={`d-${index}`}
-                        min={-5}
-                        max={5}
+                        min={limits.min}
+                        max={limits.max}
                         step={0.1}
                         value={[param.d]}
                         onValueChange={([val]) => onUpdate('d', val)}
@@ -47,6 +51,8 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
         )
     }
     if (!param.thetaIsFixed) {
+        const qIndex = getQIndexForParam(index, 'theta');
+        const limits = qIndex ? workspaceLimits[qIndex] : { min: -180, max: 180 };
         return (
             <div className="space-y-4">
                  <div className="flex justify-between items-center">
@@ -56,8 +62,8 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
                 <div className="flex items-center gap-2">
                     <Slider
                         id={`theta-${index}`}
-                        min={-180}
-                        max={180}
+                        min={limits.min}
+                        max={limits.max}
                         step={1}
                         value={[param.theta]}
                         onValueChange={([val]) => onUpdate('theta', val)}
