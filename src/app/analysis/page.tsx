@@ -72,6 +72,8 @@ export default function AnalysisPage() {
     yaw: THREE.MathUtils.radToDeg(baseEuler.z),
   }
 
+  const finalAngles = eulerAngles.length > 0 ? eulerAngles[eulerAngles.length - 1] : null;
+
   return (
     <div className="flex h-dvh flex-col font-sans">
       <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
@@ -186,6 +188,14 @@ export default function AnalysisPage() {
                                     <TableCell>{angle.yaw.toFixed(2)}°</TableCell>
                                 </TableRow>
                             ))}
+                            {finalAngles && (
+                                <TableRow className="font-bold bg-muted/50">
+                                    <TableCell>{t('baseTool')}</TableCell>
+                                    <TableCell>{finalAngles.roll.toFixed(2)}°</TableCell>
+                                    <TableCell>{finalAngles.pitch.toFixed(2)}°</TableCell>
+                                    <TableCell>{finalAngles.yaw.toFixed(2)}°</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

@@ -54,6 +54,5 @@ export const en = {
   motionTypeRotational: 'Rotational',
 
   eulerAnglesTableTitle: 'Table 3 - Euler Angles',
+  baseTool: 'Base-Tool',
 };
-
-    

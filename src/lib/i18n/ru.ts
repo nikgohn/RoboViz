@@ -54,6 +54,5 @@ export const ru = {
   motionTypeRotational: 'Вращательное',
 
   eulerAnglesTableTitle: 'Таблица 3 - Углы Эйлера',
+  baseTool: 'Стойка-Схват',
 };
-
-    
