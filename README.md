@@ -4,7 +4,6 @@ RoboViz is a web-based educational tool for designing, visualizing, and analyzin
 
 This application is built with Next.js, React, Three.js for 3D rendering, and shadcn/ui for components.
 
- <!-- Replace with a real screenshot URL if available -->
 
 ## Features
 
