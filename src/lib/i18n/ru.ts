@@ -4,6 +4,7 @@ export const ru = {
   editor: 'Редактор',
   kinematics: 'Кинематика',
   analysis: 'Анализ',
+  matrices: 'Матрицы',
   showAxes: 'Показать оси',
   showCoordinates: 'Показать коорд.',
   reset: 'Сброс',
@@ -55,4 +56,9 @@ export const ru = {
 
   eulerAnglesTableTitle: 'Таблица 3 - Углы Эйлера',
   baseTool: 'Стойка-Схват',
+  
+  // Matrices Page
+  transformationMatrices: 'Матрицы преобразования',
+  transformationMatricesDescription: 'Матрица преобразования прямой кинематики для каждого звена.',
+  baseTransform: 'Преобразование основания',
 };

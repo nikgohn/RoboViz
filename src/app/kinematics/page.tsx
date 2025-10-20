@@ -102,6 +102,7 @@ export default function KinematicsPage() {
                 <TabsList>
                     <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
                     <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
+                    <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
@@ -190,5 +191,3 @@ export default function KinematicsPage() {
     </div>
   );
 }
-
-    

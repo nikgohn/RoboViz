@@ -4,6 +4,7 @@ export const en = {
   editor: 'Editor',
   kinematics: 'Kinematics',
   analysis: 'Analysis',
+  matrices: 'Matrices',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
   reset: 'Reset',
@@ -55,4 +56,9 @@ export const en = {
 
   eulerAnglesTableTitle: 'Table 3 - Euler Angles',
   baseTool: 'Base-Tool',
+
+  // Matrices Page
+  transformationMatrices: 'Transformation Matrices',
+  transformationMatricesDescription: 'Forward kinematics transformation matrix for each link.',
+  baseTransform: 'Base Transform',
 };
