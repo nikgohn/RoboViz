@@ -26,7 +26,7 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
 
     if (param.dIsVariable) {
         const qIndex = getQIndexForParam(index, 'd');
-        const limits = qIndex ? workspaceLimits[qIndex] : { min: -5, max: 5 };
+        const limits = qIndex && workspaceLimits[qIndex] ? workspaceLimits[qIndex] : { min: -5, max: 5 };
         return (
              <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -52,7 +52,7 @@ function KinematicsController({ param, index, onUpdate }: { param: Omit<DHParams
     }
     if (!param.thetaIsFixed) {
         const qIndex = getQIndexForParam(index, 'theta');
-        const limits = qIndex ? workspaceLimits[qIndex] : { min: -180, max: 180 };
+        const limits = qIndex && workspaceLimits[qIndex] ? workspaceLimits[qIndex] : { min: -180, max: 180 };
         return (
             <div className="space-y-4">
                  <div className="flex justify-between items-center">
