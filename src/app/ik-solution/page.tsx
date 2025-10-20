@@ -1,5 +1,6 @@
 
 "use client";
+import { useDHParams } from "@/context/dh-params-context";
 import { useLanguage } from "@/context/language-context";
 import { Logo } from "@/components/icons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,8 +15,16 @@ const Formula = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
+const SymbolicValue = ({ html }: { html: string }) => {
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
+
 export default function IKSolutionPage() {
   const { t } = useLanguage();
+  const { params, getQIndexForParam } = useDHParams();
+  
+  const activeJoints = params.map((p, i) => ({...p, index: i})).filter(p => !p.thetaIsFixed || p.dIsVariable);
 
   return (
     <div className="flex h-dvh flex-col font-sans">
@@ -66,41 +75,63 @@ export default function IKSolutionPage() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('ikRevoluteJoints')}</CardTitle>
-                    <CardDescription>{t('ikRevoluteJointsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p>
-                        Let <strong>J</strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position.
-                        Let <strong>axis</strong> be the axis of rotation for the joint.
-                    </p>
-                    <Formula>V_JE = (E - J).projectOnPlane(axis)</Formula>
-                    <Formula>V_JT = (T - J).projectOnPlane(axis)</Formula>
-                    <p>The angle Δθ is the signed angle between the vectors V_JE and V_JT.</p>
-                    <Formula>Δθ = angleTo(V_JE, V_JT)</Formula>
-                    <p>The new joint angle is then:</p>
-                    <Formula>θ_new = θ_current + Δθ</Formula>
-                </CardContent>
-            </Card>
+            {activeJoints.map(joint => {
+                if (!joint.thetaIsFixed) {
+                    const qIndex = getQIndexForParam(joint.index, 'theta');
+                    return (
+                        <Card key={`theta-${joint.index}`}>
+                            <CardHeader>
+                                <CardTitle>{t('ikRevoluteJoints')} - Joint {joint.index + 1} (Variable <SymbolicValue html={`q<sub>${qIndex}</sub> = θ<sub>${joint.index+1}</sub>`}/>)</CardTitle>
+                                <CardDescription>{t('ikRevoluteJointsDescription')}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p>
+                                    Let <strong>J<sub>{joint.index}</sub></strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position.
+                                    Let <strong>axis<sub>{joint.index}</sub></strong> be the axis of rotation for the joint.
+                                </p>
+                                <Formula>V_JE = (E - J<sub>{joint.index}</sub>).projectOnPlane(axis<sub>{joint.index}</sub>)</Formula>
+                                <Formula>V_JT = (T - J<sub>{joint.index}</sub>).projectOnPlane(axis<sub>{joint.index}</sub>)</Formula>
+                                <p>The angle Δθ is the signed angle between the vectors V_JE and V_JT.</p>
+                                <Formula>Δθ = angleTo(V_JE, V_JT)</Formula>
+                                <p>The new joint angle is then:</p>
+                                <Formula>θ<sub>{joint.index + 1}</sub>_new = θ<sub>{joint.index + 1}</sub>_current + Δθ</Formula>
+                            </CardContent>
+                        </Card>
+                    )
+                }
+                if (joint.dIsVariable) {
+                    const qIndex = getQIndexForParam(joint.index, 'd');
+                    return (
+                         <Card key={`d-${joint.index}`}>
+                            <CardHeader>
+                                <CardTitle>{t('ikPrismaticJoints')} - Joint {joint.index + 1} (Variable <SymbolicValue html={`q<sub>${qIndex}</sub> = d<sub>${joint.index+1}</sub>`}/>)</CardTitle>
+                                <CardDescription>{t('ikPrismaticJointsDescription')}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p>
+                                    Let <strong>J<sub>{joint.index}</sub></strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position.
+                                    Let <strong>axis<sub>{joint.index}</sub></strong> be the axis of translation for the joint.
+                                </p>
+                                <p>The change in distance Δd is the difference in the projection of the end-effector-to-joint and target-to-joint vectors onto the joint's axis.</p>
+                                <Formula>Δd = (T - J<sub>{joint.index}</sub>)·axis<sub>{joint.index}</sub> - (E - J<sub>{joint.index}</sub>)·axis<sub>{joint.index}</sub></Formula>
+                                 <p>The new joint distance is then:</p>
+                                <Formula>d<sub>{joint.index + 1}</sub>_new = d<sub>{joint.index + 1}</sub>_current + Δd</Formula>
+                            </CardContent>
+                        </Card>
+                    )
+                }
+                return null;
+            })}
+             {activeJoints.length === 0 && (
+                <Card>
+                    <CardContent className="pt-6">
+                        <p className="text-muted-foreground text-center">
+                            There are no active (variable) joints in the current mechanism. Go to the Editor to enable them.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('ikPrismaticJoints')}</CardTitle>
-                    <CardDescription>{t('ikPrismaticJointsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p>
-                        Let <strong>J</strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position.
-                        Let <strong>axis</strong> be the axis of translation for the joint.
-                    </p>
-                    <p>The change in distance Δd is the difference in the projection of the end-effector-to-joint and target-to-joint vectors onto the joint's axis.</p>
-                    <Formula>Δd = (T - J)·axis - (E - J)·axis</Formula>
-                     <p>The new joint distance is then:</p>
-                    <Formula>d_new = d_current + Δd</Formula>
-                </CardContent>
-            </Card>
         </div>
       </main>
     </div>
