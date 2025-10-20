@@ -66,9 +66,9 @@ export default function IKSolutionPage() {
                 <CardContent>
                     <h3 className="font-semibold mb-2">{t('ikIterationProcess')}</h3>
                     <ol className="list-decimal list-inside space-y-2">
-                        <li>{t('ikIterationProcessStep1')}</li>
-                        <li>{t('ikIterationProcessStep2')}</li>
-                        <li>{t('ikIterationProcessStep3')}</li>
+                        <li><SymbolicValue html={t('ikIterationProcessStep1')} /></li>
+                        <li><SymbolicValue html={t('ikIterationProcessStep2')} /></li>
+                        <li><SymbolicValue html={t('ikIterationProcessStep3')} /></li>
                         <li>{t('ikIterationProcessStep4')}</li>
                         <li>{t('ikIterationProcessStep5')}</li>
                     </ol>
@@ -81,19 +81,18 @@ export default function IKSolutionPage() {
                     return (
                         <Card key={`theta-${joint.index}`}>
                             <CardHeader>
-                                <CardTitle>{t('ikRevoluteJoints')} - Joint {joint.index + 1} (Variable <SymbolicValue html={`q<sub>${qIndex}</sub> = θ<sub>${joint.index+1}</sub>`}/>)</CardTitle>
+                                <CardTitle>{t('ikRevoluteJoints')} - {t('link')} {joint.index + 1} ({t('variable')} <SymbolicValue html={`q<sub>${qIndex}</sub> = θ<sub>${joint.index+1}</sub>`}/>)</CardTitle>
                                 <CardDescription>{t('ikRevoluteJointsDescription')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <p>
-                                    Let <strong>J<sub>{joint.index}</sub></strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position.
-                                    Let <strong>axis<sub>{joint.index}</sub></strong> be the axis of rotation for the joint.
+                                    <SymbolicValue html={t('ikRevoluteJointsExplanation', { index: joint.index.toString() })} />
                                 </p>
                                 <Formula>V_JE = (E - J<sub>{joint.index}</sub>).projectOnPlane(axis<sub>{joint.index}</sub>)</Formula>
                                 <Formula>V_JT = (T - J<sub>{joint.index}</sub>).projectOnPlane(axis<sub>{joint.index}</sub>)</Formula>
-                                <p>The angle Δθ is the signed angle between the vectors V_JE and V_JT.</p>
+                                <p>{t('ikRevoluteJointsAngle')}</p>
                                 <Formula>Δθ = angleTo(V_JE, V_JT)</Formula>
-                                <p>The new joint angle is then:</p>
+                                <p>{t('ikNewJointAngle')}</p>
                                 <Formula>θ<sub>{joint.index + 1}</sub>_new = θ<sub>{joint.index + 1}</sub>_current + Δθ</Formula>
                             </CardContent>
                         </Card>
@@ -104,17 +103,16 @@ export default function IKSolutionPage() {
                     return (
                          <Card key={`d-${joint.index}`}>
                             <CardHeader>
-                                <CardTitle>{t('ikPrismaticJoints')} - Joint {joint.index + 1} (Variable <SymbolicValue html={`q<sub>${qIndex}</sub> = d<sub>${joint.index+1}</sub>`}/>)</CardTitle>
+                                <CardTitle>{t('ikPrismaticJoints')} - {t('link')} {joint.index + 1} ({t('variable')} <SymbolicValue html={`q<sub>${qIndex}</sub> = d<sub>${joint.index+1}</sub>`}/>)</CardTitle>
                                 <CardDescription>{t('ikPrismaticJointsDescription')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <p>
-                                    Let <strong>J<sub>{joint.index}</sub></strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position.
-                                    Let <strong>axis<sub>{joint.index}</sub></strong> be the axis of translation for the joint.
+                                     <SymbolicValue html={t('ikPrismaticJointsExplanation', { index: joint.index.toString() })} />
                                 </p>
-                                <p>The change in distance Δd is the difference in the projection of the end-effector-to-joint and target-to-joint vectors onto the joint's axis.</p>
+                                <p>{t('ikPrismaticJointsDistance')}</p>
                                 <Formula>Δd = (T - J<sub>{joint.index}</sub>)·axis<sub>{joint.index}</sub> - (E - J<sub>{joint.index}</sub>)·axis<sub>{joint.index}</sub></Formula>
-                                 <p>The new joint distance is then:</p>
+                                 <p>{t('ikNewJointDistance')}</p>
                                 <Formula>d<sub>{joint.index + 1}</sub>_new = d<sub>{joint.index + 1}</sub>_current + Δd</Formula>
                             </CardContent>
                         </Card>

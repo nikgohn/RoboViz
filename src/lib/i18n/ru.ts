@@ -90,8 +90,14 @@ export const ru = {
   ikIterationProcessStep5: '5. Повторять фиксированное количество итераций или до тех пор, пока рабочий орган не окажется достаточно близко к цели.',
   ikRevoluteJoints: 'Вращательные суставы (θᵢ)',
   ikRevoluteJointsDescription: 'Для вращательного сустава мы вычисляем угол Δθ, чтобы повернуть рабочий орган к цели.',
+  ikRevoluteJointsExplanation: "Пусть <strong>J<sub>{index}</sub></strong> — положение текущего сустава, <strong>E</strong> — положение рабочего органа, а <strong>T</strong> — целевое положение. Пусть <strong>ось<sub>{index}</sub></strong> — ось вращения сустава.",
+  ikRevoluteJointsAngle: "Угол Δθ — это знаковый угол между векторами V_JE и V_JT.",
+  ikNewJointAngle: "Тогда новый угол сустава будет:",
   ikPrismaticJoints: 'Поступательные суставы (dᵢ)',
   ikPrismaticJointsDescription: 'Для поступательного сустава мы вычисляем расстояние Δd, чтобы переместить рабочий орган к цели вдоль оси сустава.',
+  ikPrismaticJointsExplanation: "Пусть <strong>J<sub>{index}</sub></strong> — положение текущего сустава, <strong>E</strong> — положение рабочего органа, а <strong>T</strong> — целевое положение. Пусть <strong>ось<sub>{index}</sub></strong> — ось перемещения сустава.",
+  ikPrismaticJointsDistance: "Изменение расстояния Δd — это разница в проекции векторов от рабочего органа до сустава и от цели до сустава на ось сустава.",
+  ikNewJointDistance: "Тогда новое расстояние сустава будет:",
   noActiveJoints: 'В текущем механизме нет активных (переменных) суставов. Перейдите в редактор, чтобы включить их.',
 
   // Workspace Page

@@ -90,8 +90,14 @@ export const en = {
   ikIterationProcessStep5: '5. Repeat for a fixed number of iterations or until the end-effector is close enough to the target.',
   ikRevoluteJoints: 'Revolute Joints (θᵢ)',
   ikRevoluteJointsDescription: 'For a revolute joint, we calculate the angle Δθ to rotate the end-effector towards the target.',
+  ikRevoluteJointsExplanation: "Let <strong>J<sub>{index}</sub></strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position. Let <strong>axis<sub>{index}</sub></strong> be the axis of rotation for the joint.",
+  ikRevoluteJointsAngle: "The angle Δθ is the signed angle between the vectors V_JE and V_JT.",
+  ikNewJointAngle: "The new joint angle is then:",
   ikPrismaticJoints: 'Prismatic Joints (dᵢ)',
   ikPrismaticJointsDescription: 'For a prismatic joint, we calculate the distance Δd to move the end-effector towards the target along the joint axis.',
+  ikPrismaticJointsExplanation: "Let <strong>J<sub>{index}</sub></strong> be the position of the current joint, <strong>E</strong> be the end-effector position, and <strong>T</strong> be the target position. Let <strong>axis<sub>{index}</sub></strong> be the axis of translation for the joint.",
+  ikPrismaticJointsDistance: "The change in distance Δd is the difference in the projection of the end-effector-to-joint and target-to-joint vectors onto the joint\'s axis.",
+  ikNewJointDistance: "The new joint distance is then:",
   noActiveJoints: 'There are no active (variable) joints in the current mechanism. Go to the Editor to enable them.',
 
   // Workspace Page
