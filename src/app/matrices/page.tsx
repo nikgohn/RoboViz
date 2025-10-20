@@ -11,35 +11,74 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/header-actions";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { DHParams } from "@/types";
 
-const SymbolicMatrixTable = ({ index }: { index: number }) => {
+type SymbolicMatrixProps = {
+    index: number;
+    param: Omit<DHParams, 'id'>;
+    variableIndex: number;
+};
+
+const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProps) => {
     const i = index;
-    const iMinus1 = index - 1;
+    const { a, alpha, theta, thetaIsFixed, d, dIsVariable } = param;
+    let varCount = variableIndex;
+    
+    const getTheta = () => {
+        if (thetaIsFixed) {
+            return `(${(theta * Math.PI / 180).toFixed(2)})`;
+        }
+        varCount++;
+        return `q_${varCount}`;
+    };
+
+    const getD = () => {
+        if (dIsVariable) {
+            varCount++;
+            return `q_${varCount}`;
+        }
+        return d;
+    };
+    
+    const getA = () => {
+        if (a !== 0) return `L_${i}`;
+        return a;
+    };
+    
+    const theta_val = getTheta();
+    const d_val = getD();
+    const a_val = getA();
+    
+    // Recalculate variable counter based on what was rendered
+    let finalVarCount = variableIndex;
+    if (!thetaIsFixed) finalVarCount++;
+    if (dIsVariable) finalVarCount++;
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle>A<sub>{iMinus1}→{i}</sub></CardTitle>
+                <CardTitle>A<sub>{i - 1}→{i}</sub></CardTitle>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableBody className="font-mono text-center">
                         <TableRow>
-                            <TableCell>cos(θ<sub>{i}</sub>)</TableCell>
-                            <TableCell>-sin(θ<sub>{i}</sub>)cos(α<sub>{i}</sub>)</TableCell>
-                            <TableCell>sin(θ<sub>{i}</sub>)sin(α<sub>{i}</sub>)</TableCell>
-                            <TableCell>a<sub>{i}</sub>cos(θ<sub>{i}</sub>)</TableCell>
+                            <TableCell>cos({theta_val})</TableCell>
+                            <TableCell>-sin({theta_val})cos({alpha}°)</TableCell>
+                            <TableCell>sin({theta_val})sin({alpha}°)</TableCell>
+                            <TableCell>{a_val === 0 ? 0 : `${a_val}cos(${theta_val})`}</TableCell>
                         </TableRow>
                          <TableRow>
-                            <TableCell>sin(θ<sub>{i}</sub>)</TableCell>
-                            <TableCell>cos(θ<sub>{i}</sub>)cos(α<sub>{i}</sub>)</TableCell>
-                            <TableCell>-cos(θ<sub>{i}</sub>)sin(α<sub>{i}</sub>)</TableCell>
-                            <TableCell>a<sub>{i}</sub>sin(θ<sub>{i}</sub>)</TableCell>
+                            <TableCell>sin({theta_val})</TableCell>
+                            <TableCell>cos({theta_val})cos({alpha}°)</TableCell>
+                            <TableCell>-cos({theta_val})sin({alpha}°)</TableCell>
+                            <TableCell>{a_val === 0 ? 0 : `${a_val}sin(${theta_val})`}</TableCell>
                         </TableRow>
                          <TableRow>
                             <TableCell>0</TableCell>
-                            <TableCell>sin(α<sub>{i}</sub>)</TableCell>
-                            <TableCell>cos(α<sub>{i}</sub>)</TableCell>
-                            <TableCell>d<sub>{i}</sub></TableCell>
+                            <TableCell>sin({alpha}°)</TableCell>
+                            <TableCell>cos({alpha}°)</TableCell>
+                            <TableCell>{d_val}</TableCell>
                         </TableRow>
                          <TableRow>
                             <TableCell>0</TableCell>
@@ -57,6 +96,7 @@ const SymbolicMatrixTable = ({ index }: { index: number }) => {
 export default function MatricesPage() {
   const { params } = useDHParams();
   const { t } = useLanguage();
+  let variableCounter = 0;
 
   return (
     <div className="flex h-dvh flex-col font-sans">
@@ -92,15 +132,24 @@ export default function MatricesPage() {
                     <p className="text-muted-foreground">{t('transformationMatricesDescription')}</p>
                 </div>
 
-                {params.map((_, index) => (
-                    <SymbolicMatrixTable 
-                        key={index}
-                        index={index + 1}
-                    />
-                ))}
+                {params.map((param, index) => {
+                    const currentVarIndex = variableCounter;
+                    if (!param.thetaIsFixed) variableCounter++;
+                    if (param.dIsVariable) variableCounter++;
+
+                    return (
+                        <SymbolicMatrixTable 
+                            key={index}
+                            index={index + 1}
+                            param={param}
+                            variableIndex={currentVarIndex}
+                        />
+                    );
+                })}
             </div>
         </ScrollArea>
       </main>
     </div>
   );
 }
+
