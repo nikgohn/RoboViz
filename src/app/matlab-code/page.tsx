@@ -21,9 +21,11 @@ export default function MatlabCodePage() {
   const { toast } = useToast();
 
   const generatedCode = useMemo(() => {
-    let code = "% MATLAB code for Peter Corke's Robotics Toolbox\n\n";
+    let code = "clear; clc;\n\n";
+    code += "% MATLAB code for Peter Corke's Robotics Toolbox\n\n";
     
     const linkVars: string[] = [];
+    const variableJoints = params.filter(p => !p.thetaIsFixed || p.dIsVariable).length;
 
     params.forEach((param, index) => {
         const { a, alpha, dOffset, thetaOffset, dIsVariable, thetaIsFixed } = param;
@@ -32,23 +34,43 @@ export default function MatlabCodePage() {
         
         const alphaRad = (alpha * Math.PI / 180).toFixed(4);
         
-        code += `${linkVar} = `;
+        code += `${linkVar} = Link(`;
+        
+        let linkParams: string[] = [];
+
+        linkParams.push(`'alpha', ${alphaRad}`);
+        linkParams.push(`'a', ${a}`);
+
         if (dIsVariable) {
-            // Prismatic joint: theta is fixed, d is variable via qlim
+            // Prismatic joint
             const qIndexD = getQIndexForParam(index, 'd');
-            const dLimits = qIndexD && workspaceLimits[qIndexD] ? `[${workspaceLimits[qIndexD].min} ${workspaceLimits[qIndexD].max}]` : '[]';
+            const dLimits = qIndexD && workspaceLimits[qIndexD] 
+              ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
+              : '[0 5]'; // Default qlim for prismatic
             const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
-            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'theta', ${thetaRad}, 'qlim', ${dLimits}); % Prismatic Link ${index + 1}\n`;
+            linkParams.push(`'theta', ${thetaRad}`);
+            linkParams.push(`'qlim', ${dLimits}`);
+            code += `${linkParams.join(', ')}); % Prismatic Link ${index + 1}, qlim can't be lower than 0\n`;
         } else if (!thetaIsFixed) {
-            // Revolute joint: d is fixed, theta is variable via qlim
+            // Revolute joint
             const qIndexTheta = getQIndexForParam(index, 'theta');
-            const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` : '[]';
+            const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
+              ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` 
+              : '[-pi pi]'; // Default qlim for revolute
             const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
-            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'offset', ${offsetRad}, 'qlim', ${thetaLimits}); % Revolute Link ${index + 1}\n`;
+            
+            linkParams.push(`'d', ${dOffset}`);
+            if (parseFloat(offsetRad) !== 0) {
+              linkParams.push(`'offset', ${offsetRad}`);
+            }
+            linkParams.push(`'qlim', ${thetaLimits}`);
+            code += `${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
         } else {
-             // Fixed joint: both d and theta are fixed
-            const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
-            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'theta', ${thetaRad}); % Fixed Link ${index + 1}\n`;
+             // Fixed joint
+            const thetaRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            linkParams.push(`'d', ${dOffset}`);
+            linkParams.push(`'theta', ${thetaRad}`);
+            code += `${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
         }
     });
     
@@ -56,15 +78,16 @@ export default function MatlabCodePage() {
     
     const { x, y, z } = baseOrientation;
     if (x !== 0 || y !== 0 || z !== 0) {
-        const xRad = (x * Math.PI/180).toFixed(4);
-        const yRad = (y * Math.PI/180).toFixed(4);
-        const zRad = (z * Math.PI/180).toFixed(4);
-        code += `robot.base = trotx(${xRad}) * troty(${yRad}) * trotz(${zRad});\n`;
+        let baseTransforms = [];
+        if (x !== 0) baseTransforms.push(`trotx(${x})`);
+        if (y !== 0) baseTransforms.push(`troty(${y})`);
+        if (z !== 0) baseTransforms.push(`trotz(${z})`);
+        code += `robot.base = ${baseTransforms.join(' * ')}; % for some reason uses angle as an input\n`;
     }
 
-    code += `\n% To plot the robot:\n`;
-    code += `q = zeros(1, ${params.filter(p => !p.thetaIsFixed || p.dIsVariable).length});\n`;
+    code += `\nq = zeros(1, ${variableJoints});\n`;
     code += `robot.plot(q);\n`;
+    code += `robot.teach; % adds interactive part in plot\n`;
 
     return code;
 
@@ -141,3 +164,5 @@ export default function MatlabCodePage() {
     </div>
   );
 }
+
+    
