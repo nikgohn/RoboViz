@@ -97,14 +97,13 @@ export default function MatlabCodePage() {
     if (baseTransforms.length > 0) {
       code += `robot.base = ${baseTransforms.join(' * ')};\n`;
     }
-
-    const variableJoints = params.filter(p => !p.thetaIsFixed || p.dIsVariable).length;
-    code += `\nq_initial = zeros(1, ${variableJoints});\n`;
+    
+    code += `\nnum_joints = robot.n;\n`
+    code += `q_initial = zeros(1, num_joints);\n`;
     code += `robot.plot(q_initial);\n`;
 
     if (useComplexSliders) {
-        code += `\nnum_joints = robot.n;\n\n`;
-        code += `slider_handles = gobjects(1, num_joints);\n`;
+        code += `\nslider_handles = gobjects(1, num_joints);\n`;
         code += `text_handles = gobjects(1, num_joints);\n\n`;
         code += `for i = 1:num_joints\n`;
         code += `    y_pos = 0.95 - (i * 0.1);\n\n`;
