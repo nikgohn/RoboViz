@@ -73,9 +73,9 @@ export default function MatlabCodePage() {
             code += `${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
         } else {
             // Fixed joint
-            const thetaRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            const offsetRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
             linkParams.push(`'d', ${dOffset}`);
-            linkParams.push(`'theta', ${thetaRad}`);
+            linkParams.push(`'offset', ${offsetRad}`);
             linkParams.push(`'qlim', [0 0]`);
             code += `${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
         }
@@ -84,18 +84,17 @@ export default function MatlabCodePage() {
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
     const { x, y, z } = baseOrientation;
-    let baseTransforms = [];
-    const angleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `${(val * Math.PI / 180).toFixed(4)}`;
     
     const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `pi*${(val/180).toFixed(4)}`;
 
+    let baseTransforms = [];
     if (useMatlabBase) {
       baseTransforms.push(`trotx(${matlabAngleWrapper(90)}) * troty(${matlabAngleWrapper(180)})`);
     }
 
-    if (x !== 0) baseTransforms.push(`trotx(${angleWrapper(x)})`);
-    if (y !== 0) baseTransforms.push(`troty(${angleWrapper(y)})`);
-    if (z !== 0) baseTransforms.push(`trotz(${angleWrapper(z)})`);
+    if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
+    if (y !== 0) baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
+    if (z !== 0) baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
 
     if (baseTransforms.length > 0) {
       code += `robot.base = ${baseTransforms.join(' * ')};\n`;
@@ -201,4 +200,5 @@ export default function MatlabCodePage() {
     </div>
   );
 }
+
 
