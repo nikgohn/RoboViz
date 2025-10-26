@@ -28,7 +28,7 @@ export default function MatlabCodePage() {
 
 
   const generatedCode = useMemo(() => {
-    let functionName = "launch_robot_gui";
+    const functionName = "launch_robot_gui";
     let code = useComplexSliders ? `function ${functionName}()\n` : "";
     code += "clear; clc;\n\n";
     
@@ -40,8 +40,6 @@ export default function MatlabCodePage() {
         linkVars.push(linkVar);
         
         const alphaRad = (alpha * Math.PI / 180).toFixed(4);
-        
-        code += `${linkVar} = Link(`;
         
         let linkParams: string[] = [];
 
@@ -56,7 +54,7 @@ export default function MatlabCodePage() {
             const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
             linkParams.push(`'theta', ${thetaRad}`);
             linkParams.push(`'qlim', ${dLimits}`);
-            code += `${linkParams.join(', ')}); % Prismatic Link ${index + 1}\n`;
+            code += `${linkVar} = Link(${linkParams.join(', ')}); % Prismatic Link ${index + 1}\n`;
         } else if (!thetaIsFixed) {
             const qIndexTheta = getQIndexForParam(index, 'theta');
             const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
@@ -70,14 +68,14 @@ export default function MatlabCodePage() {
               linkParams.push(`'offset', ${offsetRad}`);
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
-            code += `${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
+            code += `${linkVar} = Link(${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
         } else {
             // Fixed joint
-            const totalThetaRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
             linkParams.push(`'d', ${dOffset}`);
-            linkParams.push(`'offset', ${totalThetaRad}`);
+            linkParams.push(`'offset', ${offsetRad}`);
             linkParams.push(`'qlim', [0 0]`);
-            code += `${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
+            code += `${linkVar} = Link(${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
         }
     });
     
