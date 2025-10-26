@@ -24,15 +24,14 @@ export default function MatlabCodePage() {
   
   const [useMatlabBase, setUseMatlabBase] = useState(true);
   const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
+  const [useComplexSliders, setUseComplexSliders] = useState(false);
 
 
   const generatedCode = useMemo(() => {
     let code = "clear; clc;\n\n";
-    code += "% MATLAB code for Peter Corke's Robotics Toolbox\n\n";
     
     const linkVars: string[] = [];
-    const variableJoints = params.filter(p => !p.thetaIsFixed || p.dIsVariable).length;
-
+    
     params.forEach((param, index) => {
         const { a, alpha, dOffset, thetaOffset, dIsVariable, thetaIsFixed } = param;
         const linkVar = `L${index + 1}`;
@@ -48,24 +47,23 @@ export default function MatlabCodePage() {
         linkParams.push(`'a', ${a}`);
 
         if (dIsVariable) {
-            // Prismatic joint
             const qIndexD = getQIndexForParam(index, 'd');
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
               ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
-              : '[0 5]'; // Default qlim for prismatic
+              : '[0 5]';
             const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
             linkParams.push(`'theta', ${thetaRad}`);
             linkParams.push(`'qlim', ${dLimits}`);
             code += `${linkParams.join(', ')}); % Prismatic Link ${index + 1}, qlim can't be lower than 0\n`;
         } else if (!thetaIsFixed) {
-            // Revolute joint
             const qIndexTheta = getQIndexForParam(index, 'theta');
             const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
               ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` 
-              : '[-pi pi]'; // Default qlim for revolute
-            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
+              : '[-pi pi]';
             
             linkParams.push(`'d', ${dOffset}`);
+            
+            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
             if (parseFloat(offsetRad) !== 0) {
               linkParams.push(`'offset', ${offsetRad}`);
             }
@@ -73,9 +71,9 @@ export default function MatlabCodePage() {
             code += `${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
         } else {
             // Fixed joint
-            const offsetRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            const totalThetaRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
             linkParams.push(`'d', ${dOffset}`);
-            linkParams.push(`'offset', ${offsetRad}`);
+            linkParams.push(`'offset', ${totalThetaRad}`);
             linkParams.push(`'qlim', [0 0]`);
             code += `${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
         }
@@ -100,13 +98,48 @@ export default function MatlabCodePage() {
       code += `robot.base = ${baseTransforms.join(' * ')};\n`;
     }
 
-    code += `\nq = zeros(1, ${variableJoints});\n`;
-    code += `robot.plot(q);\n`;
-    code += `robot.teach; % adds interactive part in plot\n`;
+    const variableJoints = params.filter(p => !p.thetaIsFixed || p.dIsVariable).length;
+    code += `\nq_initial = zeros(1, ${variableJoints});\n`;
+    code += `robot.plot(q_initial);\n`;
+
+    if (useComplexSliders) {
+        code += `\nnum_joints = robot.n;\n\n`;
+        code += `slider_handles = gobjects(1, num_joints);\n`;
+        code += `text_handles = gobjects(1, num_joints);\n\n`;
+        code += `for i = 1:num_joints\n`;
+        code += `    y_pos = 0.95 - (i * 0.1);\n\n`;
+        code += `    uicontrol('Style', 'text', 'Units', 'normalized', ...\n`;
+        code += `              'Position', [0.02, y_pos, 0.05, 0.05], ...\n`;
+        code += `              'String', sprintf('q%d:', i), ...\n`;
+        code += `              'HorizontalAlignment', 'right');\n\n`;
+        code += `    slider_handles(i) = uicontrol('Style', 'slider', 'Units', 'normalized', ...\n`;
+        code += `                                  'Position', [0.08, y_pos, 0.2, 0.05], ...\n`;
+        code += `                                  'Min', robot.qlim(i, 1), ...\n`;
+        code += `                                  'Max', robot.qlim(i, 2), ...\n`;
+        code += `                                  'Value', q_initial(i), ...\n`;
+        code += `                                  'Callback', @update_robot_plot);\n\n`;
+        code += `    text_handles(i) = uicontrol('Style', 'text', 'Units', 'normalized', ...\n`;
+        code += `                                'Position', [0.29, y_pos, 0.08, 0.05], ...\n`;
+        code += `                                'String', sprintf('%.2f', q_initial(i)));\n`;
+        code += `end\n\n`;
+        code += `function update_robot_plot(~, ~)\n`;
+        code += `    q = zeros(1, num_joints);\n`;
+        code += `    for j = 1:num_joints\n`;
+        code += `        q(j) = get(slider_handles(j), 'Value');\n`;
+        code += `    end\n\n`;
+        code += `    robot.animate(q);\n\n`;
+        code += `    for j = 1:num_joints\n`;
+        code += `        set(text_handles(j), 'String', sprintf('%.2f', q(j)));\n`;
+        code += `    end\n\n`;
+        code += `    drawnow;\n`;
+        code += `end\n`;
+    } else {
+        code += `robot.teach; % adds interactive part in plot\n`;
+    }
 
     return code;
 
-  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, useMatlabBase, baseAnglesInDegrees]);
+  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, useMatlabBase, baseAnglesInDegrees, useComplexSliders]);
   
 
   const handleCopy = () => {
@@ -169,6 +202,13 @@ export default function MatlabCodePage() {
                         </div>
                         <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
                    </div>
+                   <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="complex-sliders">{t('matlabComplexSliders')}</Label>
+                             <p className="text-xs text-muted-foreground">{t('matlabComplexSlidersDescription')}</p>
+                        </div>
+                        <Switch id="complex-sliders" checked={useComplexSliders} onCheckedChange={setUseComplexSliders} />
+                   </div>
                 </CardContent>
             </Card>
              <Card>
@@ -201,4 +241,4 @@ export default function MatlabCodePage() {
   );
 }
 
-
+    

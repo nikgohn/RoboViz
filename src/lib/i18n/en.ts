@@ -115,4 +115,8 @@ export const en = {
   matlabUseDefaultBaseDescription: 'Pre-applies a rotation to match MATLAB\'s default plot orientation.',
   matlabBaseAnglesInDegrees: 'Base Angles in Degrees',
   matlabBaseAnglesInDegreesDescription: 'Use degrees for base rotation (e.g., 90) or radians (e.g., 90*pi/180).',
+  matlabComplexSliders: 'More complex sliders',
+  matlabComplexSlidersDescription: 'Replace robot.teach with a custom slider UI for each joint.',
 };
+
+    
