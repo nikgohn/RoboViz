@@ -84,11 +84,11 @@ export default function MatlabCodePage() {
     
     const { x, y, z } = baseOrientation;
     let baseTransforms = [];
+    const angleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `${(val * Math.PI / 180).toFixed(4)}`;
+
     if (useMatlabBase) {
-      baseTransforms.push('trotx(90) * troty(180)');
+      baseTransforms.push(`trotx(${angleWrapper(90)}) * troty(${angleWrapper(180)})`);
     }
-    
-    const angleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `${val}*pi/180`;
 
     if (x !== 0) baseTransforms.push(`trotx(${angleWrapper(x)})`);
     if (y !== 0) baseTransforms.push(`troty(${angleWrapper(y)})`);
