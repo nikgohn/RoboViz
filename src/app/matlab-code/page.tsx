@@ -28,7 +28,9 @@ export default function MatlabCodePage() {
 
 
   const generatedCode = useMemo(() => {
-    let code = "clear; clc;\n\n";
+    let functionName = "launch_robot_gui";
+    let code = useComplexSliders ? `function ${functionName}()\n` : "";
+    code += "clear; clc;\n\n";
     
     const linkVars: string[] = [];
     
@@ -54,7 +56,7 @@ export default function MatlabCodePage() {
             const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
             linkParams.push(`'theta', ${thetaRad}`);
             linkParams.push(`'qlim', ${dLimits}`);
-            code += `${linkParams.join(', ')}); % Prismatic Link ${index + 1}, qlim can't be lower than 0\n`;
+            code += `${linkParams.join(', ')}); % Prismatic Link ${index + 1}\n`;
         } else if (!thetaIsFixed) {
             const qIndexTheta = getQIndexForParam(index, 'theta');
             const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
@@ -131,6 +133,7 @@ export default function MatlabCodePage() {
         code += `        set(text_handles(j), 'String', sprintf('%.2f', q(j)));\n`;
         code += `    end\n\n`;
         code += `    drawnow;\n`;
+        code += `end\n`;
         code += `end\n`;
     } else {
         code += `robot.teach; % adds interactive part in plot\n`;
