@@ -77,13 +77,11 @@ export default function MatlabCodePage() {
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
     const { x, y, z } = baseOrientation;
-    if (x !== 0 || y !== 0 || z !== 0) {
-        let baseTransforms = [];
-        if (x !== 0) baseTransforms.push(`trotx(${x})`);
-        if (y !== 0) baseTransforms.push(`troty(${y})`);
-        if (z !== 0) baseTransforms.push(`trotz(${z})`);
-        code += `robot.base = ${baseTransforms.join(' * ')}; % for some reason uses angle as an input\n`;
-    }
+    let baseTransforms = ['trotx(90) * troty(180)']; // Default base for MATLAB plot
+    if (x !== 0) baseTransforms.push(`trotx(${x})`);
+    if (y !== 0) baseTransforms.push(`troty(${y})`);
+    if (z !== 0) baseTransforms.push(`trotz(${z})`);
+    code += `robot.base = ${baseTransforms.join(' * ')}; % for some reason uses angle as an input\n`;
 
     code += `\nq = zeros(1, ${variableJoints});\n`;
     code += `robot.plot(q);\n`;
