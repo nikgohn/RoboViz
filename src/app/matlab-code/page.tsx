@@ -30,25 +30,25 @@ export default function MatlabCodePage() {
         const linkVar = `L${index + 1}`;
         linkVars.push(linkVar);
         
-        const qIndexD = getQIndexForParam(index, 'd');
-        const dLimits = qIndexD && workspaceLimits[qIndexD] ? `[${workspaceLimits[qIndexD].min} ${workspaceLimits[qIndexD].max}]` : '[]';
-
-        const qIndexTheta = getQIndexForParam(index, 'theta');
-        const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` : '[]';
-
         const alphaRad = (alpha * Math.PI / 180).toFixed(4);
-        const thetaOffsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
-
+        
         code += `${linkVar} = `;
         if (dIsVariable) {
-            // Prismatic joint
-            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'theta', ${thetaOffsetRad}, 'qlim', ${dLimits}, 'P'); % Prismatic Link ${index + 1}\n`;
+            // Prismatic joint: theta is fixed, d is variable via qlim
+            const qIndexD = getQIndexForParam(index, 'd');
+            const dLimits = qIndexD && workspaceLimits[qIndexD] ? `[${workspaceLimits[qIndexD].min} ${workspaceLimits[qIndexD].max}]` : '[]';
+            const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
+            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'theta', ${thetaRad}, 'qlim', ${dLimits}); % Prismatic Link ${index + 1}\n`;
         } else if (!thetaIsFixed) {
-            // Revolute joint
-            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'offset', ${thetaOffsetRad}, 'qlim', ${thetaLimits}, 'R'); % Revolute Link ${index + 1}\n`;
+            // Revolute joint: d is fixed, theta is variable via qlim
+            const qIndexTheta = getQIndexForParam(index, 'theta');
+            const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` : '[]';
+            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
+            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'offset', ${offsetRad}, 'qlim', ${thetaLimits}); % Revolute Link ${index + 1}\n`;
         } else {
-             // Fixed joint
-            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'theta', ${thetaOffsetRad}, 'R'); % Fixed Link ${index + 1}\n`;
+             // Fixed joint: both d and theta are fixed
+            const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
+            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'theta', ${thetaRad}); % Fixed Link ${index + 1}\n`;
         }
     });
     
