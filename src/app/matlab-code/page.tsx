@@ -12,13 +12,19 @@ import { HeaderActions } from "@/components/header-actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Copy } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function MatlabCodePage() {
   const { params, baseOrientation, workspaceLimits, getQIndexForParam } = useDHParams();
   const { t } = useLanguage();
   const { toast } = useToast();
+  
+  const [useMatlabBase, setUseMatlabBase] = useState(true);
+  const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
+
 
   const generatedCode = useMemo(() => {
     let code = "clear; clc;\n\n";
@@ -77,11 +83,20 @@ export default function MatlabCodePage() {
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
     const { x, y, z } = baseOrientation;
-    let baseTransforms = ['trotx(90) * troty(180)']; // Default base for MATLAB plot
-    if (x !== 0) baseTransforms.push(`trotx(${x})`);
-    if (y !== 0) baseTransforms.push(`troty(${y})`);
-    if (z !== 0) baseTransforms.push(`trotz(${z})`);
-    code += `robot.base = ${baseTransforms.join(' * ')}; % for some reason uses angle as an input\n`;
+    let baseTransforms = [];
+    if (useMatlabBase) {
+      baseTransforms.push('trotx(90) * troty(180)');
+    }
+    
+    const angleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `${val}*pi/180`;
+
+    if (x !== 0) baseTransforms.push(`trotx(${angleWrapper(x)})`);
+    if (y !== 0) baseTransforms.push(`troty(${angleWrapper(y)})`);
+    if (z !== 0) baseTransforms.push(`trotz(${angleWrapper(z)})`);
+
+    if (baseTransforms.length > 0) {
+      code += `robot.base = ${baseTransforms.join(' * ')};\n`;
+    }
 
     code += `\nq = zeros(1, ${variableJoints});\n`;
     code += `robot.plot(q);\n`;
@@ -89,7 +104,7 @@ export default function MatlabCodePage() {
 
     return code;
 
-  }, [params, baseOrientation, workspaceLimits, getQIndexForParam]);
+  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, useMatlabBase, baseAnglesInDegrees]);
   
 
   const handleCopy = () => {
@@ -135,6 +150,27 @@ export default function MatlabCodePage() {
             </div>
              <Card>
                 <CardHeader>
+                    <CardTitle>{t('matlabCodeSettings')}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="use-matlab-base">{t('matlabUseDefaultBase')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('matlabUseDefaultBaseDescription')}</p>
+                        </div>
+                        <Switch id="use-matlab-base" checked={useMatlabBase} onCheckedChange={setUseMatlabBase} />
+                   </div>
+                   <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="use-degrees">{t('matlabBaseAnglesInDegrees')}</Label>
+                             <p className="text-xs text-muted-foreground">{t('matlabBaseAnglesInDegreesDescription')}</p>
+                        </div>
+                        <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
+                   </div>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
                     <CardTitle>{t('generatedCode')}</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -162,5 +198,3 @@ export default function MatlabCodePage() {
     </div>
   );
 }
-
-    

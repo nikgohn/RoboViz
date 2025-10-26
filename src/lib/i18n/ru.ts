@@ -110,4 +110,9 @@ export const ru = {
   matlabCodeDescription: 'Сгенерировать скрипт MATLAB для Peter Corke Robotics Toolbox на основе текущих параметров Д-Х.',
   generatedCode: 'Сгенерированный код',
   copyToClipboard: 'Копировать в буфер',
+  matlabCodeSettings: 'Настройки генерации кода',
+  matlabUseDefaultBase: 'Использовать базу MATLAB',
+  matlabUseDefaultBaseDescription: 'Применяет предварительное вращение для соответствия ориентации графика MATLAB по умолчанию.',
+  matlabBaseAnglesInDegrees: 'Углы базы в градусах',
+  matlabBaseAnglesInDegreesDescription: 'Использовать градусы для вращения базы (например, 90) или радианы (например, 90*pi/180).',
 };
