@@ -30,7 +30,6 @@ export default function MatlabCodePage() {
   const generatedCode = useMemo(() => {
     let code = "";
     
-    // Function wrapper for complex sliders
     if (useComplexSliders) {
         code += `function RoboViz()\n\n`;
     }
@@ -46,7 +45,7 @@ export default function MatlabCodePage() {
     const linkVars: string[] = [];
     
     params.forEach((param, index) => {
-        const { a, alpha, dOffset, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        const { a, alpha, dOffset, thetaOffset, dIsVariable, thetaIsFixed, theta } = param;
         const linkVar = `L${index + 1}`;
         linkVars.push(linkVar);
         
