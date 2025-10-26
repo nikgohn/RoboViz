@@ -72,10 +72,11 @@ export default function MatlabCodePage() {
             linkParams.push(`'qlim', ${thetaLimits}`);
             code += `${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
         } else {
-             // Fixed joint
+            // Fixed joint
             const thetaRad = ((param.theta + thetaOffset) * Math.PI / 180).toFixed(4);
             linkParams.push(`'d', ${dOffset}`);
             linkParams.push(`'theta', ${thetaRad}`);
+            linkParams.push(`'qlim', [0 0]`);
             code += `${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
         }
     });
