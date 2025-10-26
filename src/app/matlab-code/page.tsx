@@ -7,7 +7,7 @@ import { Logo } from "@/components/icons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeaderActions } from "@/components/header-actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,9 +86,11 @@ export default function MatlabCodePage() {
     const { x, y, z } = baseOrientation;
     let baseTransforms = [];
     const angleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `${(val * Math.PI / 180).toFixed(4)}`;
+    
+    const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `pi*${(val/180).toFixed(4)}`;
 
     if (useMatlabBase) {
-      baseTransforms.push(`trotx(${angleWrapper(90)}) * troty(${angleWrapper(180)})`);
+      baseTransforms.push(`trotx(${matlabAngleWrapper(90)}) * troty(${matlabAngleWrapper(180)})`);
     }
 
     if (x !== 0) baseTransforms.push(`trotx(${angleWrapper(x)})`);
@@ -199,3 +201,4 @@ export default function MatlabCodePage() {
     </div>
   );
 }
+
