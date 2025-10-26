@@ -130,8 +130,8 @@ export function HeaderActions() {
                     } else {
                         newParam.thetaIsFixed = true;
                         const combinedTheta = parseFloat(thetaStr.replace(/\*\(pi\/180\)/, '')) || 0;
-                        newParam.theta = combinedTheta;
-                        newParam.thetaOffset = 0;
+                        newParam.theta = 0;
+                        newParam.thetaOffset = combinedTheta;
                     }
                     
                     newParams.push(newParam);
@@ -174,5 +174,3 @@ export function HeaderActions() {
         </>
     );
 }
-
-    
