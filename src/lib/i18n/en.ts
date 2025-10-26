@@ -8,6 +8,7 @@ export const en = {
   workspace: 'Workspace',
   ik: 'IK',
   ikSolution: 'IK Solution',
+  matlabCode: 'MATLAB Code',
   showAxes: 'Show Axes',
   showCoordinates: 'Show Coords',
   reset: 'Reset',
@@ -103,4 +104,10 @@ export const en = {
   // Workspace Page
   workspaceVisualization: 'Workspace Limits',
   workspaceVisualizationDescription: "Define the minimum and maximum limits for each variable joint (qᵢ). These limits will constrain the robot's movement in the Kinematics and IK modes.",
+
+  // MATLAB Code Page
+  matlabCodeGeneration: 'MATLAB Code Generation',
+  matlabCodeDescription: 'Generate a MATLAB script for the Peter Corke Robotics Toolbox based on the current DH parameters.',
+  generatedCode: 'Generated Code',
+  copyToClipboard: 'Copy to Clipboard',
 };

@@ -24,7 +24,7 @@ export default function InverseKinematicsPage() {
 
   const [targetPosition, setTargetPosition] = useState({ x: 1, y: 1, z: 1 });
   const [targetOrientation, setTargetOrientation] = useState({ roll: 0, pitch: 0, yaw: 0 });
-  const [tolerance, setTolerance] = useState(0.1);
+  const [tolerance, setTolerance] = useState(0.01);
   const [isCalculating, setIsCalculating] = useState(false);
   const [currentPosition, setCurrentPosition] = useState<THREE.Vector3 | null>(null);
 
@@ -84,6 +84,7 @@ export default function InverseKinematicsPage() {
                     <TabsTrigger value="workspace" asChild><Link href="/workspace">{t('workspace')}</Link></TabsTrigger>
                     <TabsTrigger value="inverse-kinematics" asChild><Link href="/inverse-kinematics">{t('ik')}</Link></TabsTrigger>
                     <TabsTrigger value="ik-solution" asChild><Link href="/ik-solution">{t('ikSolution')}</Link></TabsTrigger>
+                    <TabsTrigger value="matlab" asChild><Link href="/matlab-code">{t('matlabCode')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
@@ -171,11 +172,11 @@ export default function InverseKinematicsPage() {
             
             <Card>
                 <CardHeader className="p-4">
-                    <CardTitle className="text-base">IK Solver Settings</CardTitle>
+                    <CardTitle className="text-base">{t('ikSolverSettings')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                      <div>
-                        <Label htmlFor="target-tolerance">Tolerance</Label>
+                        <Label htmlFor="target-tolerance">{t('ikTolerance')}</Label>
                         <Input id="target-tolerance" type="number" value={tolerance} step={0.01} onChange={e => setTolerance(parseFloat(e.target.value) || 0)} />
                     </div>
                 </CardContent>

@@ -8,6 +8,7 @@ export const ru = {
   workspace: 'Роб. зона',
   ik: 'ОЗК',
   ikSolution: 'Решение ОЗК',
+  matlabCode: 'Код MATLAB',
   showAxes: 'Показать оси',
   showCoordinates: 'Показать коорд.',
   reset: 'Сброс',
@@ -103,4 +104,10 @@ export const ru = {
   // Workspace Page
   workspaceVisualization: 'Ограничения рабочей зоны',
   workspaceVisualizationDescription: 'Определите минимальные и максимальные ограничения для каждого переменного сустава (qᵢ). Эти ограничения будут применяться к движениям робота в режимах Кинематики и ОЗК.',
+
+  // MATLAB Code Page
+  matlabCodeGeneration: 'Генерация кода MATLAB',
+  matlabCodeDescription: 'Сгенерировать скрипт MATLAB для Peter Corke Robotics Toolbox на основе текущих параметров Д-Х.',
+  generatedCode: 'Сгенерированный код',
+  copyToClipboard: 'Копировать в буфер',
 };

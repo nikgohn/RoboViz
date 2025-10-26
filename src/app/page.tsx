@@ -27,7 +27,7 @@ export default function EditorPage() {
         <h1 className="font-headline text-xl font-semibold tracking-tight text-foreground">
           RoboViz
         </h1>
-        <nav className="flex items-center space-x-4 ml-6">
+        <nav className="flex items-center space-x-4 ml-auto">
             <Tabs defaultValue="editor">
                 <TabsList>
                     <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
@@ -37,6 +37,7 @@ export default function EditorPage() {
                     <TabsTrigger value="workspace" asChild><Link href="/workspace">{t('workspace')}</Link></TabsTrigger>
                     <TabsTrigger value="inverse-kinematics" asChild><Link href="/inverse-kinematics">{t('ik')}</Link></TabsTrigger>
                     <TabsTrigger value="ik-solution" asChild><Link href="/ik-solution">{t('ikSolution')}</Link></TabsTrigger>
+                    <TabsTrigger value="matlab" asChild><Link href="/matlab-code">{t('matlabCode')}</Link></TabsTrigger>
                 </TabsList>
             </Tabs>
         </nav>
