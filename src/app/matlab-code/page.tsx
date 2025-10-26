@@ -22,10 +22,13 @@ export default function MatlabCodePage() {
 
   const generatedCode = useMemo(() => {
     let code = "% MATLAB code for Peter Corke's Robotics Toolbox\n\n";
-    code += `L = [];\n\n`;
+    
+    const linkVars: string[] = [];
 
     params.forEach((param, index) => {
         const { a, alpha, dOffset, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        const linkVar = `L${index + 1}`;
+        linkVars.push(linkVar);
         
         const qIndexD = getQIndexForParam(index, 'd');
         const dLimits = qIndexD && workspaceLimits[qIndexD] ? `[${workspaceLimits[qIndexD].min} ${workspaceLimits[qIndexD].max}]` : '[]';
@@ -36,19 +39,20 @@ export default function MatlabCodePage() {
         const alphaRad = (alpha * Math.PI / 180).toFixed(4);
         const thetaOffsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
 
+        code += `${linkVar} = `;
         if (dIsVariable) {
             // Prismatic joint
-            code += `L = [L, Link('alpha', ${alphaRad}, 'a', ${a}, 'theta', ${thetaOffsetRad}, 'qlim', ${dLimits}, 'P')]; % Link ${index + 1}\n`;
+            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'theta', ${thetaOffsetRad}, 'qlim', ${dLimits}, 'P'); % Prismatic Link ${index + 1}\n`;
         } else if (!thetaIsFixed) {
             // Revolute joint
-            code += `L = [L, Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'offset', ${thetaOffsetRad}, 'qlim', ${thetaLimits}, 'R')]; % Link ${index + 1}\n`;
+            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'offset', ${thetaOffsetRad}, 'qlim', ${thetaLimits}, 'R'); % Revolute Link ${index + 1}\n`;
         } else {
              // Fixed joint
-            code += `L = [L, Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'theta', ${thetaOffsetRad}, 'R')]; % Fixed Link ${index + 1}\n`;
+            code += `Link('alpha', ${alphaRad}, 'a', ${a}, 'd', ${dOffset}, 'theta', ${thetaOffsetRad}, 'R'); % Fixed Link ${index + 1}\n`;
         }
     });
     
-    code += `\nrobot = SerialLink(L, 'name', 'RoboViz');\n`;
+    code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
     const { x, y, z } = baseOrientation;
     if (x !== 0 || y !== 0 || z !== 0) {
