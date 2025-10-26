@@ -36,7 +36,7 @@ export const en = {
   // Kinematics Page
   kinematicsControl: 'Kinematics Control',
   kinematicsControlDescription: 'Adjust the variable joints of the robotic arm.',
-  endEffectorPosition: 'End-Effector Position',
+  endEffectorPosition: 'End-Effector Pose',
   noVariableParameters: 'No variable parameters defined. Go to the Editor to set `d` as variable or `theta` as not fixed.',
   offset: 'offset',
   rotation: 'rotation',
@@ -117,6 +117,14 @@ export const en = {
   matlabBaseAnglesInDegreesDescription: 'Use degrees for base rotation (e.g., 90) or radians (e.g., 90*pi/180).',
   matlabComplexSliders: 'More complex sliders',
   matlabComplexSlidersDescription: 'Replace robot.teach with a custom slider UI for each joint.',
+  matlabRobotControls: 'Robot Controls',
+  matlabJointControls: 'Joint Controls',
+  matlabPoseX: 'X:',
+  matlabPoseY: 'Y:',
+  matlabPoseZ: 'Z:',
+  matlabPoseRoll: 'Roll:',
+  matlabPosePitch: 'Pitch:',
+  matlabPoseYaw: 'Yaw:',
 };
 
     

@@ -117,6 +117,14 @@ export const ru = {
   matlabBaseAnglesInDegreesDescription: 'Использовать градусы для вращения базы (например, 90) или радианы (например, 90*pi/180).',
   matlabComplexSliders: 'Более сложные слайдеры',
   matlabComplexSlidersDescription: 'Заменить robot.teach на пользовательский интерфейс со слайдерами для каждого сустава.',
+  matlabRobotControls: 'Управление роботом',
+  matlabJointControls: 'Управление шарнирами',
+  matlabPoseX: 'X:',
+  matlabPoseY: 'Y:',
+  matlabPoseZ: 'Z:',
+  matlabPoseRoll: 'Крен:',
+  matlabPosePitch: 'Тангаж:',
+  matlabPoseYaw: 'Рыскание:',
 };
 
     

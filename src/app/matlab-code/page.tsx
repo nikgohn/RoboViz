@@ -28,9 +28,20 @@ export default function MatlabCodePage() {
 
 
   const generatedCode = useMemo(() => {
-    const functionName = "launch_robot_gui";
-    let code = useComplexSliders ? `function ${functionName}()\n` : "";
+    let code = "";
+    
+    // Function wrapper for complex sliders
+    if (useComplexSliders) {
+        code += `function RoboViz()\n\n`;
+    }
+
     code += "clear; clc;\n\n";
+
+    if (params.length === 0) {
+        code += "% No links defined.\n";
+        if (useComplexSliders) code += "end\n";
+        return code;
+    }
     
     const linkVars: string[] = [];
     
@@ -42,20 +53,18 @@ export default function MatlabCodePage() {
         const alphaRad = (alpha * Math.PI / 180).toFixed(4);
         
         let linkParams: string[] = [];
-
         linkParams.push(`'alpha', ${alphaRad}`);
         linkParams.push(`'a', ${a}`);
 
-        if (dIsVariable) {
+        if (dIsVariable) { // Prismatic
             const qIndexD = getQIndexForParam(index, 'd');
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
               ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
               : '[0 5]';
-            const thetaRad = (thetaOffset * Math.PI / 180).toFixed(4);
+            const thetaRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
             linkParams.push(`'theta', ${thetaRad}`);
             linkParams.push(`'qlim', ${dLimits}`);
-            code += `${linkVar} = Link(${linkParams.join(', ')}); % Prismatic Link ${index + 1}\n`;
-        } else if (!thetaIsFixed) {
+        } else if (!thetaIsFixed) { // Revolute
             const qIndexTheta = getQIndexForParam(index, 'theta');
             const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
               ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` 
@@ -68,15 +77,15 @@ export default function MatlabCodePage() {
               linkParams.push(`'offset', ${offsetRad}`);
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
-            code += `${linkVar} = Link(${linkParams.join(', ')}); % Revolute Link ${index + 1}\n`;
-        } else {
-            // Fixed joint
-            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
+        } else { // Fixed
             linkParams.push(`'d', ${dOffset}`);
-            linkParams.push(`'offset', ${offsetRad}`);
+            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
+            if (parseFloat(offsetRad) !== 0) {
+              linkParams.push(`'offset', ${offsetRad}`);
+            }
             linkParams.push(`'qlim', [0 0]`);
-            code += `${linkVar} = Link(${linkParams.join(', ')}); % Fixed Link ${index + 1}\n`;
         }
+        code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
     });
     
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
@@ -98,48 +107,84 @@ export default function MatlabCodePage() {
       code += `robot.base = ${baseTransforms.join(' * ')};\n`;
     }
     
-    code += `\nnum_joints = robot.n;\n`
-    code += `q_initial = zeros(1, num_joints);\n`;
-    code += `robot.plot(q_initial);\n`;
-
     if (useComplexSliders) {
-        code += `\nslider_handles = gobjects(1, num_joints);\n`;
-        code += `text_handles = gobjects(1, num_joints);\n\n`;
-        code += `for i = 1:num_joints\n`;
-        code += `    y_pos = 0.95 - (i * 0.1);\n\n`;
-        code += `    uicontrol('Style', 'text', 'Units', 'normalized', ...\n`;
-        code += `              'Position', [0.02, y_pos, 0.05, 0.05], ...\n`;
-        code += `              'String', sprintf('q%d:', i), ...\n`;
-        code += `              'HorizontalAlignment', 'right');\n\n`;
-        code += `    slider_handles(i) = uicontrol('Style', 'slider', 'Units', 'normalized', ...\n`;
-        code += `                                  'Position', [0.08, y_pos, 0.2, 0.05], ...\n`;
-        code += `                                  'Min', robot.qlim(i, 1), ...\n`;
-        code += `                                  'Max', robot.qlim(i, 2), ...\n`;
-        code += `                                  'Value', q_initial(i), ...\n`;
-        code += `                                  'Callback', @update_robot_plot);\n\n`;
-        code += `    text_handles(i) = uicontrol('Style', 'text', 'Units', 'normalized', ...\n`;
-        code += `                                'Position', [0.29, y_pos, 0.08, 0.05], ...\n`;
-        code += `                                'String', sprintf('%.2f', q_initial(i)));\n`;
-        code += `end\n\n`;
-        code += `function update_robot_plot(~, ~)\n`;
-        code += `    q = zeros(1, num_joints);\n`;
-        code += `    for j = 1:num_joints\n`;
-        code += `        q(j) = get(slider_handles(j), 'Value');\n`;
-        code += `    end\n\n`;
-        code += `    robot.animate(q);\n\n`;
-        code += `    for j = 1:num_joints\n`;
-        code += `        set(text_handles(j), 'String', sprintf('%.2f', q(j)));\n`;
-        code += `    end\n\n`;
-        code += `    drawnow;\n`;
-        code += `end\n`;
-        code += `end\n`;
+        code += `
+q_initial = zeros(1, robot.n);
+robot.plot(q_initial);
+hold on;
+
+movable_joint_indices = find(robot.qlim(:, 1) ~= robot.qlim(:, 2));
+num_movable_joints = length(movable_joint_indices);
+
+main_panel = uipanel('Title', '${t('matlabRobotControls')}', 'FontSize', 12, ...
+                     'BackgroundColor', 'white', ...
+                     'Position', [0.02 0.05 0.25 0.9]); 
+
+uicontrol(main_panel, 'Style', 'text', 'String', '${t('endEffectorPosition')}', 'Units', 'normalized', 'Position', [0.1, 0.92, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
+pose_text_handles.X = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseX')}', 'Units', 'normalized', 'Position', [0.1, 0.85, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles.Y = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseY')}', 'Units', 'normalized', 'Position', [0.1, 0.80, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles.Z = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseZ')}', 'Units', 'normalized', 'Position', [0.1, 0.75, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles.Roll = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseRoll')}', 'Units', 'normalized', 'Position', [0.1, 0.68, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles.Pitch = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPosePitch')}', 'Units', 'normalized', 'Position', [0.1, 0.63, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles.Yaw = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseYaw')}', 'Units', 'normalized', 'Position', [0.1, 0.58, 0.8, 0.05], 'HorizontalAlignment', 'left');
+
+uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabJointControls')}', 'Units', 'normalized', 'Position', [0.1, 0.50, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
+slider_handles = gobjects(1, num_movable_joints);
+text_handles = gobjects(1, num_movable_joints);
+
+for i = 1:num_movable_joints
+    joint_index = movable_joint_indices(i);
+    
+    y_pos = 0.48 - (i * 0.08);
+
+    uicontrol(main_panel, 'Style', 'text', 'String', sprintf('q%d:', i), ...
+              'Units', 'normalized', 'Position', [0.05, y_pos, 0.15, 0.05], ...
+              'HorizontalAlignment', 'right');
+    
+    slider_handles(i) = uicontrol(main_panel, 'Style', 'slider', 'Units', 'normalized', 'Position', [0.22, y_pos, 0.5, 0.05], 'Min', robot.qlim(joint_index, 1), 'Max', robot.qlim(joint_index, 2), 'Value', q_initial(joint_index), 'Callback', @update_robot_plot);
+    text_handles(i) = uicontrol(main_panel, 'Style', 'text', 'String', sprintf('%.2f', q_initial(joint_index)), 'Units', 'normalized', 'Position', [0.75, y_pos, 0.2, 0.05]);
+end
+
+update_pose_display(q_initial); 
+
+    function update_robot_plot(~, ~)
+        q_full = q_initial;
+        
+        for j = 1:num_movable_joints
+            slider_value = get(slider_handles(j), 'Value');
+            joint_index = movable_joint_indices(j);
+            q_full(joint_index) = slider_value;
+            set(text_handles(j), 'String', sprintf('%.2f', slider_value));
+        end
+        
+        robot.animate(q_full);
+        update_pose_display(q_full);
+        drawnow;
+    end
+
+    function update_pose_display(q)
+        T = robot.fkine(q);
+        pos = T.t; 
+        rpy_deg = tr2rpy(T, 'deg');
+        
+        set(pose_text_handles.X,     'String', sprintf('X:     %7.3f', pos(1)));
+        set(pose_text_handles.Y,     'String', sprintf('Y:     %7.3f', pos(2)));
+        set(pose_text_handles.Z,     'String', sprintf('Z:     %7.3f', pos(3)));
+        set(pose_text_handles.Roll,  'String', sprintf('Roll:  %7.2f°', rpy_deg(1)));
+        set(pose_text_handles.Pitch, 'String', sprintf('Pitch: %7.2f°', rpy_deg(2)));
+        set(pose_text_handles.Yaw,   'String', sprintf('Yaw:   %7.2f°', rpy_deg(3)));
+    end
+end
+`;
     } else {
+        code += `q_initial = zeros(1, robot.n);\n`;
+        code += `robot.plot(q_initial);\n`;
         code += `robot.teach; % adds interactive part in plot\n`;
     }
 
     return code;
 
-  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, useMatlabBase, baseAnglesInDegrees, useComplexSliders]);
+  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, useMatlabBase, baseAnglesInDegrees, useComplexSliders, t]);
   
 
   const handleCopy = () => {
