@@ -16,6 +16,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import type { DHParams } from '@/types';
+import { RotateCcw } from 'lucide-react';
+import { WorkspaceLimits } from '@/context/dh-params-context';
 
 type VariableParam = {
   qIndex: number;
@@ -44,6 +46,18 @@ export default function WorkspacePage() {
     });
     return vars;
   }, [params]);
+  
+  const resetLimits = () => {
+    const newLimits: WorkspaceLimits = {};
+    variableParams.forEach(v => {
+        if(v.type === 'theta') {
+          newLimits[v.qIndex] = { min: -180, max: 180 };
+        } else {
+          newLimits[v.qIndex] = { min: -5, max: 5 };
+        }
+    });
+    setWorkspaceLimits(newLimits);
+  }
 
   useEffect(() => {
     const newLimits = { ...workspaceLimits };
@@ -104,8 +118,16 @@ export default function WorkspacePage() {
         <aside className="flex flex-col border-r bg-card overflow-hidden">
             <div className="flex flex-col h-full">
                 <CardHeader className="p-6">
-                    <CardTitle className="font-headline">{t('workspaceVisualization')}</CardTitle>
-                    <CardDescription>{t('workspaceVisualizationDescription')}</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="font-headline">{t('workspaceVisualization')}</CardTitle>
+                            <CardDescription>{t('workspaceVisualizationDescription')}</CardDescription>
+                        </div>
+                         <Button variant="ghost" size="sm" onClick={resetLimits}>
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            {t('reset')}
+                        </Button>
+                    </div>
                 </CardHeader>
                 <ScrollArea className="flex-1">
                     <div className="space-y-4 pb-6 px-6">
