@@ -26,6 +26,23 @@ export default function MatlabCodePage() {
   const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
   const [useComplexSliders, setUseComplexSliders] = useState(false);
 
+  const degToSymbolicRad = (deg: number) => {
+    if (deg === 0) return '0';
+    if (deg === 90) return 'pi/2';
+    if (deg === -90) return '-pi/2';
+    if (deg === 180) return 'pi';
+    if (deg === -180) return '-pi';
+    const reduced = deg / 180;
+    if (reduced === 0.5) return 'pi/2';
+    if (reduced === -0.5) return '-pi/2';
+    if (reduced === 1) return 'pi';
+    if (reduced === -1) return '-pi';
+    if (reduced * 100 % 100 === 0) { // integer check
+        return `${reduced}*pi`;
+    }
+    return `pi*${reduced.toFixed(4)}`;
+  };
+
 
   const generatedCode = useMemo(() => {
     let code = "";
@@ -49,7 +66,7 @@ export default function MatlabCodePage() {
         const linkVar = `L${index + 1}`;
         linkVars.push(linkVar);
         
-        const alphaRad = (alpha * Math.PI / 180).toFixed(4);
+        const alphaRad = degToSymbolicRad(alpha);
         
         let linkParams: string[] = [];
         
@@ -58,7 +75,7 @@ export default function MatlabCodePage() {
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
               ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
               : '[0 5]';
-            const thetaRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            const thetaRad = degToSymbolicRad(theta + thetaOffset);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
@@ -68,44 +85,42 @@ export default function MatlabCodePage() {
         } else if (!thetaIsFixed) { // Revolute
             const qIndexTheta = getQIndexForParam(index, 'theta');
             const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
-              ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` 
+              ? `[${degToSymbolicRad(workspaceLimits[qIndexTheta].min)} ${degToSymbolicRad(workspaceLimits[qIndexTheta].max)}]` 
               : '[-pi pi]';
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'d', ${dOffset}`);
             
-            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
-            if (parseFloat(offsetRad) !== 0) {
+            const offsetRad = degToSymbolicRad(thetaOffset);
+            if (offsetRad !== '0') {
               linkParams.push(`'offset', ${offsetRad}`);
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
         } else { // Fixed
-             const offsetRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            const offsetRad = degToSymbolicRad(theta + thetaOffset);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'d', ${dOffset}`);
 
-            if (parseFloat(offsetRad) !== 0) {
+            if (offsetRad !== '0') {
                 linkParams.push(`'offset', ${offsetRad}`);
             }
             linkParams.push(`'qlim', [0 0]`);
         }
-        code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
+        code += `${linkVar} = Link({${linkParams.join(', ')}});\n`;
     });
     
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
     const { x, y, z } = baseOrientation;
     
-    const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : `pi*${(val/180).toFixed(4)}`;
+    const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
 
     let baseTransforms = [];
     if (useMatlabBase) {
-      const ninety = baseAnglesInDegrees ? '90' : 'pi/2';
-      const oneEighty = baseAnglesInDegrees ? '180' : 'pi';
-      baseTransforms.push(`trotx(${ninety}) * troty(${oneEighty})`);
+      baseTransforms.push(`trotx(${matlabAngleWrapper(90)}) * troty(${matlabAngleWrapper(180)})`);
     }
 
     if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
@@ -394,6 +409,8 @@ end
     </div>
   );
 }
+
+    
 
     
 
