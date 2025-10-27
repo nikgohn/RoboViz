@@ -33,11 +33,7 @@ export default function MatlabCodePage() {
     if (deg === 180) return 'pi';
     if (deg === -180) return '-pi';
     const reduced = deg / 180;
-    if (reduced === 0.5) return 'pi/2';
-    if (reduced === -0.5) return '-pi/2';
-    if (reduced === 1) return 'pi';
-    if (reduced === -1) return '-pi';
-    if (reduced * 100 % 100 === 0) { // integer check
+    if (Number.isInteger(reduced)) {
         return `${reduced}*pi`;
     }
     return `pi*${reduced.toFixed(4)}`;
@@ -109,7 +105,7 @@ export default function MatlabCodePage() {
             }
             linkParams.push(`'qlim', [0 0]`);
         }
-        code += `${linkVar} = Link({${linkParams.join(', ')}});\n`;
+        code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
     });
     
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
@@ -120,7 +116,7 @@ export default function MatlabCodePage() {
 
     let baseTransforms = [];
     if (useMatlabBase) {
-      baseTransforms.push(`trotx(${matlabAngleWrapper(90)}) * troty(${matlabAngleWrapper(180)})`);
+      baseTransforms.push(`trotx(90) * troty(180)`);
     }
 
     if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
@@ -409,11 +405,3 @@ end
     </div>
   );
 }
-
-    
-
-    
-
-    
-
-    
