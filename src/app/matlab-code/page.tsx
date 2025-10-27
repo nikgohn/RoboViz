@@ -116,7 +116,11 @@ export default function MatlabCodePage() {
 
     let baseTransforms = [];
     if (useMatlabBase) {
-      baseTransforms.push(`trotx(90) * troty(180)`);
+      if (baseAnglesInDegrees) {
+        baseTransforms.push(`trotx(90) * troty(180)`);
+      } else {
+        baseTransforms.push(`trotx(pi/2) * troty(pi)`);
+      }
     }
 
     if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
@@ -276,9 +280,9 @@ update_pose_display(q_initial);
         pos_global = T_global.t; 
         rpy_global_deg = get_intuitive_rpy(T_global);
         
-        set(pose_text_handles_global.X,     'String', sprintf('X:     %7.3f', pos_global(1)));
-        set(pose_text_handles_global.Y,     'String', sprintf('Y:     %7.3f', pos_global(2)));
-        set(pose_text_handles_global.Z,     'String', sprintf('Z:     %7.3f', pos_global(3)));
+        set(pose_text_handles_global.X,     'String', sprintf('${t('matlabPoseX')}     %7.3f', pos_global(1)));
+        set(pose_text_handles_global.Y,     'String', sprintf('${t('matlabPoseY')}     %7.3f', pos_global(2)));
+        set(pose_text_handles_global.Z,     'String', sprintf('${t('matlabPoseZ')}     %7.3f', pos_global(3)));
         set(pose_text_handles_global.Roll,  'String', sprintf('${t('matlabPoseRoll')}  %7.2f°', rpy_global_deg(1)));
         set(pose_text_handles_global.Pitch, 'String', sprintf('${t('matlabPosePitch')} %7.2f°', rpy_global_deg(2)));
         set(pose_text_handles_global.Yaw,   'String', sprintf('${t('matlabPoseYaw')}   %7.2f°', rpy_global_deg(3)));
@@ -287,9 +291,9 @@ update_pose_display(q_initial);
         pos_local = T_local.t;
         rpy_local_deg = get_intuitive_rpy(T_local);
 
-        set(pose_text_handles_local.X,     'String', sprintf('X:     %7.3f', pos_local(1)));
-        set(pose_text_handles_local.Y,     'String', sprintf('Y:     %7.3f', pos_local(2)));
-        set(pose_text_handles_local.Z,     'String', sprintf('Z:     %7.3f', pos_local(3)));
+        set(pose_text_handles_local.X,     'String', sprintf('${t('matlabPoseX')}     %7.3f', pos_local(1)));
+        set(pose_text_handles_local.Y,     'String', sprintf('${t('matlabPoseY')}     %7.3f', pos_local(2)));
+        set(pose_text_handles_local.Z,     'String', sprintf('${t('matlabPoseZ')}     %7.3f', pos_local(3)));
         set(pose_text_handles_local.Roll,  'String', sprintf('${t('matlabPoseRoll')}  %7.2f°', rpy_local_deg(1)));
         set(pose_text_handles_local.Pitch, 'String', sprintf('${t('matlabPosePitch')} %7.2f°', rpy_local_deg(2)));
         set(pose_text_handles_local.Yaw,   'String', sprintf('${t('matlabPoseYaw')}   %7.2f°', rpy_local_deg(3)));
@@ -405,3 +409,5 @@ end
     </div>
   );
 }
+
+    
