@@ -52,8 +52,7 @@ export default function MatlabCodePage() {
         const alphaRad = (alpha * Math.PI / 180).toFixed(4);
         
         let linkParams: string[] = [];
-        linkParams.push(`'alpha', ${alphaRad}`);
-        linkParams.push(`'a', ${a}`);
+        
 
         if (dIsVariable) { // Prismatic
             const qIndexD = getQIndexForParam(index, 'd');
@@ -61,6 +60,8 @@ export default function MatlabCodePage() {
               ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
               : '[0 5]';
             const thetaRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            linkParams.push(`'alpha', ${alphaRad}`);
+            linkParams.push(`'a', ${a}`);
             linkParams.push(`'theta', ${thetaRad}`);
             linkParams.push(`'qlim', ${dLimits}`);
         } else if (!thetaIsFixed) { // Revolute
@@ -69,6 +70,8 @@ export default function MatlabCodePage() {
               ? `[${(workspaceLimits[qIndexTheta].min * Math.PI/180).toFixed(4)} ${(workspaceLimits[qIndexTheta].max * Math.PI/180).toFixed(4)}]` 
               : '[-pi pi]';
             
+            linkParams.push(`'alpha', ${alphaRad}`);
+            linkParams.push(`'a', ${a}`);
             linkParams.push(`'d', ${dOffset}`);
             
             const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
@@ -77,6 +80,8 @@ export default function MatlabCodePage() {
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
         } else { // Fixed
+            linkParams.push(`'alpha', ${alphaRad}`);
+            linkParams.push(`'a', ${a}`);
             linkParams.push(`'d', ${dOffset}`);
             const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
             if (parseFloat(offsetRad) !== 0) {
@@ -87,7 +92,7 @@ export default function MatlabCodePage() {
         code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
     });
     
-    code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
+    code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz', 'scale', 0.1);\n`;
     
     const { x, y, z } = baseOrientation;
     
