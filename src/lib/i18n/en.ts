@@ -117,8 +117,10 @@ export const en = {
   matlabBaseAnglesInDegreesDescription: 'Use degrees for base rotation (e.g., 90) or radians (e.g., 90*pi/180).',
   matlabComplexSliders: 'More complex sliders',
   matlabComplexSlidersDescription: 'Replace robot.teach with a custom slider UI for each joint.',
-  matlabRobotControls: 'Robot Controls',
-  matlabJointControls: 'Joint Controls',
+  matlabRobotControlTitle: 'Robot Control',
+  matlabGlobalPoseTitle: 'Global Position (World Frame)',
+  matlabLocalPoseTitle: 'Local Position (Base Frame)',
+  matlabJointControlTitle: 'Joint Control',
   matlabPoseX: 'X:',
   matlabPoseY: 'Y:',
   matlabPoseZ: 'Z:',
@@ -126,5 +128,3 @@ export const en = {
   matlabPosePitch: 'Pitch:',
   matlabPoseYaw: 'Yaw:',
 };
-
-    

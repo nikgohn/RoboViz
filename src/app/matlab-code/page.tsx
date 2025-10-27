@@ -115,33 +115,44 @@ export default function MatlabCodePage() {
     if (useComplexSliders) {
         code += `
 q_initial = zeros(1, robot.n);
-robot.plot(q_initial, 'scale', 0.1);
+
+figure;
+robot.plot(q_initial, 'scale', 0.5);
 hold on;
+grid on;
+view(135, 30);
 
 movable_joint_indices = find(robot.qlim(:, 1) ~= robot.qlim(:, 2));
 num_movable_joints = length(movable_joint_indices);
 q_current = q_initial;
 
-main_panel = uipanel('Title', '${t('matlabRobotControls')}', 'FontSize', 12, ...
+main_panel = uipanel('Title', '${t('matlabRobotControlTitle')}', 'FontSize', 12, ...
                      'BackgroundColor', 'white', ...
-                     'Position', [0.02 0.05 0.25 0.9]); 
+                     'Position', [0.02 0.05 0.3 0.9]); 
 
-uicontrol(main_panel, 'Style', 'text', 'String', '${t('endEffectorPosition')}', 'Units', 'normalized', 'Position', [0.1, 0.92, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
-pose_text_handles.X = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseX')}', 'Units', 'normalized', 'Position', [0.1, 0.85, 0.8, 0.05], 'HorizontalAlignment', 'left');
-pose_text_handles.Y = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseY')}', 'Units', 'normalized', 'Position', [0.1, 0.80, 0.8, 0.05], 'HorizontalAlignment', 'left');
-pose_text_handles.Z = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseZ')}', 'Units', 'normalized', 'Position', [0.1, 0.75, 0.8, 0.05], 'HorizontalAlignment', 'left');
-pose_text_handles.Roll = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseRoll')}', 'Units', 'normalized', 'Position', [0.1, 0.68, 0.8, 0.05], 'HorizontalAlignment', 'left');
-pose_text_handles.Pitch = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPosePitch')}', 'Units', 'normalized', 'Position', [0.1, 0.63, 0.8, 0.05], 'HorizontalAlignment', 'left');
-pose_text_handles.Yaw = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseYaw')}', 'Units', 'normalized', 'Position', [0.1, 0.58, 0.8, 0.05], 'HorizontalAlignment', 'left');
+uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabGlobalPoseTitle')}', 'Units', 'normalized', 'Position', [0.1, 0.93, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
+pose_text_handles_global.X = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseX')}', 'Units', 'normalized', 'Position', [0.1, 0.88, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_global.Y = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseY')}', 'Units', 'normalized', 'Position', [0.1, 0.84, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_global.Z = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseZ')}', 'Units', 'normalized', 'Position', [0.1, 0.80, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_global.Roll = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseRoll')}', 'Units', 'normalized', 'Position', [0.1, 0.76, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_global.Pitch = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPosePitch')}', 'Units', 'normalized', 'Position', [0.1, 0.72, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_global.Yaw = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseYaw')}', 'Units', 'normalized', 'Position', [0.1, 0.68, 0.8, 0.05], 'HorizontalAlignment', 'left');
 
-uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabJointControls')}', 'Units', 'normalized', 'Position', [0.1, 0.50, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
+uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabLocalPoseTitle')}', 'Units', 'normalized', 'Position', [0.1, 0.62, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
+pose_text_handles_local.X = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseX')}', 'Units', 'normalized', 'Position', [0.1, 0.57, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_local.Y = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseY')}', 'Units', 'normalized', 'Position', [0.1, 0.53, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_local.Z = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseZ')}', 'Units', 'normalized', 'Position', [0.1, 0.49, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_local.Roll = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseRoll')}', 'Units', 'normalized', 'Position', [0.1, 0.45, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_local.Pitch = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPosePitch')}', 'Units', 'normalized', 'Position', [0.1, 0.41, 0.8, 0.05], 'HorizontalAlignment', 'left');
+pose_text_handles_local.Yaw = uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabPoseYaw')}', 'Units', 'normalized', 'Position', [0.1, 0.37, 0.8, 0.05], 'HorizontalAlignment', 'left');
+
+uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabJointControlTitle')}', 'Units', 'normalized', 'Position', [0.1, 0.30, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
 slider_handles = gobjects(1, num_movable_joints);
 text_handles = gobjects(1, num_movable_joints);
 
 for i = 1:num_movable_joints
     joint_index = movable_joint_indices(i);
-    
-    y_pos = 0.48 - (i * 0.08);
+    y_pos = 0.28 - (i * 0.06);
 
     uicontrol(main_panel, 'Style', 'text', 'String', sprintf('q%d:', i), ...
               'Units', 'normalized', 'Position', [0.05, y_pos, 0.15, 0.05], ...
@@ -163,7 +174,7 @@ update_pose_display(q_initial);
             set(text_handles(j), 'String', sprintf('%.2f', slider_value));
         end
         
-        time_vector = [0:0.05:0.5]';
+        time_vector = linspace(0, 0.2, 10);
         trajectory = jtraj(q_current, q_target, time_vector);
         
         robot.animate(trajectory);
@@ -174,16 +185,27 @@ update_pose_display(q_initial);
     end
 
     function update_pose_display(q)
-        T = robot.fkine(q);
-        pos = T.t; 
-        rpy_deg = tr2rpy(T, 'deg');
+        T_global = robot.fkine(q);
+        pos_global = T_global.t; 
+        rpy_global_deg = tr2rpy(T_global, 'deg');
         
-        set(pose_text_handles.X,     'String', sprintf('X:     %7.3f', pos(1)));
-        set(pose_text_handles.Y,     'String', sprintf('Y:     %7.3f', pos(2)));
-        set(pose_text_handles.Z,     'String', sprintf('Z:     %7.3f', pos(3)));
-        set(pose_text_handles.Roll,  'String', sprintf('Roll:  %7.2f°', rpy_deg(1)));
-        set(pose_text_handles.Pitch, 'String', sprintf('Pitch: %7.2f°', rpy_deg(2)));
-        set(pose_text_handles.Yaw,   'String', sprintf('Yaw:   %7.2f°', rpy_deg(3)));
+        set(pose_text_handles_global.X,     'String', sprintf('X:     %7.3f', pos_global(1)));
+        set(pose_text_handles_global.Y,     'String', sprintf('Y:     %7.3f', pos_global(2)));
+        set(pose_text_handles_global.Z,     'String', sprintf('Z:     %7.3f', pos_global(3)));
+        set(pose_text_handles_global.Roll,  'String', sprintf('Roll:  %7.2f°', rpy_global_deg(1)));
+        set(pose_text_handles_global.Pitch, 'String', sprintf('Pitch: %7.2f°', rpy_global_deg(2)));
+        set(pose_text_handles_global.Yaw,   'String', sprintf('Yaw:   %7.2f°', rpy_global_deg(3)));
+
+        T_local = inv(robot.base) * T_global;
+        pos_local = T_local.t;
+        rpy_local_deg = tr2rpy(T_local, 'deg');
+
+        set(pose_text_handles_local.X,     'String', sprintf('X:     %7.3f', pos_local(1)));
+        set(pose_text_handles_local.Y,     'String', sprintf('Y:     %7.3f', pos_local(2)));
+        set(pose_text_handles_local.Z,     'String', sprintf('Z:     %7.3f', pos_local(3)));
+        set(pose_text_handles_local.Roll,  'String', sprintf('Roll:  %7.2f°', rpy_local_deg(1)));
+        set(pose_text_handles_local.Pitch, 'String', sprintf('Pitch: %7.2f°', rpy_local_deg(2)));
+        set(pose_text_handles_local.Yaw,   'String', sprintf('Yaw:   %7.2f°', rpy_local_deg(3)));
     end
 end
 `;
@@ -296,5 +318,3 @@ end
     </div>
   );
 }
-
-    
