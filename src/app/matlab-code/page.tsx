@@ -56,12 +56,14 @@ export default function MatlabCodePage() {
         if (dIsVariable) { // Prismatic
             const qIndexD = getQIndexForParam(index, 'd');
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
-              ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
+              ? `[${workspaceLimits[qIndexD].min} ${workspaceLimits[qIndexD].max}]` 
               : '[0 5]';
             const thetaRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'theta', ${thetaRad}`);
+            linkParams.push(`'offset', ${dOffset}`);
             linkParams.push(`'qlim', ${dLimits}`);
         } else if (!thetaIsFixed) { // Revolute
             const qIndexTheta = getQIndexForParam(index, 'theta');
@@ -82,6 +84,7 @@ export default function MatlabCodePage() {
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'d', ${dOffset}`);
+
             const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
             if (parseFloat(offsetRad) !== 0) {
               linkParams.push(`'offset', ${offsetRad}`);
@@ -164,6 +167,25 @@ end
 
 update_pose_display(q_initial); 
 
+    function rpy_deg = get_intuitive_rpy(T)
+        epsilon = 1e-5;
+        R = T.R;
+        pitch_rad = asin(-R(3,1));
+
+        if abs(pitch_rad - pi/2) < epsilon
+            roll_rad  = 0;
+            yaw_rad   = atan2(R(1,2), R(2,2));
+        elseif abs(pitch_rad + pi/2) < epsilon
+            roll_rad  = 0;
+            yaw_rad   = atan2(-R(1,2), -R(2,2));
+        else
+            rpy_deg_vector = tr2rpy(T, 'deg');
+            rpy_deg = rpy_deg_vector;
+            return;
+        end
+        rpy_deg = rad2deg([roll_rad, pitch_rad, yaw_rad]);
+    end
+
     function update_robot_plot(~, ~)
         q_target = q_current;
         
@@ -187,7 +209,7 @@ update_pose_display(q_initial);
     function update_pose_display(q)
         T_global = robot.fkine(q);
         pos_global = T_global.t; 
-        rpy_global_deg = tr2rpy(T_global, 'deg');
+        rpy_global_deg = get_intuitive_rpy(T_global);
         
         set(pose_text_handles_global.X,     'String', sprintf('X:     %7.3f', pos_global(1)));
         set(pose_text_handles_global.Y,     'String', sprintf('Y:     %7.3f', pos_global(2)));
@@ -198,7 +220,7 @@ update_pose_display(q_initial);
 
         T_local = inv(robot.base) * T_global;
         pos_local = T_local.t;
-        rpy_local_deg = tr2rpy(T_local, 'deg');
+        rpy_local_deg = get_intuitive_rpy(T_local);
 
         set(pose_text_handles_local.X,     'String', sprintf('X:     %7.3f', pos_local(1)));
         set(pose_text_handles_local.Y,     'String', sprintf('Y:     %7.3f', pos_local(2)));
@@ -211,7 +233,7 @@ end
 `;
     } else {
         code += `q_initial = zeros(1, robot.n);\n`;
-        code += `robot.plot(q_initial, 'scale', 0.1);\n`;
+        code += `robot.plot(q_initial, 'scale', 0.5);\n`;
         code += `robot.teach; % adds interactive part in plot\n`;
     }
 
@@ -318,3 +340,5 @@ end
     </div>
   );
 }
+
+    
