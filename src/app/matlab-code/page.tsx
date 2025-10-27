@@ -45,7 +45,7 @@ export default function MatlabCodePage() {
     const linkVars: string[] = [];
     
     params.forEach((param, index) => {
-        const { a, alpha, dOffset, thetaOffset, dIsVariable, thetaIsFixed, theta } = param;
+        const { a, alpha, d, dOffset, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
         const linkVar = `L${index + 1}`;
         linkVars.push(linkVar);
         
@@ -53,7 +53,6 @@ export default function MatlabCodePage() {
         
         let linkParams: string[] = [];
         
-
         if (dIsVariable) { // Prismatic
             const qIndexD = getQIndexForParam(index, 'd');
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
@@ -92,7 +91,7 @@ export default function MatlabCodePage() {
         code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
     });
     
-    code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz', 'scale', 0.1);\n`;
+    code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
     const { x, y, z } = baseOrientation;
     
@@ -116,7 +115,7 @@ export default function MatlabCodePage() {
     if (useComplexSliders) {
         code += `
 q_initial = zeros(1, robot.n);
-robot.plot(q_initial);
+robot.plot(q_initial, 'scale', 0.1);
 hold on;
 
 movable_joint_indices = find(robot.qlim(:, 1) ~= robot.qlim(:, 2));
@@ -190,7 +189,7 @@ end
 `;
     } else {
         code += `q_initial = zeros(1, robot.n);\n`;
-        code += `robot.plot(q_initial);\n`;
+        code += `robot.plot(q_initial, 'scale', 0.1);\n`;
         code += `robot.teach; % adds interactive part in plot\n`;
     }
 
