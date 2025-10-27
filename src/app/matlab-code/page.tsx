@@ -56,7 +56,7 @@ export default function MatlabCodePage() {
         if (dIsVariable) { // Prismatic
             const qIndexD = getQIndexForParam(index, 'd');
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
-              ? `[${workspaceLimits[qIndexD].min} ${workspaceLimits[qIndexD].max}]` 
+              ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
               : '[0 5]';
             const thetaRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
             
@@ -81,13 +81,14 @@ export default function MatlabCodePage() {
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
         } else { // Fixed
+            const offsetRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
+            
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'d', ${dOffset}`);
 
-            const offsetRad = (thetaOffset * Math.PI / 180).toFixed(4);
             if (parseFloat(offsetRad) !== 0) {
-              linkParams.push(`'offset', ${offsetRad}`);
+                linkParams.push(`'offset', ${offsetRad}`);
             }
             linkParams.push(`'qlim', [0 0]`);
         }
@@ -340,5 +341,7 @@ end
     </div>
   );
 }
+
+    
 
     
