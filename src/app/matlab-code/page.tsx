@@ -81,7 +81,7 @@ export default function MatlabCodePage() {
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
         } else { // Fixed
-            const offsetRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
+             const offsetRad = ((theta + thetaOffset) * Math.PI / 180).toFixed(4);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
@@ -152,49 +152,102 @@ pose_text_handles_local.Yaw = uicontrol(main_panel, 'Style', 'text', 'String', '
 
 uicontrol(main_panel, 'Style', 'text', 'String', '${t('matlabJointControlTitle')}', 'Units', 'normalized', 'Position', [0.1, 0.30, 0.8, 0.05], 'FontSize', 10, 'FontWeight', 'bold');
 slider_handles = gobjects(1, num_movable_joints);
-text_handles = gobjects(1, num_movable_joints);
+edit_handles = gobjects(1, num_movable_joints);
 
 for i = 1:num_movable_joints
     joint_index = movable_joint_indices(i);
+    link = robot.links(joint_index);
     y_pos = 0.28 - (i * 0.06);
 
-    uicontrol(main_panel, 'Style', 'text', 'String', sprintf('q%d:', i), ...
-              'Units', 'normalized', 'Position', [0.05, y_pos, 0.15, 0.05], ...
-              'HorizontalAlignment', 'right');
-    
-    slider_handles(i) = uicontrol(main_panel, 'Style', 'slider', 'Units', 'normalized', 'Position', [0.22, y_pos, 0.5, 0.05], 'Min', robot.qlim(joint_index, 1), 'Max', robot.qlim(joint_index, 2), 'Value', q_initial(joint_index), 'Callback', @update_robot_plot);
-    text_handles(i) = uicontrol(main_panel, 'Style', 'text', 'String', sprintf('%.2f', q_initial(joint_index)), 'Units', 'normalized', 'Position', [0.75, y_pos, 0.2, 0.05]);
+    if link.isrevolute
+        min_deg = rad2deg(robot.qlim(joint_index, 1));
+        max_deg = rad2deg(robot.qlim(joint_index, 2));
+        val_deg = rad2deg(q_initial(joint_index));
+        
+        uicontrol(main_panel, 'Style', 'text', 'String', sprintf('q%d (°):', i), ...
+                  'Units', 'normalized', 'Position', [0.05, y_pos, 0.15, 0.05], ...
+                  'HorizontalAlignment', 'right');
+        
+        slider_handles(i) = uicontrol(main_panel, 'Style', 'slider', 'Units', 'normalized', ...
+                                'Position', [0.22, y_pos, 0.5, 0.05], ...
+                                'Min', min_deg, 'Max', max_deg, 'Value', val_deg, ...
+                                'Callback', @update_from_slider);
+        edit_handles(i) = uicontrol(main_panel, 'Style', 'edit', ...
+                                'String', sprintf('%.2f', val_deg), ...
+                                'Units', 'normalized', 'Position', [0.75, y_pos, 0.2, 0.05], ...
+                                'Callback', @update_from_edit);
+    else
+        uicontrol(main_panel, 'Style', 'text', 'String', sprintf('q%d (m):', i), ...
+                  'Units', 'normalized', 'Position', [0.05, y_pos, 0.15, 0.05], ...
+                  'HorizontalAlignment', 'right');
+        slider_handles(i) = uicontrol(main_panel, 'Style', 'slider', 'Units', 'normalized', ...
+                                'Position', [0.22, y_pos, 0.5, 0.05], ...
+                                'Min', robot.qlim(joint_index, 1), 'Max', robot.qlim(joint_index, 2), ...
+                                'Value', q_initial(joint_index), 'Callback', @update_from_slider);
+        edit_handles(i) = uicontrol(main_panel, 'Style', 'edit', ...
+                                'String', sprintf('%.2f', q_initial(joint_index)), ...
+                                'Units', 'normalized', 'Position', [0.75, y_pos, 0.2, 0.05], ...
+                                'Callback', @update_from_edit);
+    end
 end
 
 update_pose_display(q_initial); 
 
     function rpy_deg = get_intuitive_rpy(T)
-        epsilon = 1e-5;
-        R = T.R;
-        pitch_rad = asin(-R(3,1));
-
-        if abs(pitch_rad - pi/2) < epsilon
-            roll_rad  = 0;
-            yaw_rad   = atan2(R(1,2), R(2,2));
-        elseif abs(pitch_rad + pi/2) < epsilon
-            roll_rad  = 0;
-            yaw_rad   = atan2(-R(1,2), -R(2,2));
-        else
-            rpy_deg_vector = tr2rpy(T, 'deg');
-            rpy_deg = rpy_deg_vector;
-            return;
+        rpy_deg = tr2rpy(T, 'deg', 'zyx');
+    end
+    
+    function update_from_slider(src, ~)
+        slider_val = get(src, 'Value');
+        idx = find(slider_handles == src);
+        if ~isempty(idx)
+            set(edit_handles(idx), 'String', sprintf('%.2f', slider_val));
+            update_robot_state();
         end
-        rpy_deg = rad2deg([roll_rad, pitch_rad, yaw_rad]);
     end
 
-    function update_robot_plot(~, ~)
+    function update_from_edit(src, ~)
+        new_val_str = get(src, 'String');
+        new_val = str2double(new_val_str);
+        
+        idx = find(edit_handles == src);
+        if isempty(idx), return; end
+
+        slider = slider_handles(idx);
+        min_val = get(slider, 'Min');
+        max_val = get(slider, 'Max');
+        
+        if isnan(new_val)
+            current_val = get(slider, 'Value');
+            set(src, 'String', sprintf('%.2f', current_val));
+            return;
+        end
+        
+        if new_val < min_val
+            new_val = min_val;
+        elseif new_val > max_val
+            new_val = max_val;
+        end
+        
+        set(src, 'String', sprintf('%.2f', new_val));
+        set(slider, 'Value', new_val);
+        
+        update_robot_state();
+    end
+
+    function update_robot_state()
         q_target = q_current;
         
         for j = 1:num_movable_joints
             slider_value = get(slider_handles(j), 'Value');
             joint_index = movable_joint_indices(j);
-            q_target(joint_index) = slider_value;
-            set(text_handles(j), 'String', sprintf('%.2f', slider_value));
+            link = robot.links(joint_index);
+            
+            if link.isrevolute
+                q_target(joint_index) = deg2rad(slider_value);
+            else
+                q_target(joint_index) = slider_value;
+            end
         end
         
         time_vector = linspace(0, 0.2, 10);
@@ -215,9 +268,9 @@ update_pose_display(q_initial);
         set(pose_text_handles_global.X,     'String', sprintf('X:     %7.3f', pos_global(1)));
         set(pose_text_handles_global.Y,     'String', sprintf('Y:     %7.3f', pos_global(2)));
         set(pose_text_handles_global.Z,     'String', sprintf('Z:     %7.3f', pos_global(3)));
-        set(pose_text_handles_global.Roll,  'String', sprintf('Roll:  %7.2f°', rpy_global_deg(1)));
-        set(pose_text_handles_global.Pitch, 'String', sprintf('Pitch: %7.2f°', rpy_global_deg(2)));
-        set(pose_text_handles_global.Yaw,   'String', sprintf('Yaw:   %7.2f°', rpy_global_deg(3)));
+        set(pose_text_handles_global.Roll,  'String', sprintf('${t('matlabPoseRoll')}  %7.2f°', rpy_global_deg(1)));
+        set(pose_text_handles_global.Pitch, 'String', sprintf('${t('matlabPosePitch')} %7.2f°', rpy_global_deg(2)));
+        set(pose_text_handles_global.Yaw,   'String', sprintf('${t('matlabPoseYaw')}   %7.2f°', rpy_global_deg(3)));
 
         T_local = inv(robot.base) * T_global;
         pos_local = T_local.t;
@@ -226,12 +279,12 @@ update_pose_display(q_initial);
         set(pose_text_handles_local.X,     'String', sprintf('X:     %7.3f', pos_local(1)));
         set(pose_text_handles_local.Y,     'String', sprintf('Y:     %7.3f', pos_local(2)));
         set(pose_text_handles_local.Z,     'String', sprintf('Z:     %7.3f', pos_local(3)));
-        set(pose_text_handles_local.Roll,  'String', sprintf('Roll:  %7.2f°', rpy_local_deg(1)));
-        set(pose_text_handles_local.Pitch, 'String', sprintf('Pitch: %7.2f°', rpy_local_deg(2)));
-        set(pose_text_handles_local.Yaw,   'String', sprintf('Yaw:   %7.2f°', rpy_local_deg(3)));
+        set(pose_text_handles_local.Roll,  'String', sprintf('${t('matlabPoseRoll')}  %7.2f°', rpy_local_deg(1)));
+        set(pose_text_handles_local.Pitch, 'String', sprintf('${t('matlabPosePitch')} %7.2f°', rpy_local_deg(2)));
+        set(pose_text_handles_local.Yaw,   'String', sprintf('${t('matlabPoseYaw')}   %7.2f°', rpy_local_deg(3)));
     end
 end
-`;
+`
     } else {
         code += `q_initial = zeros(1, robot.n);\n`;
         code += `robot.plot(q_initial, 'scale', 0.5);\n`;
@@ -341,6 +394,8 @@ end
     </div>
   );
 }
+
+    
 
     
 
