@@ -95,7 +95,9 @@ export default function MatlabCodePage() {
 
     let baseTransforms = [];
     if (useMatlabBase) {
-      baseTransforms.push(`trotx(${matlabAngleWrapper(90)}) * troty(${matlabAngleWrapper(180)})`);
+      const ninety = baseAnglesInDegrees ? '90' : 'pi/2';
+      const oneEighty = baseAnglesInDegrees ? '180' : 'pi';
+      baseTransforms.push(`trotx(${ninety}) * troty(${oneEighty})`);
     }
 
     if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
@@ -114,6 +116,7 @@ hold on;
 
 movable_joint_indices = find(robot.qlim(:, 1) ~= robot.qlim(:, 2));
 num_movable_joints = length(movable_joint_indices);
+q_current = q_initial;
 
 main_panel = uipanel('Title', '${t('matlabRobotControls')}', 'FontSize', 12, ...
                      'BackgroundColor', 'white', ...
@@ -147,17 +150,22 @@ end
 update_pose_display(q_initial); 
 
     function update_robot_plot(~, ~)
-        q_full = q_initial;
+        q_target = q_current;
         
         for j = 1:num_movable_joints
             slider_value = get(slider_handles(j), 'Value');
             joint_index = movable_joint_indices(j);
-            q_full(joint_index) = slider_value;
+            q_target(joint_index) = slider_value;
             set(text_handles(j), 'String', sprintf('%.2f', slider_value));
         end
         
-        robot.animate(q_full);
-        update_pose_display(q_full);
+        time_vector = [0:0.05:0.5]';
+        trajectory = jtraj(q_current, q_target, time_vector);
+        
+        robot.animate(trajectory);
+        
+        q_current = q_target;
+        update_pose_display(q_current);
         drawnow;
     end
 
