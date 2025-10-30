@@ -402,6 +402,7 @@ end
 }
 
 export default function MatlabCodePage() {
+    const { t } = useLanguage();
     return (
         <div className="flex h-dvh flex-col font-sans">
           <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
