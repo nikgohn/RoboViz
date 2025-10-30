@@ -12,19 +12,29 @@ import { HeaderActions } from "@/components/header-actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
 import { Copy } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useSearchParams } from "next/navigation";
 
-export default function MatlabCodePage() {
+function MatlabCodePageContent() {
   const { params, baseOrientation, workspaceLimits, getQIndexForParam } = useDHParams();
   const { t } = useLanguage();
   const { toast } = useToast();
-  
+  const searchParams = useSearchParams();
+
   const [useMatlabBase, setUseMatlabBase] = useState(true);
   const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
   const [useComplexSliders, setUseComplexSliders] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    // Check for query parameter to unlock the feature
+    if (searchParams.get('access') === 'true') {
+      setIsAuthorized(true);
+    }
+  }, [searchParams]);
 
   const degToSymbolicRad = (deg: number) => {
     if (deg === 0) return '0';
@@ -32,10 +42,15 @@ export default function MatlabCodePage() {
     if (deg === -90) return '-pi/2';
     if (deg === 180) return 'pi';
     if (deg === -180) return '-pi';
-    const reduced = deg / 180;
-    if (Number.isInteger(reduced)) {
-        return `${reduced}*pi`;
+    // Find common fractions of pi
+    const tolerance = 1e-4;
+    const fractions = { '1/6': Math.PI/6, '1/4': Math.PI/4, '1/3': Math.PI/3, '2/3': 2*Math.PI/3, '3/4': 3*Math.PI/4, '5/6': 5*Math.PI/6 };
+    for (const [key, value] of Object.entries(fractions)) {
+      if (Math.abs(Math.abs(deg * Math.PI/180) - value) < tolerance) {
+        return (deg < 0 ? '-' : '') + `pi*${key}`;
+      }
     }
+    const reduced = deg / 180;
     return `pi*${reduced.toFixed(4)}`;
   };
 
@@ -103,7 +118,6 @@ export default function MatlabCodePage() {
             if (offsetRad !== '0') {
                 linkParams.push(`'offset', ${offsetRad}`);
             }
-            linkParams.push(`'qlim', [0 0]`);
         }
         code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
     });
@@ -321,93 +335,106 @@ end
   };
 
   return (
-    <div className="flex h-dvh flex-col font-sans">
-      <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
-        <Logo className="h-6 w-6 text-primary" />
-        <h1 className="font-headline text-xl font-semibold tracking-tight text-foreground">
-          RoboViz
-        </h1>
-        <nav className="ml-auto flex items-center space-x-4">
-            <Tabs defaultValue="matlab">
-                <TabsList>
-                    <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
-                    <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
-                    <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
-                    <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
-                    <TabsTrigger value="workspace" asChild><Link href="/workspace">{t('workspace')}</Link></TabsTrigger>
-                    <TabsTrigger value="inverse-kinematics" asChild><Link href="/inverse-kinematics">{t('ik')}</Link></TabsTrigger>
-                    <TabsTrigger value="ik-solution" asChild><Link href="/ik-solution">{t('ikSolution')}</Link></TabsTrigger>
-                    <TabsTrigger value="matlab" asChild><Link href="/matlab-code">{t('matlabCode')}</Link></TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <HeaderActions />
-          <LanguageSwitcher />
+    <>
+        <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight">{t('matlabCodeGeneration')}</h2>
+            <p className="text-muted-foreground">{t('matlabCodeDescription')}</p>
         </div>
-      </header>
-      <main className="flex-1 overflow-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">{t('matlabCodeGeneration')}</h2>
-                <p className="text-muted-foreground">{t('matlabCodeDescription')}</p>
-            </div>
-             <Card>
-                <CardHeader>
-                    <CardTitle>{t('matlabCodeSettings')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="flex items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="use-matlab-base">{t('matlabUseDefaultBase')}</Label>
-                            <p className="text-xs text-muted-foreground">{t('matlabUseDefaultBaseDescription')}</p>
-                        </div>
-                        <Switch id="use-matlab-base" checked={useMatlabBase} onCheckedChange={setUseMatlabBase} />
-                   </div>
-                   <div className="flex items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="use-degrees">{t('matlabBaseAnglesInDegrees')}</Label>
-                             <p className="text-xs text-muted-foreground">{t('matlabBaseAnglesInDegreesDescription')}</p>
-                        </div>
-                        <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
-                   </div>
-                   <div className="flex items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="complex-sliders">{t('matlabComplexSliders')}</Label>
-                             <p className="text-xs text-muted-foreground">{t('matlabComplexSlidersDescription')}</p>
-                        </div>
-                        <Switch id="complex-sliders" checked={useComplexSliders} onCheckedChange={setUseComplexSliders} />
-                   </div>
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle>{t('generatedCode')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="relative">
-                        <Textarea
-                            readOnly
-                            value={generatedCode}
-                            className="h-96 font-mono text-xs bg-muted"
-                            aria-label="Generated MATLAB code"
-                        />
-                         <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-2 right-2 h-8 w-8"
-                            onClick={handleCopy}
-                        >
-                            <Copy className="h-4 w-4" />
-                            <span className="sr-only">{t('copyToClipboard')}</span>
-                        </Button>
+         <Card>
+            <CardHeader>
+                <CardTitle>{t('matlabCodeSettings')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+               <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="use-matlab-base">{t('matlabUseDefaultBase')}</Label>
+                        <p className="text-xs text-muted-foreground">{t('matlabUseDefaultBaseDescription')}</p>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
-      </main>
-    </div>
+                    <Switch id="use-matlab-base" checked={useMatlabBase} onCheckedChange={setUseMatlabBase} />
+               </div>
+               <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="use-degrees">{t('matlabBaseAnglesInDegrees')}</Label>
+                         <p className="text-xs text-muted-foreground">{t('matlabBaseAnglesInDegreesDescription')}</p>
+                    </div>
+                    <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
+               </div>
+               <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="complex-sliders" className={!isAuthorized ? 'text-muted-foreground' : ''}>{t('matlabComplexSliders')}</Label>
+                         <p className="text-xs text-muted-foreground">{t('matlabComplexSlidersDescription')}</p>
+                    </div>
+                    <Switch 
+                      id="complex-sliders" 
+                      checked={useComplexSliders} 
+                      onCheckedChange={setUseComplexSliders} 
+                      disabled={!isAuthorized}
+                    />
+               </div>
+            </CardContent>
+        </Card>
+         <Card>
+            <CardHeader>
+                <CardTitle>{t('generatedCode')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="relative">
+                    <Textarea
+                        readOnly
+                        value={generatedCode}
+                        className="h-96 font-mono text-xs bg-muted"
+                        aria-label="Generated MATLAB code"
+                    />
+                     <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-8 w-8"
+                        onClick={handleCopy}
+                    >
+                        <Copy className="h-4 w-4" />
+                        <span className="sr-only">{t('copyToClipboard')}</span>
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+    </>
   );
 }
 
-    
+export default function MatlabCodePage() {
+    return (
+        <div className="flex h-dvh flex-col font-sans">
+          <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
+            <Logo className="h-6 w-6 text-primary" />
+            <h1 className="font-headline text-xl font-semibold tracking-tight text-foreground">
+              RoboViz
+            </h1>
+            <nav className="ml-auto flex items-center space-x-4">
+                <Tabs defaultValue="matlab">
+                    <TabsList>
+                        <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
+                        <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
+                        <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
+                        <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
+                        <TabsTrigger value="workspace" asChild><Link href="/workspace">{t('workspace')}</Link></TabsTrigger>
+                        <TabsTrigger value="inverse-kinematics" asChild><Link href="/inverse-kinematics">{t('ik')}</Link></TabsTrigger>
+                        <TabsTrigger value="ik-solution" asChild><Link href="/ik-solution">{t('ikSolution')}</Link></TabsTrigger>
+                        <TabsTrigger value="matlab" asChild><Link href="/matlab-code">{t('matlabCode')}</Link></TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </nav>
+            <div className="ml-auto flex items-center gap-2">
+              <HeaderActions />
+              <LanguageSwitcher />
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto p-6">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <Suspense fallback={<div>Loading...</div>}>
+                <MatlabCodePageContent />
+              </Suspense>
+            </div>
+          </main>
+        </div>
+      );
+}
