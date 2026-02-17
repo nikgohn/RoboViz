@@ -169,7 +169,7 @@ export function DhPanel({ params, setParams, showAxes, setShowAxes }: DhPanelPro
   }
   
   const resetOrientation = () => {
-    setBaseOrientation({ x: -90, y: 0, z: 0 });
+    setBaseOrientation({ x: 0, y: 0, z: 0 });
   }
 
   const handleExcelExport = () => {

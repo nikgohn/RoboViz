@@ -60,7 +60,7 @@ export default function AnalysisPage() {
   }, [] as {link: number, matrix: THREE.Matrix4, roll: number, pitch: number, yaw: number}[]);
 
   const baseEuler = new THREE.Euler(
-    THREE.MathUtils.degToRad(baseOrientation.x),
+    THREE.MathUtils.degToRad(baseOrientation.x - 90),
     THREE.MathUtils.degToRad(baseOrientation.y),
     THREE.MathUtils.degToRad(baseOrientation.z),
     'XYZ'

@@ -24,7 +24,6 @@ function MatlabCodePageContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
-  const [useMatlabBase, setUseMatlabBase] = useState(true);
   const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
   const [useComplexSliders, setUseComplexSliders] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -129,13 +128,9 @@ function MatlabCodePageContent() {
     const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
 
     let baseTransforms = [];
-    if (useMatlabBase) {
-      if (baseAnglesInDegrees) {
-        baseTransforms.push(`trotx(90) * troty(180)`);
-      } else {
-        baseTransforms.push(`trotx(pi/2) * troty(pi)`);
-      }
-    }
+    
+    // Always apply the -90deg X rotation to make Z-up the default.
+    baseTransforms.push(`trotx(${matlabAngleWrapper(-90)})`);
 
     if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
     if (y !== 0) baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
@@ -322,7 +317,7 @@ end
 
     return code;
 
-  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, useMatlabBase, baseAnglesInDegrees, useComplexSliders, t]);
+  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, baseAnglesInDegrees, useComplexSliders, t]);
   
 
   const handleCopy = () => {
@@ -345,13 +340,6 @@ end
                 <CardTitle>{t('matlabCodeSettings')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-               <div className="flex items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="use-matlab-base">{t('matlabUseDefaultBase')}</Label>
-                        <p className="text-xs text-muted-foreground">{t('matlabUseDefaultBaseDescription')}</p>
-                    </div>
-                    <Switch id="use-matlab-base" checked={useMatlabBase} onCheckedChange={setUseMatlabBase} />
-               </div>
                <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                         <Label htmlFor="use-degrees">{t('matlabBaseAnglesInDegrees')}</Label>

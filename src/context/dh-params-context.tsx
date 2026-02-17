@@ -44,7 +44,7 @@ export type BaseOrientation = {
 
 export type WorkspaceLimits = Record<number, {min: number, max: number}>;
 
-const initialOrientation: BaseOrientation = { x: -90, y: 0, z: 0 };
+const initialOrientation: BaseOrientation = { x: 0, y: 0, z: 0 };
 const initialWorkspaceLimits: WorkspaceLimits = {};
 
 const PARAMS_STORAGE_KEY = 'robot-dh-params';

@@ -112,8 +112,6 @@ export const en = {
   generatedCode: 'Generated Code',
   copyToClipboard: 'Copy to Clipboard',
   matlabCodeSettings: 'Code Generation Settings',
-  matlabUseDefaultBase: 'Use MATLAB Base',
-  matlabUseDefaultBaseDescription: 'Pre-applies a rotation to match MATLAB\'s default plot orientation.',
   matlabBaseAnglesInDegrees: 'Base Angles in Degrees',
   matlabBaseAnglesInDegreesDescription: 'Use degrees for base rotation (e.g., 90) or radians (e.g., 90*pi/180).',
   matlabComplexSliders: 'More complex sliders',

@@ -112,8 +112,6 @@ export const ru = {
   generatedCode: 'Сгенерированный код',
   copyToClipboard: 'Копировать в буфер',
   matlabCodeSettings: 'Настройки генерации кода',
-  matlabUseDefaultBase: 'Использовать базу MATLAB',
-  matlabUseDefaultBaseDescription: 'Применяет предварительное вращение для соответствия ориентации графика MATLAB по умолчанию.',
   matlabBaseAnglesInDegrees: 'Углы базы в градусах',
   matlabBaseAnglesInDegreesDescription: 'Использовать градусы для вращения базы (например, 90) или радианы (например, 90*pi/180).',
   matlabComplexSliders: 'Более сложные слайдеры',

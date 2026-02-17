@@ -220,9 +220,9 @@ export function RobotVisualizer({ params, showAxes, showLinkCoordinates = false,
       robotGroup.remove(robotGroup.children[0]);
     }
     
-    // Apply base orientation
+    // Apply base orientation. A -90deg rotation on X is pre-applied to make Z-up the default.
     const euler = new THREE.Euler(
-        THREE.MathUtils.degToRad(baseOrientation.x),
+        THREE.MathUtils.degToRad(baseOrientation.x - 90),
         THREE.MathUtils.degToRad(baseOrientation.y),
         THREE.MathUtils.degToRad(baseOrientation.z),
         'XYZ'

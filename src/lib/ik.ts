@@ -9,7 +9,7 @@ const getForwardKinematics = (dhParams: Omit<DHParams, "id">[], baseOrientation:
     const joints: { position: THREE.Vector3; axis: THREE.Vector3; }[] = [];
     const baseMatrix = new THREE.Matrix4().makeRotationFromEuler(
         new THREE.Euler(
-            THREE.MathUtils.degToRad(baseOrientation.x),
+            THREE.MathUtils.degToRad(baseOrientation.x - 90),
             THREE.MathUtils.degToRad(baseOrientation.y),
             THREE.MathUtils.degToRad(baseOrientation.z),
             'XYZ'
