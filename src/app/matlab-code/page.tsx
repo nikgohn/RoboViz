@@ -73,7 +73,7 @@ function MatlabCodePageContent() {
     const linkVars: string[] = [];
     
     params.forEach((param, index) => {
-        const { a, alpha, dOffset, dIsVariable, thetaIsFixed, thetaOffset } = param;
+        const { a, alpha, d, dOffset, dIsVariable, theta, thetaIsFixed, thetaOffset } = param;
         const linkVar = `L${index + 1}`;
         linkVars.push(linkVar);
         
@@ -83,25 +83,23 @@ function MatlabCodePageContent() {
         
         if (dIsVariable) { // Prismatic
             const qIndexD = getQIndexForParam(index, 'd');
-            const dLimits = qIndexD && workspaceLimits[qIndexD] 
-              ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
-              : '[0 5]';
+            const limits = qIndexD && workspaceLimits[qIndexD] ? workspaceLimits[qIndexD] : { min: -5, max: 5 };
+            const dLimits = `[${Math.max(0, limits.min)} ${limits.max}]`;
             const thetaRad = degToSymbolicRad(param.theta + thetaOffset);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'theta', ${thetaRad}`);
-            linkParams.push(`'offset', ${dOffset}`);
+            linkParams.push(`'offset', ${dOffset}`); // For Prismatic, this is the d value, but the toolbox uses 'offset'
             linkParams.push(`'qlim', ${dLimits}`);
         } else if (!thetaIsFixed) { // Revolute
             const qIndexTheta = getQIndexForParam(index, 'theta');
-            const thetaLimits = qIndexTheta && workspaceLimits[qIndexTheta] 
-              ? `[${degToSymbolicRad(workspaceLimits[qIndexTheta].min)} ${degToSymbolicRad(workspaceLimits[qIndexTheta].max)}]` 
-              : '[-pi pi]';
+            const limits = qIndexTheta && workspaceLimits[qIndexTheta] ? workspaceLimits[qIndexTheta] : { min: -180, max: 180 };
+            const thetaLimits = `[${degToSymbolicRad(limits.min)} ${degToSymbolicRad(limits.max)}]`;
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
-            linkParams.push(`'d', ${dOffset}`);
+            linkParams.push(`'d', ${dOffset + d}`); // For Revolute, d is fixed
             
             const offsetRad = degToSymbolicRad(thetaOffset);
             if (offsetRad !== '0') {
@@ -109,17 +107,17 @@ function MatlabCodePageContent() {
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
         } else { // Fixed
-            const offsetRad = degToSymbolicRad(param.theta + thetaOffset);
+            const thetaRad = degToSymbolicRad(theta + thetaOffset);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
-            linkParams.push(`'d', ${dOffset}`);
+            linkParams.push(`'d', ${dOffset + d}`);
 
-            if (offsetRad !== '0') {
-                linkParams.push(`'offset', ${offsetRad}`);
+            if (thetaRad !== '0') {
+                linkParams.push(`'theta', ${thetaRad}`);
             }
         }
-        code += `${linkVar} = Link(${linkParams.join(', ')});\n`;
+        code += `${linkVar} = Link([${linkParams.join(', ')}]);\n`;
     });
     
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
@@ -129,12 +127,20 @@ function MatlabCodePageContent() {
         const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
         let baseTransforms = [];
         
-        // Always apply the -90deg X rotation to make Z-up the default.
-        baseTransforms.push(`trotx(${matlabAngleWrapper(-90)})`);
-
-        if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
-        if (y !== 0) baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
-        if (z !== 0) baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
+        // To match the visualizer's XYZ Euler order, which is equivalent to
+        // extrinsic Rz then Ry then Rx, the MATLAB post-multiplication order is
+        // trotx(...) * troty(...) * trotz(...)
+        
+        // We always include the X rotation due to the Z-up correction
+        baseTransforms.push(`trotx(${matlabAngleWrapper(x - 90)})`);
+        
+        // Add Y and Z rotations if they are non-zero
+        if (y !== 0) {
+            baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
+        }
+        if (z !== 0) {
+            baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
+        }
 
         if (baseTransforms.length > 0) {
           code += `robot.base = ${baseTransforms.join(' * ')};\n`;
