@@ -90,7 +90,7 @@ function MatlabCodePageContent() {
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
             linkParams.push(`'theta', ${thetaRad}`);
-            linkParams.push(`'offset', ${dOffset}`); // For Prismatic, this is the d value, but the toolbox uses 'offset'
+            linkParams.push(`'offset', ${dOffset}`);
             linkParams.push(`'qlim', ${dLimits}`);
         } else if (!thetaIsFixed) { // Revolute
             const qIndexTheta = getQIndexForParam(index, 'theta');
@@ -99,7 +99,7 @@ function MatlabCodePageContent() {
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
-            linkParams.push(`'d', ${dOffset + d}`); // For Revolute, d is fixed
+            linkParams.push(`'d', ${dOffset + d}`);
             
             const offsetRad = degToSymbolicRad(thetaOffset);
             if (offsetRad !== '0') {
@@ -125,18 +125,16 @@ function MatlabCodePageContent() {
     if (useNonStandardBase) {
         const { x, y, z } = baseOrientation;
 
-        // Only generate a base transform if the user has set a non-zero orientation.
-        // If orientation is (0,0,0), no 'robot.base' line will be added.
         if (x !== 0 || y !== 0 || z !== 0) {
             const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
             let baseTransforms = [];
             
-            // To match the visualizer's XYZ Euler order, which is equivalent to
-            // extrinsic Rz then Ry then Rx, the MATLAB post-multiplication order is
-            // trotx(...) * troty(...) * trotz(...)
-            
-            // The -90 on X reorients the base to be Z-up, matching the visualizer.
-            baseTransforms.push(`trotx(${matlabAngleWrapper(x - 90)})`);
+            if (x !== 0) {
+                baseTransforms.push(`trotx(${matlabAngleWrapper(x - 90)})`);
+            } else {
+                // If x is 0, but y or z is not, we still need the base rotation to match the Z-up visualizer
+                baseTransforms.push(`trotx(${matlabAngleWrapper(-90)})`);
+            }
             
             if (y !== 0) {
                 baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
@@ -145,7 +143,9 @@ function MatlabCodePageContent() {
                 baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
             }
 
-            code += `robot.base = ${baseTransforms.join(' * ')};\n`;
+            if(baseTransforms.length > 0) {
+              code += `robot.base = ${baseTransforms.join(' * ')};\n`;
+            }
         }
     }
     
@@ -441,3 +441,4 @@ export default function MatlabCodePage() {
         </div>
       );
 }
+
