@@ -5,7 +5,7 @@ export const ru = {
   kinematics: 'Кинематика',
   analysis: 'Анализ',
   matrices: 'Матрицы',
-  workspace: 'Роб. зона',
+  workspace: 'Ограничения',
   ik: 'ОЗК',
   ikSolution: 'Решение ОЗК',
   matlabCode: 'Код MATLAB',
@@ -14,7 +14,7 @@ export const ru = {
   reset: 'Сброс',
   calculate: 'Рассчитать',
   calculating: 'Вычисление...',
-  forwardKinematics: 'Прямая',
+  forwardKinematics: 'Управление',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',
@@ -36,7 +36,7 @@ export const ru = {
 
   // Kinematics Page
   kinematicsControl: 'Управление кинематикой',
-  kinematicsControlDescription: 'Настройте переменные шарниры робота-манипулятора.',
+  kinematicsControlDescription: 'Проверьте движения и выставите (сбросьте) ограничения движений.',
   endEffectorPosition: 'Положение рабочего органа',
   noVariableParameters: 'Переменные параметры не определены. Перейдите в редактор, чтобы установить `d` как переменную или `theta` как нефиксированную.',
   offset: 'смещение',
@@ -117,7 +117,7 @@ export const ru = {
   matlabUseNonStandardBase: 'Использовать нестандартное основание',
   matlabUseNonStandardBaseDescription: 'Применить пользовательскую ориентацию основания со страницы редактора. Если отключено, основание будет в начале мировых координат.',
   matlabComplexSliders: 'Более сложные слайдеры',
-  matlabComplexSlidersDescription: 'Заменить robot.teach на пользовательский интерфейс со слайдерами для каждого сустава.',
+  matlabComplexSlidersDescription: 'Заменить robot.teach на пользовательский интерфейс со слайдерами для каждого сустава (?access=true). \r\nНе рекомендуется!',
   matlabRobotControlTitle: 'Управление роботом',
   matlabGlobalPoseTitle: 'Глобальное положение (Мировая система координат)',
   matlabLocalPoseTitle: 'Локальное положение (Система координат основания)',

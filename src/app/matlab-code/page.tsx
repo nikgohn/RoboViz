@@ -24,7 +24,7 @@ function MatlabCodePageContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
-  const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
+  const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(false);
   const [useComplexSliders, setUseComplexSliders] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [useNonStandardBase, setUseNonStandardBase] = useState(false);
@@ -130,12 +130,8 @@ function MatlabCodePageContent() {
             let baseTransforms = [];
             
             if (x !== 0) {
-                baseTransforms.push(`trotx(${matlabAngleWrapper(x - 90)})`);
-            } else {
-                // If x is 0, but y or z is not, we still need the base rotation to match the Z-up visualizer
-                baseTransforms.push(`trotx(${matlabAngleWrapper(-90)})`);
-            }
-            
+                baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
+            }            
             if (y !== 0) {
                 baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
             }
@@ -353,17 +349,17 @@ end
             <CardContent className="space-y-4">
                <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
-                        <Label htmlFor="use-degrees">{pageT('matlabBaseAnglesInDegrees')}</Label>
-                         <p className="text-xs text-muted-foreground">{pageT('matlabBaseAnglesInDegreesDescription')}</p>
-                    </div>
-                    <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
-               </div>
-               <div className="flex items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
                         <Label htmlFor="use-non-standard-base">{pageT('matlabUseNonStandardBase')}</Label>
                          <p className="text-xs text-muted-foreground">{pageT('matlabUseNonStandardBaseDescription')}</p>
                     </div>
                     <Switch id="use-non-standard-base" checked={useNonStandardBase} onCheckedChange={setUseNonStandardBase} />
+               </div>
+               <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="use-degrees">{pageT('matlabBaseAnglesInDegrees')}</Label>
+                         <p className="text-xs text-muted-foreground">{pageT('matlabBaseAnglesInDegreesDescription')}</p>
+                    </div>
+                    <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
                </div>
                <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">

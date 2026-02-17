@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { translations, Language } from '@/lib/i18n';
 
 type TranslationFunction = (
-  key: keyof (typeof translations)['en'],
+  key: keyof (typeof translations)['ru'],
   vars?: Record<string, string>
 ) => string;
 
@@ -20,7 +20,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const LOCAL_STORAGE_KEY = 'robot-language';
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('ru');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       if (storedLanguage && translations[storedLanguage]) {
         setLanguage(storedLanguage);
       } else {
-        setLanguage('en');
+        setLanguage('ru');
       }
     } catch (error) {
       console.error("Failed to parse language from localStorage", error);
