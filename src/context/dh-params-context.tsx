@@ -44,7 +44,7 @@ export type BaseOrientation = {
 
 export type WorkspaceLimits = Record<number, {min: number, max: number}>;
 
-const initialOrientation: BaseOrientation = { x: 0, y: 0, z: 0 };
+const initialOrientation: BaseOrientation = { x: -90, y: 0, z: 0 };
 const initialWorkspaceLimits: WorkspaceLimits = {};
 
 const PARAMS_STORAGE_KEY = 'robot-dh-params';
@@ -83,6 +83,8 @@ export const DHParamsProvider = ({ children }: { children: ReactNode }) => {
       const storedOrientation = localStorage.getItem(ORIENTATION_STORAGE_KEY);
       if (storedOrientation) {
         setBaseOrientation(JSON.parse(storedOrientation));
+      } else {
+        setBaseOrientation(initialOrientation);
       }
       
       const storedLimits = localStorage.getItem(WORKSPACE_LIMITS_STORAGE_KEY);
