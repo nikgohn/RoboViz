@@ -124,26 +124,28 @@ function MatlabCodePageContent() {
     
     if (useNonStandardBase) {
         const { x, y, z } = baseOrientation;
-        const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
-        let baseTransforms = [];
-        
-        // To match the visualizer's XYZ Euler order, which is equivalent to
-        // extrinsic Rz then Ry then Rx, the MATLAB post-multiplication order is
-        // trotx(...) * troty(...) * trotz(...)
-        
-        // We always include the X rotation due to the Z-up correction
-        baseTransforms.push(`trotx(${matlabAngleWrapper(x - 90)})`);
-        
-        // Add Y and Z rotations if they are non-zero
-        if (y !== 0) {
-            baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
-        }
-        if (z !== 0) {
-            baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
-        }
 
-        if (baseTransforms.length > 0) {
-          code += `robot.base = ${baseTransforms.join(' * ')};\n`;
+        // Only generate a base transform if the user has set a non-zero orientation.
+        // If orientation is (0,0,0), no 'robot.base' line will be added.
+        if (x !== 0 || y !== 0 || z !== 0) {
+            const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
+            let baseTransforms = [];
+            
+            // To match the visualizer's XYZ Euler order, which is equivalent to
+            // extrinsic Rz then Ry then Rx, the MATLAB post-multiplication order is
+            // trotx(...) * troty(...) * trotz(...)
+            
+            // The -90 on X reorients the base to be Z-up, matching the visualizer.
+            baseTransforms.push(`trotx(${matlabAngleWrapper(x - 90)})`);
+            
+            if (y !== 0) {
+                baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
+            }
+            if (z !== 0) {
+                baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
+            }
+
+            code += `robot.base = ${baseTransforms.join(' * ')};\n`;
         }
     }
     
