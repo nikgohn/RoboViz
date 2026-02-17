@@ -9,9 +9,119 @@ import Link from "next/link";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { HeaderActions } from "@/components/header-actions";
 import { createDHMatrix } from '@/lib/dh';
+
+type SymbolicMatrixProps = {
+    index: number;
+    param: Omit<import("@/types").DHParams, 'id'>;
+    variableIndex: number;
+};
+
+const SymbolicValue = ({ html }: { html: string }) => {
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
+const SymbolicMatrixTable = ({ index, param, variableIndex }: SymbolicMatrixProps) => {
+    const i = index + 1;
+    const { a, alpha, thetaIsFixed, dIsVariable, dOffset, thetaOffset } = param;
+    let varCount = variableIndex;
+    
+    const getThetaSymbol = () => {
+        if (thetaIsFixed) {
+            return ((param.theta + thetaOffset) * Math.PI / 180).toString();
+        }
+        varCount++;
+        const offsetStr = thetaOffset !== 0 ? `+${thetaOffset}*(pi/180)` : '';
+        return `q<sub>${varCount}</sub>${offsetStr}`;
+    };
+
+    const getDSymbol = () => {
+        if (dIsVariable) {
+            varCount++;
+            const offsetStr = dOffset !== 0 ? `+${dOffset}` : '';
+            return `q<sub>${varCount}</sub>${offsetStr}`;
+        }
+        return (param.d + dOffset).toString();
+    };
+
+    const getASymbol = () => {
+        if (a !== 0) return `L<sub>${i}</sub>`;
+        return '0';
+    };
+
+    const thetaSymbol = getThetaSymbol();
+    const dSymbol = getDSymbol();
+    const aSymbol = getASymbol();
+    
+    const cosTheta = thetaIsFixed ? Math.cos(parseFloat(thetaSymbol)).toFixed(2) : `cos(${thetaSymbol})`;
+    const sinTheta = thetaIsFixed ? Math.sin(parseFloat(thetaSymbol)).toFixed(2) : `sin(${thetaSymbol})`;
+    const cosAlphaVal = parseFloat(Math.cos(alpha * Math.PI / 180).toFixed(2));
+    const sinAlphaVal = parseFloat(Math.sin(alpha * Math.PI / 180).toFixed(2));
+    
+    const multiplySymbolic = (symbol: string, factor: number) => {
+        if (factor === 0) return '0';
+        
+        const isNumericSymbol = !isNaN(parseFloat(symbol)) && isFinite(Number(symbol));
+        if (isNumericSymbol) {
+            return (parseFloat(symbol) * factor).toFixed(2);
+        }
+        
+        if (factor === 1) return symbol;
+        if (factor === -1) return `-${symbol}`;
+        
+        return `${factor.toFixed(2)}*${symbol}`;
+    };
+
+    const negSinTheta = thetaIsFixed ? (-parseFloat(sinTheta)).toFixed(2) : `-sin(${thetaSymbol})`;
+
+    const negSinThetaCosAlpha = multiplySymbolic(negSinTheta, cosAlphaVal);
+    const sinThetaSinAlpha = multiplySymbolic(sinTheta, sinAlphaVal);
+    const cosThetaCosAlpha = multiplySymbolic(cosTheta, cosAlphaVal);
+    const negCosThetaSinAlpha = multiplySymbolic(cosTheta, -sinAlphaVal);
+
+    const aCosTheta = aSymbol === '0' ? '0' : `${aSymbol}*${cosTheta}`;
+    const aSinTheta = aSymbol === '0' ? '0' : `${aSymbol}*${sinTheta}`;
+
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>A<sub>{i - 1}→{i}</sub></CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableBody className="font-mono text-center">
+                        <TableRow>
+                            <TableCell><SymbolicValue html={cosTheta} /></TableCell>
+                            <TableCell><SymbolicValue html={negSinThetaCosAlpha} /></TableCell>
+                            <TableCell><SymbolicValue html={sinThetaSinAlpha} /></TableCell>
+                            <TableCell><SymbolicValue html={aCosTheta} /></TableCell>
+                        </TableRow>
+                         <TableRow>
+                            <TableCell><SymbolicValue html={sinTheta} /></TableCell>
+                            <TableCell><SymbolicValue html={cosThetaCosAlpha} /></TableCell>
+                            <TableCell><SymbolicValue html={negCosThetaSinAlpha} /></TableCell>
+                            <TableCell><SymbolicValue html={aSinTheta} /></TableCell>
+                        </TableRow>
+                         <TableRow>
+                            <TableCell>0</TableCell>
+                            <TableCell>{sinAlphaVal.toFixed(2)}</TableCell>
+                            <TableCell>{cosAlphaVal.toFixed(2)}</TableCell>
+                            <TableCell><SymbolicValue html={dSymbol} /></TableCell>
+                        </TableRow>
+                         <TableRow>
+                            <TableCell>0</TableCell>
+                            <TableCell>0</TableCell>
+                            <TableCell>0</TableCell>
+                            <TableCell>1</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+};
 
 export default function AnalysisPage() {
   const { params, baseOrientation } = useDHParams();
@@ -74,6 +184,8 @@ export default function AnalysisPage() {
 
   const finalAngles = eulerAngles.length > 0 ? eulerAngles[eulerAngles.length - 1] : null;
 
+  let variableCounter = 0;
+
   return (
     <div className="flex h-dvh flex-col font-sans">
       <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
@@ -86,7 +198,6 @@ export default function AnalysisPage() {
                 <TabsList>
                     <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
                     <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
-                    <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
                     <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
                     <TabsTrigger value="matlab" asChild><Link href="/matlab-code">{t('matlabCode')}</Link></TabsTrigger>
                 </TabsList>
@@ -199,6 +310,25 @@ export default function AnalysisPage() {
                     </Table>
                 </CardContent>
             </Card>
+
+            <div className="space-y-2 pt-6">
+                <h2 className="text-2xl font-bold tracking-tight">{t('transformationMatrices')}</h2>
+                <p className="text-muted-foreground">{t('transformationMatricesDescription')}</p>
+            </div>
+            {params.map((param, index) => {
+                const currentVarIndex = variableCounter;
+                if (!param.thetaIsFixed) variableCounter++;
+                if (param.dIsVariable) variableCounter++;
+
+                return (
+                    <SymbolicMatrixTable 
+                        key={`symbolic-${index}`}
+                        index={index}
+                        param={param}
+                        variableIndex={currentVarIndex}
+                    />
+                );
+            })}
         </div>
       </main>
     </div>

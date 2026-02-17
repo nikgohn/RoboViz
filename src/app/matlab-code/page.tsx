@@ -329,28 +329,30 @@ end
     });
   };
 
+  const { t: pageT } = useLanguage();
+
   return (
     <>
         <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight">{t('matlabCodeGeneration')}</h2>
-            <p className="text-muted-foreground">{t('matlabCodeDescription')}</p>
+            <h2 className="text-3xl font-bold tracking-tight">{pageT('matlabCodeGeneration')}</h2>
+            <p className="text-muted-foreground">{pageT('matlabCodeDescription')}</p>
         </div>
          <Card>
             <CardHeader>
-                <CardTitle>{t('matlabCodeSettings')}</CardTitle>
+                <CardTitle>{pageT('matlabCodeSettings')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
-                        <Label htmlFor="use-degrees">{t('matlabBaseAnglesInDegrees')}</Label>
-                         <p className="text-xs text-muted-foreground">{t('matlabBaseAnglesInDegreesDescription')}</p>
+                        <Label htmlFor="use-degrees">{pageT('matlabBaseAnglesInDegrees')}</Label>
+                         <p className="text-xs text-muted-foreground">{pageT('matlabBaseAnglesInDegreesDescription')}</p>
                     </div>
                     <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
                </div>
                <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
-                        <Label htmlFor="complex-sliders" className={!isAuthorized ? 'text-muted-foreground' : ''}>{t('matlabComplexSliders')}</Label>
-                         <p className="text-xs text-muted-foreground">{t('matlabComplexSlidersDescription')}</p>
+                        <Label htmlFor="complex-sliders" className={!isAuthorized ? 'text-muted-foreground' : ''}>{pageT('matlabComplexSliders')}</Label>
+                         <p className="text-xs text-muted-foreground">{pageT('matlabComplexSlidersDescription')}</p>
                     </div>
                     <Switch 
                       id="complex-sliders" 
@@ -363,7 +365,7 @@ end
         </Card>
          <Card>
             <CardHeader>
-                <CardTitle>{t('generatedCode')}</CardTitle>
+                <CardTitle>{pageT('generatedCode')}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="relative">
@@ -380,7 +382,7 @@ end
                         onClick={handleCopy}
                     >
                         <Copy className="h-4 w-4" />
-                        <span className="sr-only">{t('copyToClipboard')}</span>
+                        <span className="sr-only">{pageT('copyToClipboard')}</span>
                     </Button>
                 </div>
             </CardContent>
@@ -403,7 +405,6 @@ export default function MatlabCodePage() {
                     <TabsList>
                         <TabsTrigger value="editor" asChild><Link href="/">{t('editor')}</Link></TabsTrigger>
                         <TabsTrigger value="kinematics" asChild><Link href="/kinematics">{t('kinematics')}</Link></TabsTrigger>
-                        <TabsTrigger value="matrices" asChild><Link href="/matrices">{t('matrices')}</Link></TabsTrigger>
                         <TabsTrigger value="analysis" asChild><Link href="/analysis">{t('analysis')}</Link></TabsTrigger>
                         <TabsTrigger value="matlab" asChild><Link href="/matlab-code">{t('matlabCode')}</Link></TabsTrigger>
                     </TabsList>
