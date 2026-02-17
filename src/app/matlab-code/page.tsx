@@ -27,6 +27,7 @@ function MatlabCodePageContent() {
   const [baseAnglesInDegrees, setBaseAnglesInDegrees] = useState(true);
   const [useComplexSliders, setUseComplexSliders] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [useNonStandardBase, setUseNonStandardBase] = useState(false);
 
   useEffect(() => {
     // Check for query parameter to unlock the feature
@@ -72,7 +73,7 @@ function MatlabCodePageContent() {
     const linkVars: string[] = [];
     
     params.forEach((param, index) => {
-        const { a, alpha, d, dOffset, theta, thetaOffset, dIsVariable, thetaIsFixed } = param;
+        const { a, alpha, dOffset, dIsVariable, thetaIsFixed, thetaOffset } = param;
         const linkVar = `L${index + 1}`;
         linkVars.push(linkVar);
         
@@ -85,7 +86,7 @@ function MatlabCodePageContent() {
             const dLimits = qIndexD && workspaceLimits[qIndexD] 
               ? `[${Math.max(0, workspaceLimits[qIndexD].min)} ${workspaceLimits[qIndexD].max}]` 
               : '[0 5]';
-            const thetaRad = degToSymbolicRad(theta + thetaOffset);
+            const thetaRad = degToSymbolicRad(param.theta + thetaOffset);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
@@ -108,7 +109,7 @@ function MatlabCodePageContent() {
             }
             linkParams.push(`'qlim', ${thetaLimits}`);
         } else { // Fixed
-            const offsetRad = degToSymbolicRad(theta + thetaOffset);
+            const offsetRad = degToSymbolicRad(param.theta + thetaOffset);
             
             linkParams.push(`'alpha', ${alphaRad}`);
             linkParams.push(`'a', ${a}`);
@@ -123,21 +124,21 @@ function MatlabCodePageContent() {
     
     code += `\nrobot = SerialLink([${linkVars.join(' ')}], 'name', 'RoboViz');\n`;
     
-    const { x, y, z } = baseOrientation;
-    
-    const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
+    if (useNonStandardBase) {
+        const { x, y, z } = baseOrientation;
+        const matlabAngleWrapper = (val: number) => baseAnglesInDegrees ? val.toString() : degToSymbolicRad(val);
+        let baseTransforms = [];
+        
+        // Always apply the -90deg X rotation to make Z-up the default.
+        baseTransforms.push(`trotx(${matlabAngleWrapper(-90)})`);
 
-    let baseTransforms = [];
-    
-    // Always apply the -90deg X rotation to make Z-up the default.
-    baseTransforms.push(`trotx(${matlabAngleWrapper(-90)})`);
+        if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
+        if (y !== 0) baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
+        if (z !== 0) baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
 
-    if (x !== 0) baseTransforms.push(`trotx(${matlabAngleWrapper(x)})`);
-    if (y !== 0) baseTransforms.push(`troty(${matlabAngleWrapper(y)})`);
-    if (z !== 0) baseTransforms.push(`trotz(${matlabAngleWrapper(z)})`);
-
-    if (baseTransforms.length > 0) {
-      code += `robot.base = ${baseTransforms.join(' * ')};\n`;
+        if (baseTransforms.length > 0) {
+          code += `robot.base = ${baseTransforms.join(' * ')};\n`;
+        }
     }
     
     if (useComplexSliders) {
@@ -317,7 +318,7 @@ end
 
     return code;
 
-  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, baseAnglesInDegrees, useComplexSliders, t]);
+  }, [params, baseOrientation, workspaceLimits, getQIndexForParam, baseAnglesInDegrees, useComplexSliders, t, useNonStandardBase]);
   
 
   const handleCopy = () => {
@@ -348,6 +349,13 @@ end
                          <p className="text-xs text-muted-foreground">{pageT('matlabBaseAnglesInDegreesDescription')}</p>
                     </div>
                     <Switch id="use-degrees" checked={baseAnglesInDegrees} onCheckedChange={setBaseAnglesInDegrees} />
+               </div>
+               <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                        <Label htmlFor="use-non-standard-base">{pageT('matlabUseNonStandardBase')}</Label>
+                         <p className="text-xs text-muted-foreground">{pageT('matlabUseNonStandardBaseDescription')}</p>
+                    </div>
+                    <Switch id="use-non-standard-base" checked={useNonStandardBase} onCheckedChange={setUseNonStandardBase} />
                </div>
                <div className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
