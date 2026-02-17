@@ -14,6 +14,7 @@ export const ru = {
   reset: 'Сброс',
   calculate: 'Рассчитать',
   calculating: 'Вычисление...',
+  forwardKinematics: 'Прямая',
 
   // DH Panel
   dhParameters: 'Параметры Д-Х',

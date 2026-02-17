@@ -14,6 +14,7 @@ export const en = {
   reset: 'Reset',
   calculate: 'Calculate',
   calculating: 'Calculating...',
+  forwardKinematics: 'Forward',
   
   // DH Panel
   dhParameters: 'DH Parameters',
